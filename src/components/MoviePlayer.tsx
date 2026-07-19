@@ -242,7 +242,7 @@ const MoviePlayer = ({
 
         {/* Up Next card — only shows once we detect the video actually ended */}
         {ended && nextItem && onNext && (
-          <UpNextCard item={nextItem} onNext={onNext} />
+          <UpNextCard item={nextItem} onNext={onNext} autoplay={getSetting("autoplay")} />
         )}
       </div>
 
@@ -406,14 +406,17 @@ const QualitySelector = ({
 const UpNextCard = ({
   item,
   onNext,
+  autoplay,
 }: {
   item: { title: string; poster?: string | null; subtitle?: string };
   onNext: () => void;
+  autoplay: boolean;
 }) => {
-  const [n, setN] = useState(5);
+  const [n, setN] = useState(autoplay ? 5 : -1);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    if (n < 0) return; // autoplay disabled — wait for manual click
     if (n <= 0) {
       onNext();
       return;
@@ -433,7 +436,9 @@ const UpNextCard = ({
         <img src={item.poster} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next in {n}s</p>
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">
+          {autoplay && n >= 0 ? `Up Next in ${n}s` : "Up Next"}
+        </p>
         <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
         {item.subtitle && <p className="text-[9px] text-white/50 truncate">{item.subtitle}</p>}
         <div className="flex gap-1 mt-1">
