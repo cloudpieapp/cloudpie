@@ -1,47 +1,20 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import {
-  RefreshCw,
-  Expand,
-  WifiOff,
-  CloudDownload,
-} from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Expand, WifiOff, CloudDownload, Play } from "lucide-react";
 import { Link } from "react-router-dom";
-import { recordStream, getCachedStream } from "@/lib/streamCache";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
+import {
+  resolveMovieboxDownloads,
+  movieboxProxyUrl,
+  resolutionLabel,
+  type MovieboxDownload,
+} from "@/lib/moviebox";
 
-interface ServerDef {
-  id: ServerId;
-  label: string;
-  badge?: "Fast" | "HD" | "New";
-  build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
-}
-
-export type ServerId = "movies111" | "smashystream";
-
-// Only two curated sources: 111Movies (Fast) and SmashyStream (HD).
-export const PLAYER_SERVERS: ServerDef[] = [
-  {
-    id: "movies111",
-    label: "Fast Stream",
-    badge: "Fast",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://111movies.com/tv/${id}/${s}/${e}`
-        : `https://111movies.com/movie/${id}`,
-  },
-  {
-    id: "smashystream",
-    label: "HD Stream",
-    badge: "HD",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-];
+// Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
+// still typecheck. The value is ignored — MovieBox is the only source now.
+export type ServerId = "moviebox";
 
 interface Props {
   tmdbId: string;
@@ -64,28 +37,20 @@ const MoviePlayer = ({
   type = "movie",
   season = 1,
   episode = 1,
-  serverId,
-  onServerChange,
   title,
   year,
   poster,
   backdrop,
-  onPrev,
   onNext,
   nextItem,
 }: Props) => {
-  const initialIdx = Math.max(
-    0,
-    PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
-  );
-  const [serverIdx, setServerIdx] = useState(initialIdx === -1 ? 0 : initialIdx);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [resolvedSrc, setResolvedSrc] = useState<string>("");
+  const [phase, setPhase] = useState<"loading" | "select" | "playing" | "error">("loading");
+  const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
+  const [selectedUrl, setSelectedUrl] = useState<string>("");
   const [ended, setEnded] = useState(false);
+  const [errorReason, setErrorReason] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
 
@@ -99,81 +64,41 @@ const MoviePlayer = ({
     };
   }, [type, tmdbId]);
 
+  // Resolve MovieBox stream URLs whenever the title / episode changes.
   useEffect(() => {
-    if (!serverId) return;
-    const i = PLAYER_SERVERS.findIndex((s) => s.id === serverId);
-    if (i >= 0 && i !== serverIdx) setServerIdx(i);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverId]);
-
-  const server = PLAYER_SERVERS[serverIdx];
-  const builtSrc = server.build(tmdbId, type, season, episode);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    setEnded(false);
-    setResolvedSrc("");
+    if (!title) return;
     let active = true;
+    setPhase("loading");
+    setDownloads([]);
+    setSelectedUrl("");
+    setEnded(false);
+    setErrorReason("");
     (async () => {
-      const cached = await getCachedStream(
-        tmdbId,
-        type,
-        server.id,
-        type === "tv" ? season : undefined,
-        type === "tv" ? episode : undefined,
-      );
+      const res = await resolveMovieboxDownloads({
+        title,
+        year,
+        mediaType: type,
+        season: type === "tv" ? season : 0,
+        episode: type === "tv" ? episode : 0,
+      });
       if (!active) return;
-      setResolvedSrc(cached?.url || builtSrc);
+      if (!res.ok || !res.downloads || res.downloads.length === 0) {
+        setErrorReason(res.reason || "No stream available.");
+        setPhase("error");
+        return;
+      }
+      setDownloads(res.downloads);
+      setPhase("select");
     })();
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [builtSrc]);
+  }, [title, year, type, tmdbId, season, episode]);
 
-  useEffect(() => {
-    if (!resolvedSrc) return;
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setError(true);
-      recordStream(
-        tmdbId,
-        type,
-        server.id,
-        resolvedSrc,
-        false,
-        type === "tv" ? season : undefined,
-        type === "tv" ? episode : undefined,
-      );
-    }, 15000);
-    return () => clearTimeout(timerRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedSrc]);
-
-  const selectServer = useCallback(
-    (idx: number) => {
-      const i = ((idx % PLAYER_SERVERS.length) + PLAYER_SERVERS.length) % PLAYER_SERVERS.length;
-      setServerIdx(i);
-      onServerChange?.(PLAYER_SERVERS[i].id);
-    },
-    [onServerChange],
-  );
-
-  const handleLoad = () => {
-    clearTimeout(timerRef.current);
-    setLoading(false);
-    setError(false);
-    recordStream(
-      tmdbId,
-      type,
-      server.id,
-      resolvedSrc,
-      true,
-      type === "tv" ? season : undefined,
-      type === "tv" ? episode : undefined,
-    );
-  };
+  const pickQuality = useCallback((d: MovieboxDownload) => {
+    setSelectedUrl(movieboxProxyUrl(d.url));
+    setPhase("playing");
+  }, []);
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
@@ -219,57 +144,6 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Listen for postMessage 'ended' events from iframe players
-  useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
-      const data = e.data;
-      if (!data) return;
-      const t = typeof data === "string" ? data : data.type || data.event || data.action;
-      if (typeof t === "string" && /ended|complete|finish/i.test(t)) {
-        setEnded(true);
-      }
-    };
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
-
-  // Prevent iframe scroll-jack
-  useEffect(() => {
-    if (!resolvedSrc) return;
-    const anchorY = window.scrollY;
-    let lastUserInput = 0;
-    const markUser = () => {
-      lastUserInput = Date.now();
-    };
-    window.addEventListener("wheel", markUser, { passive: true });
-    window.addEventListener("touchstart", markUser, { passive: true });
-    const onScroll = () => {
-      if (Date.now() - lastUserInput > 200) {
-        window.scrollTo({ top: anchorY, behavior: "auto" });
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    try {
-      containerRef.current?.focus({ preventScroll: true } as FocusOptions);
-    } catch {
-      /* ignore */
-    }
-    const stop = setTimeout(() => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", markUser);
-      window.removeEventListener("touchstart", markUser);
-    }, 1500);
-    return () => {
-      clearTimeout(stop);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", markUser);
-      window.removeEventListener("touchstart", markUser);
-    };
-  }, [resolvedSrc]);
-
-  // Blocker default ON — no UI toggle. Strict sandbox strips popups.
-  const sandboxAttr = "allow-scripts allow-same-origin allow-forms";
-
   if (!online && !savedOffline) {
     return (
       <div className="w-full bg-background">
@@ -301,44 +175,42 @@ const MoviePlayer = ({
         className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
         style={{ contain: "layout paint" }}
       >
-        {resolvedSrc && (
-          <iframe
-            ref={iframeRef}
-            key={resolvedSrc}
-            src={resolvedSrc}
-            className="absolute inset-0 w-full h-full"
-            onLoad={handleLoad}
-            allowFullScreen
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
-            sandbox={sandboxAttr}
-            referrerPolicy="no-referrer"
-            title="BingBloom Player"
-            style={{ border: 0 }}
+        {/* Native video player once a quality has been picked */}
+        {phase === "playing" && selectedUrl && (
+          <video
+            ref={videoRef}
+            key={selectedUrl}
+            src={selectedUrl}
+            poster={backdrop || poster || undefined}
+            className="absolute inset-0 w-full h-full bg-black"
+            controls
+            autoPlay
+            playsInline
+            controlsList="nodownload"
+            onEnded={() => setEnded(true)}
           />
         )}
 
-        {loading && !error && (
-          <PlayerBrandLoader variant="loading" label={`Loading ${server.label}…`} />
+        {/* Loading state: backdrop + title metadata + 3-dot animation */}
+        {phase === "loading" && (
+          <MetadataLoader title={title} year={year} backdrop={backdrop} poster={poster} />
         )}
 
-        {error && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center bg-black">
-            <img
-              src="/logo-compact.png"
-              alt="BingBloom"
-              className="h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(229,9,20,0.55)]"
-            />
-            <p className="text-white text-sm font-semibold tracking-wide">Coming soon</p>
-            <p className="text-white/55 text-[10.5px] max-w-xs leading-relaxed">
-              This title isn't streamable on {server.label} yet. Try another server.
-            </p>
-            <button
-              onClick={() => selectServer(serverIdx + 1)}
-              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold pointer-events-auto bg-primary"
-            >
-              <RefreshCw className="w-3 h-3" /> Try next server
-            </button>
-          </div>
+        {/* Quality selector shown before playback starts */}
+        {phase === "select" && (
+          <QualitySelector
+            downloads={downloads}
+            backdrop={backdrop}
+            poster={poster}
+            title={title}
+            year={year}
+            onPick={pickQuality}
+          />
+        )}
+
+        {/* Coming-soon / error state */}
+        {phase === "error" && (
+          <PlayerBrandLoader variant="coming-soon" label="Coming soon" />
         )}
 
         {/* Up Next card — only shows once we detect the video actually ended */}
@@ -347,43 +219,8 @@ const MoviePlayer = ({
         )}
       </div>
 
-      {/* Single-row toolbar: Source pills + Download + Fullscreen */}
-      <div
-        className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap"
-      >
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-          Source
-        </span>
-        <div className="flex gap-1">
-          {PLAYER_SERVERS.map((s, i) => {
-            const active = i === serverIdx;
-            const isFast = s.badge === "Fast";
-            return (
-              <button
-                key={s.id}
-                onClick={() => selectServer(i)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-foreground transition focus:outline-none"
-                style={{
-                  background: active
-                    ? isFast
-                      ? "rgba(34,197,94,0.25)"
-                      : "rgba(229,9,20,0.25)"
-                    : "rgba(127,127,127,0.12)",
-                  border: `1px solid ${
-                    active
-                      ? isFast
-                        ? "rgba(34,197,94,0.6)"
-                        : "rgba(229,9,20,0.6)"
-                      : "rgba(127,127,127,0.2)"
-                  }`,
-                }}
-              >
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-
+      {/* Toolbar: Download + Fullscreen */}
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
         <div className="flex items-center gap-1.5 ml-auto">
           {title && (
             <DownloadButton
@@ -407,6 +244,133 @@ const MoviePlayer = ({
             <Expand className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Loading overlay: backdrop of the movie/episode in the background with the
+// title, year and a bouncing three-dot animation on top. Shown while the
+// MovieBox resolver is running.
+const MetadataLoader = ({
+  title,
+  year,
+  backdrop,
+  poster,
+}: {
+  title?: string;
+  year?: string;
+  backdrop?: string | null;
+  poster?: string | null;
+}) => {
+  const bg = backdrop || poster;
+  return (
+    <div
+      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center"
+      style={{
+        background: bg
+          ? `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)), url(${bg}) center/cover no-repeat`
+          : "#0A0A0A",
+      }}
+    >
+      {title && (
+        <div>
+          <p className="text-white text-sm sm:text-base font-bold tracking-tight line-clamp-2">
+            {title}
+          </p>
+          {year && <p className="text-white/60 text-[10.5px] mt-0.5">{year}</p>}
+        </div>
+      )}
+      <div className="flex items-center gap-1.5 mt-1" aria-label="Loading">
+        <span className="bb-dot" style={{ animationDelay: "0ms" }} />
+        <span className="bb-dot" style={{ animationDelay: "160ms" }} />
+        <span className="bb-dot" style={{ animationDelay: "320ms" }} />
+      </div>
+      <p className="text-white/70 text-[10.5px] font-semibold tracking-wide">
+        Preparing stream…
+      </p>
+      <style>{`
+        .bb-dot {
+          width: 7px; height: 7px; border-radius: 9999px;
+          background: #E50914;
+          box-shadow: 0 0 12px rgba(229,9,20,0.6);
+          animation: bb-bounce 1s infinite ease-in-out both;
+          display: inline-block;
+        }
+        @keyframes bb-bounce {
+          0%, 80%, 100% { transform: translateY(0) scale(0.85); opacity: 0.55; }
+          40% { transform: translateY(-6px) scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// Quality selector shown before playback starts. Filters to 1080p/720p/480p
+// when present; falls back to whatever MovieBox returned. Never shows file
+// sizes per product requirement.
+const QualitySelector = ({
+  downloads,
+  backdrop,
+  poster,
+  title,
+  year,
+  onPick,
+}: {
+  downloads: MovieboxDownload[];
+  backdrop?: string | null;
+  poster?: string | null;
+  title?: string;
+  year?: string;
+  onPick: (d: MovieboxDownload) => void;
+}) => {
+  const bg = backdrop || poster;
+  const preferred = [1080, 720, 480];
+  // Pick best match per preferred rung, fall back to whatever exists.
+  const options: MovieboxDownload[] = [];
+  for (const rung of preferred) {
+    const match = downloads
+      .filter((d) => Math.abs(d.resolution - rung) <= 60)
+      .sort((a, b) => Math.abs(a.resolution - rung) - Math.abs(b.resolution - rung))[0];
+    if (match && !options.includes(match)) options.push(match);
+  }
+  if (options.length === 0) options.push(...downloads.slice(0, 3));
+
+  return (
+    <div
+      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 px-6 text-center"
+      style={{
+        background: bg
+          ? `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.9)), url(${bg}) center/cover no-repeat`
+          : "#0A0A0A",
+      }}
+    >
+      {title && (
+        <div className="max-w-md">
+          <p className="text-white text-sm sm:text-base font-bold tracking-tight line-clamp-2">
+            {title}
+          </p>
+          {year && <p className="text-white/60 text-[10.5px] mt-0.5">{year}</p>}
+        </div>
+      )}
+      <p className="text-white/70 text-[10.5px] font-semibold uppercase tracking-[0.14em]">
+        Choose quality
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2 max-w-sm">
+        {options.map((d) => (
+          <button
+            key={d.url}
+            onClick={() => onPick(d)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white transition hover:scale-105"
+            style={{
+              background: "rgba(229,9,20,0.9)",
+              boxShadow: "0 0 18px rgba(229,9,20,0.45)",
+            }}
+          >
+            <Play className="w-3 h-3 fill-white" />
+            {resolutionLabel(d.resolution)}
+          </button>
+        ))}
       </div>
     </div>
   );
