@@ -35,6 +35,9 @@ export interface ResolveArgs {
 }
 
 export async function resolveMovieboxDownloads(args: ResolveArgs): Promise<MovieboxResult> {
+  const key = cacheKey(args);
+  const cached = readCache(key);
+  if (cached) return cached;
   try {
     const { data, error } = await supabase.functions.invoke("moviebox-resolve", {
       body: {
@@ -46,9 +49,51 @@ export async function resolveMovieboxDownloads(args: ResolveArgs): Promise<Movie
       },
     });
     if (error) return { ok: false, reason: "Fast Downloads is unavailable right now." };
-    return data as MovieboxResult;
+    const result = data as MovieboxResult;
+    if (result?.ok && result.downloads?.length) writeCache(key, result);
+    return result;
   } catch {
     return { ok: false, reason: "Fast Downloads is unavailable right now." };
+  }
+}
+
+// ---------- Cache ----------
+// Cache successful MovieBox resolves per (title, year, type, season, episode)
+// for 6 hours. Cuts the "loading stream" wait on repeat plays (autoplay next
+// episode, back/forward navigation) from ~2-4s down to instant.
+const CACHE_PREFIX = "bb:mb:v1:";
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const memCache = new Map<string, { at: number; value: MovieboxResult }>();
+
+function cacheKey(a: ResolveArgs): string {
+  return `${CACHE_PREFIX}${a.mediaType}|${(a.title || "").toLowerCase().trim()}|${a.year || ""}|${a.season ?? 0}|${a.episode ?? 0}`;
+}
+
+function readCache(key: string): MovieboxResult | null {
+  const hit = memCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { at: number; value: MovieboxResult };
+    if (!parsed?.at || Date.now() - parsed.at > CACHE_TTL_MS) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    memCache.set(key, parsed);
+    return parsed.value;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key: string, value: MovieboxResult) {
+  const entry = { at: Date.now(), value };
+  memCache.set(key, entry);
+  try {
+    localStorage.setItem(key, JSON.stringify(entry));
+  } catch {
+    /* quota — ignore */
   }
 }
 

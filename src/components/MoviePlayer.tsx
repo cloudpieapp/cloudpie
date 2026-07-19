@@ -11,6 +11,9 @@ import {
   resolutionLabel,
   type MovieboxDownload,
 } from "@/lib/moviebox";
+import { getSetting } from "@/hooks/useSettings";
+
+const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
 // still typecheck. The value is ignored — MovieBox is the only source now.
@@ -97,8 +100,32 @@ const MoviePlayer = ({
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
     setSelectedUrl(movieboxProxyUrl(d.url));
+    try {
+      localStorage.setItem(QUALITY_PREF_KEY, String(d.resolution));
+    } catch {
+      /* ignore */
+    }
     setPhase("playing");
   }, []);
+
+  // Auto-pick the user's preferred quality (or best available) so autoplay
+  // → next episode / next movie doesn't stop on the picker.
+  useEffect(() => {
+    if (phase !== "select" || downloads.length === 0) return;
+    if (!getSetting("autoplay")) return;
+    let pref = 0;
+    try {
+      pref = Number(localStorage.getItem(QUALITY_PREF_KEY) || 0);
+    } catch {
+      /* ignore */
+    }
+    const match = pref
+      ? downloads
+          .slice()
+          .sort((a, b) => Math.abs(a.resolution - pref) - Math.abs(b.resolution - pref))[0]
+      : downloads[0];
+    if (match) pickQuality(match);
+  }, [phase, downloads, pickQuality]);
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
