@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>BingBloom — Discover , Stream , Bloom</title>
+    <meta name="description" content="BingBloom is a free, ad-supported streaming service offering movies, series, live channels, and music. Discover. Stream. Bloom. Visit bingbloom.lovable.app">
+    <meta name="author" content="BingBloom" />
+    <meta name="google-site-verification" content="-kqzmu5hqhUSAhjWKvpzbDw5XiekurHKwTRkpTE0lws" />
+    <link rel="canonical" href="https://bingbloom.lovable.app/" />
+    <meta property="og:url" content="https://bingbloom.lovable.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/o4DUK7MkXjVftDFhnTvCN9jKJkA3/social-images/social-1781381007115-bing_logo.webp">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://bingbloom.lovable.app/" />
+    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/o4DUK7MkXjVftDFhnTvCN9jKJkA3/social-images/social-1781381007115-bing_logo.webp">
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "BingBloom",
+            "url": "https://bingbloom.lovable.app/",
+            "description": "BingBloom is a legal streaming service to watch and download movies and series."
+          },
+          {
+            "@type": "Organization",
+            "name": "BingBloom",
+            "url": "https://bingbloom.lovable.app/",
+            "logo": "https://bingbloom.lovable.app/logo.png",
+            "description": "Legal streaming service for watching and downloading movies and series."
+          }
+        ]
+      }
+    </script>
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="BingBloom — Discover , Stream , Bloom">
+  <meta name="twitter:title" content="BingBloom — Discover , Stream , Bloom">
+  <meta property="og:description" content="BingBloom is a free, ad-supported streaming service offering movies, series, live channels, and music. Discover. Stream. Bloom. Visit bingbloom.lovable.app">
+  <meta name="twitter:description" content="BingBloom is a free, ad-supported streaming service offering movies, series, live channels, and music. Discover. Stream. Bloom. Visit bingbloom.lovable.app">
+</head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Global redirect / pop-under kill-switch. The player iframe cannot use
+      // the `sandbox` attribute (vidsrc.pm refuses to load in a sandboxed
+      // frame), so we block programmatic redirects here instead.
+      (function () {
+        try {
+          var lastUserGesture = 0;
+          ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+            window.addEventListener(ev, function () { lastUserGesture = Date.now(); }, true);
+          });
+          var _open = window.open;
+          window.open = function (url, name, features) {
+            // Only allow window.open within 1500ms of a real user gesture.
+            if (Date.now() - lastUserGesture > 1500) return null;
+            try { return _open.call(window, url, name || '_blank', features || 'noopener,noreferrer'); }
+            catch (_) { return null; }
+          };
+          // Prevent iframes from navigating the top window without a gesture.
+          window.addEventListener('beforeunload', function (e) {
+            if (Date.now() - lastUserGesture > 1500) {
+              e.preventDefault();
+              e.returnValue = '';
+            }
+          });
+        } catch (_) { /* noop */ }
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

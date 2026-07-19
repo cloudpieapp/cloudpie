@@ -10,15 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
 *.local
-
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+android/app/build/
+android/app/*.keystore
+android/.gradle/
+android/app/.cxx/
 
 # Editor directories and files
 .vscode/*
