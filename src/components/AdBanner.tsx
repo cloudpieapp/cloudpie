@@ -30,23 +30,39 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
     const host = ref.current;
     if (!host) return;
 
-    const slotId = `adsterra-banner-${format}-${cfg.key.slice(0, 8)}`;
     host.innerHTML = "";
 
-    const wrapper = document.createElement("div");
-    wrapper.style.cssText = `width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:transparent;overflow:hidden;`;
+    // Adsterra's highperformanceformat.com invoke.js reads a GLOBAL
+    // `window.atOptions` when it runs. Building an isolated iframe per slot
+    // avoids the globals colliding between multiple banners on the same page
+    // (which is why they were rendering blank).
+    const iframe = document.createElement("iframe");
+    iframe.width = String(cfg.width);
+    iframe.height = String(cfg.height);
+    iframe.scrolling = "no";
+    iframe.frameBorder = "0";
+    iframe.marginWidth = "0";
+    iframe.marginHeight = "0";
+    iframe.style.cssText = "border:0;display:block;background:transparent;overflow:hidden;";
+    iframe.setAttribute("allowtransparency", "true");
+    host.appendChild(iframe);
 
-    const container = document.createElement("div");
-    container.id = slotId;
-    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
-    wrapper.appendChild(container);
-    host.appendChild(wrapper);
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = `https://www.highperformanceformat.com/${cfg.key}/invoke.js`;
-    host.appendChild(script);
+    const doc = iframe.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(`<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden;}</style></head><body><script type="text/javascript">
+        atOptions = {
+          'key' : '${cfg.key}',
+          'format' : 'iframe',
+          'height' : ${cfg.height},
+          'width' : ${cfg.width},
+          'params' : {}
+        };
+      <\/script>
+      <script async data-cfasync="false" src="//www.highperformanceformat.com/${cfg.key}/invoke.js"><\/script>
+      </body></html>`);
+      doc.close();
+    }
 
     return () => {
       host.innerHTML = "";
