@@ -285,7 +285,7 @@ const MoviePlayer = ({
             autoPlay
             playsInline
             controlsList="nodownload"
-            crossOrigin="anonymous"
+            {...(subtitleVttUrl ? { crossOrigin: "anonymous" as const } : {})}
             onLoadedMetadata={handleLoadedMetadata}
             onEnded={() => setEnded(true)}
           >
@@ -587,12 +587,13 @@ const ToolbarMenu = ({
         onClick={() => setOpen((v) => !v)}
         title={label}
         aria-label={label}
-        className="grid place-items-center h-7 w-7 rounded-md text-foreground hover:bg-foreground/10 border border-border/60"
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md text-[12px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
       >
         {icon}
+        <span>{label}</span>
       </button>
       {open && (
-        <div className="absolute right-0 bottom-full mb-1.5 z-40 min-w-[140px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
+        <div className="absolute right-0 bottom-full mb-1.5 z-40 min-w-[180px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
           <p className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white/50 bg-white/5">{label}</p>
           <div className="max-h-56 overflow-y-auto">
             {options.map((opt) => {
@@ -630,7 +631,7 @@ const QualityMenu = ({
   );
   return (
     <ToolbarMenu
-      icon={<Settings className="w-3.5 h-3.5" />}
+      icon={<Settings className="w-4 h-4" />}
       label="Quality"
       options={options}
       currentKey={String(current)}
@@ -652,12 +653,15 @@ const SubtitleMenu = ({
   onPick: (lang: string) => void;
 }) => {
   const options = useMemo(
-    () => [{ key: "off", label: "Off" }, ...captions.map((c) => ({ key: c.lang, label: c.lang }))],
+    () => [
+      { key: "off", label: "Off" },
+      ...captions.map((c) => ({ key: c.lang, label: languageName(c.lang) })),
+    ],
     [captions],
   );
   return (
     <ToolbarMenu
-      icon={<Subtitles className="w-3.5 h-3.5" />}
+      icon={<Subtitles className="w-4 h-4" />}
       label="Subtitles"
       options={options}
       currentKey={current}
@@ -665,3 +669,57 @@ const SubtitleMenu = ({
     />
   );
 };
+
+// Map MovieBox short language codes / labels to full human-readable names.
+// Falls back to Intl.DisplayNames when possible, then the raw value.
+function languageName(code: string): string {
+  if (!code) return "Unknown";
+  const raw = code.trim();
+  const lower = raw.toLowerCase();
+  const map: Record<string, string> = {
+    en: "English", eng: "English", "en-us": "English (US)", "en-gb": "English (UK)",
+    es: "Spanish", spa: "Spanish", "es-la": "Spanish (Latin America)", "es-es": "Spanish (Spain)",
+    fr: "French", fre: "French", fra: "French",
+    de: "German", ger: "German", deu: "German",
+    it: "Italian", ita: "Italian",
+    pt: "Portuguese", por: "Portuguese", "pt-br": "Portuguese (Brazil)",
+    ru: "Russian", rus: "Russian",
+    ja: "Japanese", jpn: "Japanese",
+    ko: "Korean", kor: "Korean",
+    zh: "Chinese", chi: "Chinese", zho: "Chinese", "zh-cn": "Chinese (Simplified)", "zh-tw": "Chinese (Traditional)",
+    ar: "Arabic", ara: "Arabic",
+    hi: "Hindi", hin: "Hindi",
+    id: "Indonesian", ind: "Indonesian",
+    th: "Thai", tha: "Thai",
+    vi: "Vietnamese", vie: "Vietnamese",
+    tr: "Turkish", tur: "Turkish",
+    nl: "Dutch", dut: "Dutch", nld: "Dutch",
+    pl: "Polish", pol: "Polish",
+    sv: "Swedish", swe: "Swedish",
+    no: "Norwegian", nor: "Norwegian",
+    da: "Danish", dan: "Danish",
+    fi: "Finnish", fin: "Finnish",
+    he: "Hebrew", heb: "Hebrew",
+    fa: "Persian", per: "Persian", fas: "Persian",
+    sw: "Swahili", swa: "Swahili",
+    ur: "Urdu", urd: "Urdu",
+    bn: "Bengali", ben: "Bengali",
+    ta: "Tamil", tam: "Tamil",
+    te: "Telugu", tel: "Telugu",
+    ml: "Malayalam", mal: "Malayalam",
+    ms: "Malay", may: "Malay", msa: "Malay",
+    tl: "Filipino", fil: "Filipino",
+    ro: "Romanian", rum: "Romanian", ron: "Romanian",
+    cs: "Czech", cze: "Czech", ces: "Czech",
+    el: "Greek", gre: "Greek", ell: "Greek",
+    hu: "Hungarian", hun: "Hungarian",
+    uk: "Ukrainian", ukr: "Ukrainian",
+  };
+  if (map[lower]) return map[lower];
+  try {
+    const dn = new (Intl as any).DisplayNames(["en"], { type: "language" });
+    const name = dn.of(lower);
+    if (name && name.toLowerCase() !== lower) return name;
+  } catch { /* ignore */ }
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
