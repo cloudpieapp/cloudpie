@@ -285,7 +285,7 @@ const MoviePlayer = ({
             autoPlay
             playsInline
             controlsList="nodownload"
-            crossOrigin="anonymous"
+            {...(subtitleVttUrl ? { crossOrigin: "anonymous" as const } : {})}
             onLoadedMetadata={handleLoadedMetadata}
             onEnded={() => setEnded(true)}
           >
