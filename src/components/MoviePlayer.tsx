@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Expand, WifiOff, CloudDownload, Play } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Expand, WifiOff, CloudDownload, Play, Settings, Subtitles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
@@ -10,10 +10,12 @@ import {
   movieboxProxyUrl,
   resolutionLabel,
   type MovieboxDownload,
+  type MovieboxCaption,
 } from "@/lib/moviebox";
 import { getSetting } from "@/hooks/useSettings";
 
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
+const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
 // still typecheck. The value is ignored — MovieBox is the only source now.
@@ -49,11 +51,16 @@ const MoviePlayer = ({
 }: Props) => {
   const [phase, setPhase] = useState<"loading" | "select" | "playing" | "error">("loading");
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
+  const [captions, setCaptions] = useState<MovieboxCaption[]>([]);
   const [selectedUrl, setSelectedUrl] = useState<string>("");
+  const [selectedRes, setSelectedRes] = useState<number>(0);
+  const [subtitleLang, setSubtitleLang] = useState<string>("off");
+  const [subtitleVttUrl, setSubtitleVttUrl] = useState<string>("");
   const [ended, setEnded] = useState(false);
   const [errorReason, setErrorReason] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const resumeAtRef = useRef<number>(0);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
 
@@ -73,7 +80,9 @@ const MoviePlayer = ({
     let active = true;
     setPhase("loading");
     setDownloads([]);
+    setCaptions([]);
     setSelectedUrl("");
+    setSelectedRes(0);
     setEnded(false);
     setErrorReason("");
     (async () => {
@@ -91,6 +100,7 @@ const MoviePlayer = ({
         return;
       }
       setDownloads(res.downloads);
+      setCaptions(res.captions || []);
       setPhase("select");
     })();
     return () => {
@@ -99,7 +109,10 @@ const MoviePlayer = ({
   }, [title, year, type, tmdbId, season, episode]);
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
+    const v = videoRef.current;
+    if (v && !v.paused) resumeAtRef.current = v.currentTime || 0;
     setSelectedUrl(movieboxProxyUrl(d.url));
+    setSelectedRes(d.resolution);
     try {
       localStorage.setItem(QUALITY_PREF_KEY, String(d.resolution));
     } catch {
@@ -107,6 +120,64 @@ const MoviePlayer = ({
     }
     setPhase("playing");
   }, []);
+
+  const handleLoadedMetadata = useCallback(() => {
+    const v = videoRef.current;
+    if (v && resumeAtRef.current > 0) {
+      try { v.currentTime = resumeAtRef.current; } catch { /* ignore */ }
+      resumeAtRef.current = 0;
+      v.play().catch(() => {});
+    }
+  }, []);
+
+  // Restore preferred subtitle language once captions are known.
+  useEffect(() => {
+    if (captions.length === 0) return;
+    let pref = "off";
+    try { pref = localStorage.getItem(SUBTITLE_PREF_KEY) || "off"; } catch { /* ignore */ }
+    if (pref !== "off" && captions.some((c) => c.lang === pref)) setSubtitleLang(pref);
+  }, [captions]);
+
+  // Fetch + convert the chosen subtitle to a VTT blob URL the <video> can render.
+  useEffect(() => {
+    if (subtitleLang === "off") {
+      setSubtitleVttUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return ""; });
+      return;
+    }
+    const cap = captions.find((c) => c.lang === subtitleLang);
+    if (!cap) return;
+    let cancelled = false;
+    let createdUrl = "";
+    (async () => {
+      try {
+        const res = await fetch(movieboxProxyUrl(cap.url));
+        const text = await res.text();
+        const vtt = text.trim().startsWith("WEBVTT") ? text : srtToVtt(text);
+        const blob = new Blob([vtt], { type: "text/vtt" });
+        createdUrl = URL.createObjectURL(blob);
+        if (!cancelled) setSubtitleVttUrl(createdUrl);
+      } catch { /* ignore */ }
+    })();
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [subtitleLang, captions]);
+
+  const pickSubtitle = useCallback((lang: string) => {
+    setSubtitleLang(lang);
+    try { localStorage.setItem(SUBTITLE_PREF_KEY, lang); } catch { /* ignore */ }
+  }, []);
+
+  // Force the newly added <track> to actually show (browsers default to "disabled").
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const tracks = v.textTracks;
+    for (let i = 0; i < tracks.length; i++) {
+      tracks[i].mode = subtitleVttUrl && subtitleLang !== "off" ? "showing" : "disabled";
+    }
+  }, [subtitleVttUrl, subtitleLang, selectedUrl]);
 
   // Auto-pick the user's preferred quality (or best available) so autoplay
   // → next episode / next movie doesn't stop on the picker.
@@ -214,8 +285,21 @@ const MoviePlayer = ({
             autoPlay
             playsInline
             controlsList="nodownload"
+            crossOrigin="anonymous"
+            onLoadedMetadata={handleLoadedMetadata}
             onEnded={() => setEnded(true)}
-          />
+          >
+            {subtitleVttUrl && (
+              <track
+                key={subtitleVttUrl}
+                kind="subtitles"
+                src={subtitleVttUrl}
+                srcLang={subtitleLang}
+                label={subtitleLang}
+                default
+              />
+            )}
+          </video>
         )}
 
         {/* Loading state: backdrop + title metadata + 3-dot animation */}
@@ -249,6 +333,12 @@ const MoviePlayer = ({
       {/* Toolbar: Download + Fullscreen */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
         <div className="flex items-center gap-1.5 ml-auto">
+          {phase === "playing" && downloads.length > 1 && (
+            <QualityMenu downloads={downloads} current={selectedRes} onPick={pickQuality} />
+          )}
+          {phase === "playing" && captions.length > 0 && (
+            <SubtitleMenu captions={captions} current={subtitleLang} onPick={pickSubtitle} />
+          )}
           {title && (
             <DownloadButton
               size="sm"
@@ -461,3 +551,117 @@ const UpNextCard = ({
 };
 
 export default MoviePlayer;
+
+// Naive SRT -> WebVTT: change comma timestamps to periods and prepend header.
+function srtToVtt(srt: string): string {
+  const body = srt.replace(/\r+/g, "").replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+  return `WEBVTT\n\n${body}`;
+}
+
+const ToolbarMenu = ({
+  icon,
+  label,
+  options,
+  currentKey,
+  onPick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  options: { key: string; label: string }[];
+  currentKey: string;
+  onPick: (key: string) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        title={label}
+        aria-label={label}
+        className="grid place-items-center h-7 w-7 rounded-md text-foreground hover:bg-foreground/10 border border-border/60"
+      >
+        {icon}
+      </button>
+      {open && (
+        <div className="absolute right-0 bottom-full mb-1.5 z-40 min-w-[140px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
+          <p className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white/50 bg-white/5">{label}</p>
+          <div className="max-h-56 overflow-y-auto">
+            {options.map((opt) => {
+              const active = opt.key === currentKey;
+              return (
+                <button
+                  key={opt.key}
+                  onClick={() => { onPick(opt.key); setOpen(false); }}
+                  className={`w-full text-left px-2.5 py-1.5 text-[11px] font-semibold flex items-center justify-between gap-2 hover:bg-white/10 ${active ? "text-[#E50914]" : "text-white"}`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {active && <span className="text-[9px]">●</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const QualityMenu = ({
+  downloads,
+  current,
+  onPick,
+}: {
+  downloads: MovieboxDownload[];
+  current: number;
+  onPick: (d: MovieboxDownload) => void;
+}) => {
+  const options = useMemo(
+    () => downloads.map((d) => ({ key: String(d.resolution), label: resolutionLabel(d.resolution) })),
+    [downloads],
+  );
+  return (
+    <ToolbarMenu
+      icon={<Settings className="w-3.5 h-3.5" />}
+      label="Quality"
+      options={options}
+      currentKey={String(current)}
+      onPick={(k) => {
+        const d = downloads.find((x) => String(x.resolution) === k);
+        if (d) onPick(d);
+      }}
+    />
+  );
+};
+
+const SubtitleMenu = ({
+  captions,
+  current,
+  onPick,
+}: {
+  captions: MovieboxCaption[];
+  current: string;
+  onPick: (lang: string) => void;
+}) => {
+  const options = useMemo(
+    () => [{ key: "off", label: "Off" }, ...captions.map((c) => ({ key: c.lang, label: c.lang }))],
+    [captions],
+  );
+  return (
+    <ToolbarMenu
+      icon={<Subtitles className="w-3.5 h-3.5" />}
+      label="Subtitles"
+      options={options}
+      currentKey={current}
+      onPick={onPick}
+    />
+  );
+};
