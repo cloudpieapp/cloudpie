@@ -5,6 +5,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
+import FollowChannelBanner from "@/components/FollowChannelBanner";
 import {
   resolveMovieboxDownloads,
   movieboxProxyUrl,
@@ -362,6 +363,7 @@ const MoviePlayer = ({
           </button>
         </div>
       </div>
+      <FollowChannelBanner />
     </div>
   );
 };
@@ -587,10 +589,10 @@ const ToolbarMenu = ({
         onClick={() => setOpen((v) => !v)}
         title={label}
         aria-label={label}
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md text-[12px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
+        className="inline-flex items-center gap-1 h-8 sm:h-9 px-2 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
       >
         {icon}
-        <span>{label}</span>
+        <span className="hidden xs:inline sm:inline">{label}</span>
       </button>
       {open && (
         <div className="absolute right-0 bottom-full mb-1.5 z-40 min-w-[180px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
