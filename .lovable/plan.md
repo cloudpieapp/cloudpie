@@ -1,70 +1,87 @@
-# 10-Task Implementation Plan
+## Task 1 — True end-of-video autoplay
 
-A single-pass rollout covering the player, downloads, Live TV, home brand rail, and search. Each task is scoped so it can be shipped together in one go.
+In `MoviePlayer.tsx`, remove any pre-emptive countdown triggers. Detect the true end of playback:
 
----
+- For iframe sources: listen for `postMessage` events with `type: 'ended'|'video-ended'|'complete'` and player-specific hooks (VidSrc / Smashy). Add a fallback timer set to `runtime` from TMDB, but only trigger if user hasn't paused.
+- For HLS/native `<video>`: bind `onEnded`.
+When end fires → render Up-Next card (poster of next item, title, 5s countdown, "Play now" / "Cancel"). After 5s auto-navigate. No countdown shows before end.
+Wire `TvWatchPage` to advance to next episode (roll to next season via TMDB). Wire `MovieWatchPage` to first suggestion.
 
-### Task 1 — Compact Quality dropdown on mobile
-- In `MoviePlayer.tsx`, replace the full-screen Quality overlay on small screens (`sm:` breakpoint) with a small anchored dropdown (Radix `DropdownMenu`) opening below the Quality button.
-- Keep the labeled "Quality" button; dropdown shows 1080p / 720p / 480p with a check on the active one.
-- Same pattern reused for Subtitles button (small anchored dropdown listing full language names + Off).
-- Persist selection as today.
+## Task 2 — Ads always filled (3s refill, no blanks)
 
-### Task 2 — Player gestures & in-app control buttons
-- Add tap zones over the video:
-  - Double-tap right → +10s, double-tap left → −10s (with a brief arrow+seconds pill).
-  - Left-edge vertical swipe → brightness overlay (CSS filter on the video for web; Capacitor `@capacitor-community/screen-brightness` when running native).
-  - Right-edge vertical swipe → app volume (video element `volume`).
-- Toolbar buttons: Previous episode, Play/Pause, Next episode, plus a small "Preview" button that shows the next-episode still on hover/tap.
-- Buttons hidden when no series context (movies just show Play/Pause + seek).
+Update `NativeAd.tsx` + `AdsterraIframeAd.tsx`:
 
-### Task 3 — Replace "app has ads" CTA with Follow-channel CTA
-- Remove the ads-notice CTA everywhere it renders.
-- Add a slim banner: "We just hit 100 followers — help us grow, follow our channel." Button opens WhatsApp channel URL via `window.open` (Capacitor `Browser.open` on native). Stored dismissal in `localStorage` for 7 days.
+- Reduce empty-slot refill check from 8s → **3s**.
+- remove it from 30s to at most 5s 
+- Add a third fallback key rotation (primary → alt → primary reload) so a slot never stays gray.
+- Render a low-key skeleton with "Sponsored" label so the space never looks blank while waiting.
+- Preload the Adsterra invoke script once at app boot in `main.tsx`.
 
-### Task 4 — Downloads: bundle subtitles + offline subtitle playback
-- In `DownloadSourceSheet` / `offlineDownloads.ts`:
-  - When starting a download, also fetch every caption from the MovieBox result, convert SRT→VTT, and store each as a Blob in a new `subtitles` IndexedDB store keyed by `videoId + lang`.
-  - Extend `OfflineVideo` with `subtitles: {lang, label}[]`.
-- In the offline player (downloads player), add the same Subtitles dropdown; tracks are built from IndexedDB blobs via `URL.createObjectURL`.
+## Task 3 — Live TV: full iptv-org catalog, globe hero, working-only
 
-### Task 5 — Downloads page: 3-dot menu + Sort + grouped ordering
-- Replace inline Delete/Queue buttons on each row with a single `⋮` `DropdownMenu` containing: Play, Pause/Resume (queue), Delete, Share.
-- Add a top toolbar: **Sort** dropdown (Recently added, Title A–Z, Size, Category) and **Category** chips (Movies, Series, Anime).
-- Series episodes: group by `seriesTitle`, expandable folders; inside a folder, sort by `season` then `episode` ascending (S1E1 → S1E2 → S2E1…).
+In `src/lib/iptv.ts`:
 
-### Task 6 — Downloads player: auto-next episode + Recommendations rail
-- After a downloaded episode ends, look up the same series' next `(season, episode)` in IndexedDB and autoplay it (respect the existing autoplay setting + countdown card).
-- Below the offline player, render a "More like this" rail. Data source: `useEnrichedMetadata` recommendations for the tmdbId, cached to `localStorage` (`bb:recs:v1:<type>-<id>`, 7-day TTL). When offline, read from cache; hide rail if empty.
+- Fetch `https://iptv-org.github.io/api/streams.json` + `channels.json` + `categories.json` and join client-side.
+- Filter to streams where `status !== 'error'` and URL responds `200` via a background HEAD probe (through existing `proxy` edge function). Cache probe results 30 min in `localStorage`.
+- Group by category (News, Sports, Movies, Music, Kids, Entertainment) and country. Pin News + Sports.
+- Remove YouTube-live channels that don't resolve — drop the youtube resolver path from the UI unless it returns HLS.
+In `LiveTVPage.tsx`:
+- Replace world-map with an animated CSS globe (rotating sphere with meridian grid + glow) at hero position. Keep the sticky sidebar with search + category chips + channel list. Only channels flagged `status: 'ok'` render.        also the homepage use the tv logos and inip the player the full logo on the player as the link loads 
 
-### Task 7 — Live TV page redesigned as logo cards
-- Rebuild `LiveTVPage.tsx` grid: rounded cards with the channel's official logo centered on a brand-tinted background, name below, "LIVE" pill.
-- Use lovable-assets pointers already in `src/assets/livetv/` and add missing ones (BBC News, CNN, Fox News, Bloomberg, Amazon Prime, Netflix, Disney+, Tubi, DreamWorks, IMAX) from the uploaded reference images via `lovable-assets create` so they're CDN-cached.
-- Preserve current playback wiring; only the card presentation changes.
+## Task 4 — Remove redirect message from player
 
-### Task 8 — 50 free YouTube live channels via Piped
-- Extend `src/lib/piped.ts` with `getLiveChannel(handle)` and a curated `FREE_LIVE_CHANNELS` array (50 entries: news, sports, music, kids, docs — reusing the prior list).
-- New `useLiveChannels()` hook resolves each channel's current live stream (HLS URL) through the existing `piped-proxy` edge function; cached in React Query for 5 min.
-- Live TV page merges IPTV channels (existing) + Piped channels into the same card grid; each card tags its source.
+In `MoviePlayer.tsx`, delete the "You may see redirects for ~5s" banner/toast and the 5-second overlay entirely.
 
-### Task 9 — Home page "Streaming Universe" rail
-- New `StreamingBrandsRow` on `HomePage.tsx` showing Netflix, Amazon Prime, Tubi, Disney+, DreamWorks, IMAX as logo cards (uses the same cached asset pointers from Task 7).
-- Tapping a card routes to `/search?provider=netflix` (etc.).
+## Task 5 — Player toolbar: single row + F fullscreen
 
-### Task 10 — Smarter search: never blank + provider filter + related fallback
-- In `SearchPage.tsx`:
-  - Read `provider` query param; when present, filter TMDB results by `with_watch_providers` (TMDB provider IDs mapped: Netflix 8, Prime 9, Disney+ 337, Tubi 73, etc.) and label the header ("Netflix picks").
-  - Empty query → render Trending + "Because you watched" (from Continue Watching seeds) + Top by genre so the page is never blank.
-  - Non-empty query with 0 exact hits → fall back to TMDB `search/multi` with fuzzy tokens + `discover` by inferred genre keyword so related results still show, under a "Related results" heading.
-  - Debounce 250ms, cache queries in React Query.
+Rework `MoviePlayer.tsx` toolbar:
 
----
+- Hide the ad-blocker toggle button (default-on, no UI).
+- One row: `[Source pill group] [Download] [Fullscreen icon]` — flex, wraps only on <360px.
+- Fullscreen becomes an icon button (Maximize2 lucide icon) that calls `requestFullscreen` on the player wrapper and locks orientation to landscape on mobile.
+- Add global keyboard: `f` → toggle fullscreen (desktop only; ignore if input focused).
+
+## Task 6 — Desktop keyboard shortcuts + fire Explore icon
+
+- Add shortcuts (desktop / TV): `f` fullscreen, `space` play/pause, `←/→` skip (postMessage), `m` mute (where applicable), `?` show shortcut sheet. Register in `MoviePlayer.tsx` with a small `ShortcutsHelp` popover.
+- In `BottomNav.tsx` (and desktop `TopBar.tsx` if Explore lives there), swap Explore icon → `Flame` from lucide-react.
+- Remove the ad row that currently sits on the Explore page (`SearchPage.tsx` or explore route).
+
+## Task 7 — Downloads rebuild (MovieBox-style + full player parity)
+
+Rebuild `DownloadPage.tsx` and `MyDownloadsPage.tsx`:
+
+- Hero download card: poster left, title/meta/size/quality right, primary "Download" button, secondary "Watch offline".
+- Right sticky sidebar "Suggested Downloads" (from TMDB similar/recommended).
+- Offline player: reuse `MoviePlayer` shell but backed by cached blob URL from `offlineDownloads.ts`. Show same Up-Next card, same suggestion sidebar, same fullscreen/shortcut toolbar. Use `useMovieRecommendations` for cached-suggestion rail below.
+- Match spacing, typography, sticky header, and background color of the online watch pages exactly.
+
+## Task 8 — Full light-mode theming
+
+Audit for hardcoded dark colors (`bg-[#0A0A0A]`, `bg-black/…`, `text-white`) in: `MovieWatchPage`, `TvWatchPage`, `MoviePlayer`, `DownloadPage`, `LiveTVPage`, `BottomNav`, `TopBar`, `Footer`, `HomePage` hero.
+
+- Replace with semantic tokens (`bg-background`, `text-foreground`, `bg-card`, `border-border`, `text-muted-foreground`).
+- Confirm `.light` class overrides in `index.css` cover the token set used. Add missing tokens (e.g. `--player-bg`) with light/dark values.
+- Test by toggling `ThemeToggle` — no black patches remain.
+
+## Task 9 — Prune non-working stream sources
+
+- In `MoviePlayer.tsx`, keep only sources that have been verified working: **movies111** and **smashystreams**. Remove any leftover fallbacks (VidSrc dead mirrors, YouTube trailer fallbacks that hit CORS).
+- In `iptv.ts` (Live TV), drop YouTube-live channels whose resolver returns non-HLS embed-only (they intermittently fail); keep only iptv-org HLS URLs that pass the HEAD probe from Task 3.
+- Log `[Player] source ok` / `[Player] source failed → switching`.
+
+## Task 10 — Centered desktop top nav + verify build
+
+- In `TopBar.tsx`, change desktop layout: logo left, nav links centered (`mx-auto`), profile/search right. Use `max-w-[1180px] mx-auto` container so it aligns with the watch page.
+- Ensure mobile bottom nav unchanged.
+- Final verification:
+  - `bunx tsgo --noEmit`
+  - Playwright: `/home` (centered nav, Flame icon), `/watch/movie/<id>` (single-row toolbar, no redirect banner, F toggles fullscreen, no blank ads after 5s), `/live-tv` (globe visible, ≥50 channels, all ok), `/downloads/<id>` (matches watch layout), toggle light mode and screenshot all pages.
 
 ## Technical notes
-- New/changed files: `MoviePlayer.tsx`, `OfflinePlayer` (extract), `offlineDownloads.ts` (+ subtitles store, schema bump to v2), `MyDownloadsPage.tsx`, `LiveTVPage.tsx`, `HomePage.tsx`, `SearchPage.tsx`, `src/lib/piped.ts`, `src/lib/liveChannels.ts` (new), `src/components/StreamingBrandsRow.tsx` (new), `src/components/FollowChannelBanner.tsx` (new).
-- IndexedDB migration: bump `DB_VERSION` to 2, add `subtitles` store, backfill `subtitles: []` on existing rows.
-- Gestures implemented with plain pointer events (no new deps). Brightness on native only when Capacitor is present.
-- All new brand logos uploaded via `lovable-assets` so they're CDN-cached and available offline through the service worker.
-- Recommendations cache keyed per title in `localStorage`; SW `public/sw.js` already caches API GETs — recs will be re-served offline.
 
-Approve and I'll implement all ten in one pass.
+- No schema changes.
+- Ad refill loop capped at 1 request / 3s / slot to respect Adsterra.
+- HEAD-probe for IPTV uses existing `proxy` edge function; results cached in `localStorage` under `iptv:probe:<url>`.
+- Fullscreen orientation lock guarded by feature-detect (`screen.orientation?.lock`).
+- Light-mode audit is presentational only — no business-logic changes.

@@ -6,7 +6,6 @@ import TmdbContinueRow from "@/components/TmdbContinueRow";
 import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
-import StreamingBrandsRow from "@/components/StreamingBrandsRow";
 import {
   useTrendingMovies,
   useTrendingTv,
@@ -72,8 +71,6 @@ const HomePage = () => {
       <TmdbHero item={heroItem} type="movie" isLoading={trendingMovies.isLoading} />
 
       <CategoryChips />
-
-      <StreamingBrandsRow />
 
       {/* Ad #1 */}
       <InlineAdRow count={4} />

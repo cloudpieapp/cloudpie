@@ -6,7 +6,6 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 
 import InlineAdRow from "@/components/InlineAdRow";
-import { BRAND_PROVIDER_MAP } from "@/components/StreamingBrandsRow";
 
 import {
   searchMovies,
@@ -152,8 +151,6 @@ const SearchPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQ = searchParams.get("q") || "";
-  const providerSlug = searchParams.get("provider") || "";
-  const provider = providerSlug ? BRAND_PROVIDER_MAP[providerSlug] : undefined;
   const [query, setQuery] = useState(initialQ);
   const [searchQuery, setSearchQuery] = useState(initialQ);
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -177,14 +174,11 @@ const SearchPage = () => {
   });
 
   const { data: results = [], isFetching } = useQuery<ResultItem[]>({
-    queryKey: ["mixed-search", searchQuery, provider?.providerId ?? 0],
+    queryKey: ["mixed-search", searchQuery],
     queryFn: async () => {
-      const discoverArgs: any = provider?.providerId
-        ? { with_watch_providers: provider.providerId, watch_region: "US" }
-        : {};
       const [movies, tv] = await Promise.all([
-        searchQuery.trim() ? searchMovies(searchQuery) : discoverMovies(discoverArgs),
-        searchQuery.trim() ? searchTv(searchQuery) : discoverTv(discoverArgs),
+        searchQuery.trim() ? searchMovies(searchQuery) : discoverMovies({}),
+        searchQuery.trim() ? searchTv(searchQuery) : discoverTv({}),
       ]);
       const decorated: ResultItem[] = [
         ...movies.map((m) => {
@@ -201,22 +195,6 @@ const SearchPage = () => {
         }),
       ];
       return decorated.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-    },
-    staleTime: 1000 * 60 * 10,
-  });
-
-  // Related fallback when a query yields no exact hits — searches with the
-  // first meaningful token so users still see relevant results.
-  const { data: related = [] } = useQuery<ResultItem[]>({
-    queryKey: ["related-search", searchQuery],
-    enabled: !!searchQuery.trim() && results.length === 0 && !isFetching,
-    queryFn: async () => {
-      const token = searchQuery.trim().split(/\s+/).filter((t) => t.length > 2)[0] || searchQuery.trim();
-      const multi = await searchMulti(token);
-      return multi
-        .filter((r: any) => r.media_type === "movie" || r.media_type === "tv")
-        .slice(0, 12)
-        .map((r: any) => ({ ...r, _type: r.media_type, _bucket: "all" as FilterKey }));
     },
     staleTime: 1000 * 60 * 10,
   });
@@ -264,7 +242,6 @@ const SearchPage = () => {
   }, []);
 
   const showExplore = !searchQuery;
-  const headerTitle = provider ? `${provider.label} picks` : "Trending now";
 
   return (
     <AppLayout>
@@ -333,7 +310,7 @@ const SearchPage = () => {
           <>
             <div className="flex items-center gap-1.5 mb-3">
               <Flame className="w-4 h-4 fill-[#E50914]" style={{ color: "#E50914" }} />
-              <h2 className="text-white text-sm font-bold">{headerTitle}</h2>
+              <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
               <BrandedLoadingState label="Loading trending" />
@@ -376,17 +353,13 @@ const SearchPage = () => {
             ) : filtered.length === 0 ? (
               <div className="py-8 flex flex-col items-center text-center">
                 <img src="/logo-compact.png" alt="" className="h-14 w-14 mb-3 rounded-xl opacity-90" />
-                <p className="text-sm font-semibold text-white">No exact matches</p>
-                <p className="text-xs text-white/55 mt-1 mb-5">
-                  {related.length > 0 ? `Showing related results for "${searchQuery}"` : `Nothing matches "${searchQuery}". Here's what's trending.`}
-                </p>
-                {(related.length > 0 ? related : trending).length > 0 && (
+                <p className="text-sm font-semibold text-white">No results found</p>
+                <p className="text-xs text-white/55 mt-1 mb-5">Nothing matches "{searchQuery}". Try another title.</p>
+                {trending.length > 0 && (
                   <div className="text-left w-full">
-                    <h3 className="text-[11px] font-semibold text-white/80 mb-2">
-                      {related.length > 0 ? "Related results" : "You might like"}
-                    </h3>
+                    <h3 className="text-[11px] font-semibold text-white/80 mb-2">You might like</h3>
                     <div className="space-y-2">
-                      {((related.length > 0 ? related : trending) as any[]).slice(0, 12).map((m: any) => (
+                      {(trending as any[]).slice(0, 8).map((m: any) => (
                         <ResultRow
                           key={`sgg-${m._type}-${m.id}`}
                           item={{ ...m, _bucket: "all" }}
