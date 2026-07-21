@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand } from "lucide-react";
+import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
 
 function fmtMB(bytes: number) {
   if (!bytes) return "";
@@ -21,6 +31,9 @@ interface SeriesFolder {
   episodes: OfflineVideo[];
 }
 
+type SortKey = "recent" | "title" | "size";
+type Category = "all" | "movies" | "tv" | "anime";
+
 const MyDownloadsPage = () => {
   const [offline, setOffline] = useState<OfflineVideo[]>([]);
   const [query, setQuery] = useState("");
@@ -28,6 +41,8 @@ const MyDownloadsPage = () => {
   const [playUrl, setPlayUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState<OfflineVideo | null>(null);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  const [sortBy, setSortBy] = useState<SortKey>("recent");
+  const [category, setCategory] = useState<Category>("all");
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
@@ -72,6 +87,7 @@ const MyDownloadsPage = () => {
     const folderMap = new Map<string, SeriesFolder>();
 
     for (const v of offline) {
+      if (category !== "all" && v.type !== category) continue;
       if (v.type === "tv") {
         const key = `tv-${v.tmdbId}`;
         const name = v.seriesTitle || v.title;
@@ -89,11 +105,23 @@ const MyDownloadsPage = () => {
     }
 
     const folderList = Array.from(folderMap.values());
+    // Episodes inside a folder always play in canonical season/episode order.
     folderList.forEach((f) =>
       f.episodes.sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0)),
     );
+    // Apply outer sort
+    const cmp = (a: { title: string; size: number; updatedAt: number }, b: typeof a) => {
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      if (sortBy === "size") return b.size - a.size;
+      return b.updatedAt - a.updatedAt;
+    };
+    movieList.sort(cmp);
+    folderList.sort((a, b) => cmp(
+      { title: a.title, size: a.episodes.reduce((n, e) => n + e.size, 0), updatedAt: Math.max(...a.episodes.map((e) => e.updatedAt)) },
+      { title: b.title, size: b.episodes.reduce((n, e) => n + e.size, 0), updatedAt: Math.max(...b.episodes.map((e) => e.updatedAt)) },
+    ));
     return { movies: movieList, folders: folderList };
-  }, [offline, query]);
+  }, [offline, query, category, sortBy]);
 
   const empty = movies.length === 0 && folders.length === 0;
 
@@ -103,7 +131,19 @@ const MyDownloadsPage = () => {
     return offline.filter((v) => v.status === "ready" && v.id !== playing.id).slice(0, 20);
   }, [offline, playing]);
 
+  // Auto-next: if this is a TV episode, jump to the next episode of the same
+  // series that's ready offline (S/E order). Falls back to first ready suggestion.
   const playNext = () => {
+    if (playing?.type === "tv") {
+      const sameSeries = offline
+        .filter((v) => v.type === "tv" && v.tmdbId === playing.tmdbId && v.status === "ready" && v.id !== playing.id)
+        .sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
+      const next = sameSeries.find(
+        (v) => (v.season ?? 0) > (playing.season ?? 0) ||
+              ((v.season ?? 0) === (playing.season ?? 0) && (v.episode ?? 0) > (playing.episode ?? 0)),
+      ) || sameSeries[0];
+      if (next) { playOffline(next); return; }
+    }
     if (suggestions[0]) playOffline(suggestions[0]);
   };
 
@@ -158,32 +198,34 @@ const MyDownloadsPage = () => {
             </div>
           )}
         </div>
-        {downloading && (
-          <button onClick={() => pauseDownload(v.id)} className="p-2 text-muted-foreground hover:text-foreground" aria-label="Pause">
-            <Pause className="w-4 h-4" />
-          </button>
-        )}
-        {v.status === "paused" && (
-          <button
-            onClick={() => { resumeDownload(v.id); toast.success("Resuming download"); }}
-            className="p-2 text-muted-foreground hover:text-foreground"
-            aria-label="Resume"
-          >
-            <PlayCircle className="w-4 h-4" />
-          </button>
-        )}
-        {v.status === "error" && (
-          <button
-            onClick={() => { resumeDownload(v.id); toast.success("Retrying"); }}
-            className="p-2 text-muted-foreground hover:text-foreground"
-            aria-label="Retry"
-          >
-            <PlayCircle className="w-4 h-4" />
-          </button>
-        )}
-        <button onClick={() => removeOne(v.id)} className="p-2 text-muted-foreground hover:text-primary" aria-label="Delete">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 text-muted-foreground hover:text-foreground" aria-label="More options">
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            {ready && (
+              <DropdownMenuItem onClick={() => playOffline(v)}>
+                <Play className="w-3.5 h-3.5 mr-2" /> Play
+              </DropdownMenuItem>
+            )}
+            {downloading && (
+              <DropdownMenuItem onClick={() => pauseDownload(v.id)}>
+                <Pause className="w-3.5 h-3.5 mr-2" /> Pause (queue)
+              </DropdownMenuItem>
+            )}
+            {(v.status === "paused" || v.status === "error") && (
+              <DropdownMenuItem onClick={() => { resumeDownload(v.id); toast.success("Resuming"); }}>
+                <PlayCircle className="w-3.5 h-3.5 mr-2" /> Resume
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => removeOne(v.id)} className="text-primary focus:text-primary">
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </li>
     );
   };
@@ -212,6 +254,42 @@ const MyDownloadsPage = () => {
               className="w-full mb-3 px-3 py-2 rounded-lg bg-card border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60"
             />
           )}
+
+          {/* Sort + category toolbar */}
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+              {(["all", "movies", "tv", "anime"] as const).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCategory(c)}
+                  className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold whitespace-nowrap transition ${
+                    category === c
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card text-muted-foreground border border-border"
+                  }`}
+                >
+                  {c === "all" ? "All" : c === "tv" ? "Series" : c === "movies" ? "Movies" : "Anime"}
+                </button>
+              ))}
+            </div>
+            <div className="ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-semibold bg-card border border-border text-muted-foreground hover:text-foreground">
+                    <ArrowUpDown className="w-3 h-3" /> Sort
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuLabel className="text-[10px] uppercase tracking-wider">Sort by</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
+                    <DropdownMenuRadioItem value="recent">Recently added</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="title">Title (A–Z)</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="size">File size</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
 
           {empty ? (
             <div className="text-center py-16 text-muted-foreground">
