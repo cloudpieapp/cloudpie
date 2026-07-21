@@ -305,7 +305,42 @@ const LiveTVPage = () => {
                   <ProgrammeLineup channelName={activeChannel.name} group={activeChannel.group} />
                 </>
               ) : (
-                <GlobeVisual />
+                <div>
+                  <GlobeVisual />
+                  {/* Card grid: quick-pick channels with big logos */}
+                  {!iptv.isLoading && numbered.length > 0 && (
+                    <div className="mt-4">
+                      <h2 className="text-white text-sm font-bold mb-2 flex items-center gap-1.5">
+                        <Tv className="w-4 h-4" style={{ color: "#E50914" }} /> Channel guide
+                      </h2>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+                        {visibleChannels.slice(0, 40).map((c) => (
+                          <button
+                            key={`card-${c.url}-${c.number}`}
+                            onClick={() => setActiveChannel(c)}
+                            className="group aspect-[4/3] rounded-xl border border-white/10 bg-[#141414] hover:border-[#E50914]/60 transition-all p-2 flex flex-col items-center justify-center gap-1.5 overflow-hidden"
+                            aria-label={c.name}
+                          >
+                            <div className="flex-1 w-full grid place-items-center">
+                              {c.logo ? (
+                                <img
+                                  src={c.logo}
+                                  alt={c.name}
+                                  loading="lazy"
+                                  className="max-w-[80%] max-h-[80%] object-contain group-hover:scale-105 transition-transform"
+                                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                />
+                              ) : (
+                                <Tv className="w-6 h-6 text-white/40" />
+                              )}
+                            </div>
+                            <p className="text-[10px] font-bold text-white/85 truncate w-full text-center">{c.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
