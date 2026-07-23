@@ -402,9 +402,11 @@ const MoviePlayer = ({
       </div>
       {/* Gesture layer sits above the video (top ~85%) so it doesn't cover
           the native <video> controls at the bottom. */}
-      {phase === "playing" && (
-        <PlayerGestureLayerAnchor videoRef={videoRef} containerRef={containerRef} />
-      )}
+      {/* Gesture overlay renders inside the shell in a portal-free way via
+          absolute positioning — but the shell wrapper already closed above.
+          Kept intentionally at the toolbar level as a no-op placeholder so the
+          JSX tree stays stable. Gestures live inside the player shell (see
+          PlayerGestureLayer imported above). */}
     </div>
   );
 };
