@@ -332,10 +332,36 @@ const MyDownloadsPage = () => {
                                   {f.episodes.length} episode{f.episodes.length !== 1 ? "s" : ""} · {readyCount} ready offline
                                 </p>
                               </button>
-                              <button onClick={() => removeFolder(f)} className="p-2 text-muted-foreground hover:text-primary" aria-label="Delete series">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-2 text-muted-foreground hover:text-foreground"
+                                    aria-label="Series options"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                  <DropdownMenuItem
+                                    onClick={() => setOpenFolders((s) => ({ ...s, [f.key]: !s[f.key] }))}
+                                  >
+                                    <ChevronDown className="w-3.5 h-3.5 mr-2" />
+                                    {isOpen ? "Collapse" : "Expand"}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => removeFolder(f)}
+                                    className="text-primary focus:text-primary"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete series
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              <ChevronDown
+                                onClick={() => setOpenFolders((s) => ({ ...s, [f.key]: !s[f.key] }))}
+                                className={`w-4 h-4 text-muted-foreground cursor-pointer transition-transform ${isOpen ? "rotate-180" : ""}`}
+                              />
                             </div>
                             {isOpen && (
                               <ul className="space-y-2 px-2 pb-2">

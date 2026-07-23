@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Radio, Tv, Search, Star, ChevronLeft, Globe2 } from "lucide-react";
+import { Radio, Tv, Search, Star, ChevronLeft, Globe2, EyeOff, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
@@ -173,6 +179,7 @@ interface NumberedChannel extends IptvChannel {
 }
 
 const FAV_KEY = "livetv:favorites";
+const HIDDEN_KEY = "livetv:hidden";
 
 const LiveTVPage = () => {
   const [activeChannel, setActiveChannel] = useState<NumberedChannel | null>(null);
@@ -185,10 +192,24 @@ const LiveTVPage = () => {
       return [];
     }
   });
+  const [hidden, setHidden] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
   }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(hidden));
+  }, [hidden]);
+
+  const hideChannel = (url: string) => setHidden((h) => (h.includes(url) ? h : [url, ...h]));
+  const showAllHidden = () => setHidden([]);
 
   const toggleFav = (url: string) => {
     setFavorites((f) => (f.includes(url) ? f.filter((u) => u !== url) : [url, ...f]));
@@ -202,7 +223,8 @@ const LiveTVPage = () => {
   });
 
   const { numbered, byCategory, categories } = useMemo(() => {
-    const list = iptv.data ?? [];
+    const raw = iptv.data ?? [];
+    const list = raw.filter((c) => !hidden.includes(c.url));
     const numbered: NumberedChannel[] = list.map((c, i) => ({ ...c, number: i + 1 }));
     const byCategory = new Map<string, NumberedChannel[]>();
     for (const c of numbered) {
@@ -218,7 +240,7 @@ const LiveTVPage = () => {
     if (favs.length) byCategory.set("★ Favorites", favs);
     byCategory.set("All", numbered);
     return { numbered, byCategory, categories };
-  }, [iptv.data, favorites]);
+  }, [iptv.data, favorites, hidden]);
 
   const visibleChannels = useMemo(() => {
     const base = byCategory.get(activeCategory) ?? numbered;
