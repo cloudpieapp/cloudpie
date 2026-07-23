@@ -1,6 +1,7 @@
 import { useMovieDetail, useTvDetail } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
 import { User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Props {
   tmdbId: string;
@@ -22,7 +23,12 @@ const TmdbCastSection = ({ tmdbId, type }: Props) => {
         {cast.map((c: any) => {
           const photo = img(c.profile_path, "w200");
           return (
-            <div key={c.cast_id ?? c.credit_id ?? c.id} className="flex-shrink-0 w-20 sm:w-24 text-center">
+            <Link
+              to={`/search?q=${encodeURIComponent(c.name)}`}
+              key={c.cast_id ?? c.credit_id ?? c.id}
+              className="flex-shrink-0 w-20 sm:w-24 text-center hover:opacity-90"
+              title={`See more with ${c.name}`}
+            >
               <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden bg-white/5">
                 {photo ? (
                   <img src={photo} alt={c.name} className="w-full h-full object-cover" loading="lazy" />
@@ -32,11 +38,11 @@ const TmdbCastSection = ({ tmdbId, type }: Props) => {
                   </div>
                 )}
               </div>
-              <p className="text-[11px] font-medium text-white mt-1.5 line-clamp-2">{c.name}</p>
+              <p className="text-[11px] font-medium text-white mt-1.5 line-clamp-2 hover:text-primary">{c.name}</p>
               {c.character && (
                 <p className="text-[10px] text-white/50 line-clamp-1">{c.character}</p>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>

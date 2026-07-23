@@ -5,7 +5,6 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
-import FollowChannelBanner from "@/components/FollowChannelBanner";
 import {
   resolveMovieboxDownloads,
   movieboxProxyUrl,
@@ -14,6 +13,8 @@ import {
   type MovieboxCaption,
 } from "@/lib/moviebox";
 import { getSetting } from "@/hooks/useSettings";
+import { getResume, setResume, resumeIdFor } from "@/lib/resumePositions";
+import PlayerGestureLayer from "@/components/PlayerGestureLayer";
 
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
@@ -64,6 +65,42 @@ const MoviePlayer = ({
   const resumeAtRef = useRef<number>(0);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
+
+  // Stable resume-position key for this movie / episode.
+  const resumeKey = useMemo(
+    () => resumeIdFor({ type, tmdbId, season, episode }),
+    [type, tmdbId, season, episode],
+  );
+
+  // Seed the resume point from storage so first-play jumps back to where the
+  // user left off, even after a device restart.
+  useEffect(() => {
+    const saved = getResume(resumeKey);
+    if (saved > 15) resumeAtRef.current = saved;
+  }, [resumeKey]);
+
+  // Periodically persist current position while playing so accidental closes
+  // don't lose progress.
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const iv = window.setInterval(() => {
+      const v = videoRef.current;
+      if (!v || v.paused || !v.currentTime) return;
+      setResume(resumeKey, v.currentTime, v.duration || 0);
+    }, 5000);
+    const onHide = () => {
+      const v = videoRef.current;
+      if (v && v.currentTime) setResume(resumeKey, v.currentTime, v.duration || 0);
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("beforeunload", onHide);
+    return () => {
+      window.clearInterval(iv);
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("beforeunload", onHide);
+      onHide();
+    };
+  }, [phase, resumeKey]);
 
   useEffect(() => {
     let active = true;
@@ -303,6 +340,8 @@ const MoviePlayer = ({
           </video>
         )}
 
+        {phase === "playing" && <PlayerGestureLayer videoRef={videoRef} />}
+
         {/* Loading state: backdrop + title metadata + 3-dot animation */}
         {phase === "loading" && (
           <MetadataLoader title={title} year={year} backdrop={backdrop} poster={poster} />
@@ -363,7 +402,13 @@ const MoviePlayer = ({
           </button>
         </div>
       </div>
-      <FollowChannelBanner />
+      {/* Gesture layer sits above the video (top ~85%) so it doesn't cover
+          the native <video> controls at the bottom. */}
+      {/* Gesture overlay renders inside the shell in a portal-free way via
+          absolute positioning — but the shell wrapper already closed above.
+          Kept intentionally at the toolbar level as a no-op placeholder so the
+          JSX tree stays stable. Gestures live inside the player shell (see
+          PlayerGestureLayer imported above). */}
     </div>
   );
 };

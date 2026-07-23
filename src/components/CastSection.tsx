@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import { searchJikanAnime, getAnimeCharacters, type JikanCharacter } from "@/lib/jikan";
 
 interface CastSectionProps {
@@ -64,7 +65,12 @@ const CastSection = ({ title, channel }: CastSectionProps) => {
       <h3 className="text-sm font-semibold text-foreground mb-3">🎭 Cast & Characters</h3>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
         {cast.map((c) => (
-          <div key={c.name} className="flex-shrink-0 w-20 text-center">
+          <Link
+            to={`/search?q=${encodeURIComponent(c.name)}`}
+            key={c.name}
+            className="flex-shrink-0 w-20 text-center hover:opacity-90"
+            title={`See more with ${c.name}`}
+          >
             <div className="w-16 h-16 mx-auto rounded-full overflow-hidden bg-muted">
               {c.image && !c.image.includes("questionmark") ? (
                 <img src={c.image} alt={c.name} className="w-full h-full object-cover" loading="lazy" />
@@ -79,7 +85,7 @@ const CastSection = ({ title, channel }: CastSectionProps) => {
             {c.voiceActor && (
               <p className="text-[8px] text-primary mt-0.5 line-clamp-1">VA: {c.voiceActor.name}</p>
             )}
-          </div>
+          </Link>
         ))}
       </div>
     </div>

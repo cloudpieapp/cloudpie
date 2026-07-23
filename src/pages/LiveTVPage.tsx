@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Radio, Tv, Search, Star, ChevronLeft, Globe2 } from "lucide-react";
+import { Radio, Tv, Search, Star, ChevronLeft, Globe2, EyeOff, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
@@ -173,6 +179,7 @@ interface NumberedChannel extends IptvChannel {
 }
 
 const FAV_KEY = "livetv:favorites";
+const HIDDEN_KEY = "livetv:hidden";
 
 const LiveTVPage = () => {
   const [activeChannel, setActiveChannel] = useState<NumberedChannel | null>(null);
@@ -185,10 +192,24 @@ const LiveTVPage = () => {
       return [];
     }
   });
+  const [hidden, setHidden] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
   }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(hidden));
+  }, [hidden]);
+
+  const hideChannel = (url: string) => setHidden((h) => (h.includes(url) ? h : [url, ...h]));
+  const showAllHidden = () => setHidden([]);
 
   const toggleFav = (url: string) => {
     setFavorites((f) => (f.includes(url) ? f.filter((u) => u !== url) : [url, ...f]));
@@ -202,7 +223,8 @@ const LiveTVPage = () => {
   });
 
   const { numbered, byCategory, categories } = useMemo(() => {
-    const list = iptv.data ?? [];
+    const raw = iptv.data ?? [];
+    const list = raw.filter((c) => !hidden.includes(c.url));
     const numbered: NumberedChannel[] = list.map((c, i) => ({ ...c, number: i + 1 }));
     const byCategory = new Map<string, NumberedChannel[]>();
     for (const c of numbered) {
@@ -218,7 +240,7 @@ const LiveTVPage = () => {
     if (favs.length) byCategory.set("★ Favorites", favs);
     byCategory.set("All", numbered);
     return { numbered, byCategory, categories };
-  }, [iptv.data, favorites]);
+  }, [iptv.data, favorites, hidden]);
 
   const visibleChannels = useMemo(() => {
     const base = byCategory.get(activeCategory) ?? numbered;
@@ -358,6 +380,14 @@ const LiveTVPage = () => {
                     style={{ background: "#1F1F1F" }}
                   />
                 </div>
+                {hidden.length > 0 && (
+                  <button
+                    onClick={showAllHidden}
+                    className="w-full text-[10.5px] text-white/70 hover:text-white flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/10 bg-white/[0.03]"
+                  >
+                    <EyeOff className="w-3 h-3" /> Show {hidden.length} hidden channel{hidden.length === 1 ? "" : "s"}
+                  </button>
+                )}
 
                 {/* Category chips */}
                 {!iptv.isLoading && categories.length > 0 && (
@@ -460,21 +490,39 @@ const LiveTVPage = () => {
                               {c.country ? ` · ${c.country}` : ""} · #{c.number}
                             </p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFav(c.url);
-                            }}
-                            className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5 flex-shrink-0"
-                            aria-label="Favorite"
-                          >
-                            <Star
-                              className={`w-3.5 h-3.5 ${
-                                isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"
-                              }`}
-                            />
-                          </button>
+                          <div className="flex items-center gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => toggleFav(c.url)}
+                              className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5"
+                              aria-label="Favorite"
+                            >
+                              <Star
+                                className={`w-3.5 h-3.5 ${
+                                  isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"
+                                }`}
+                              />
+                            </button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5"
+                                  aria-label="Channel options"
+                                >
+                                  <MoreVertical className="w-3.5 h-3.5 text-white/35" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => toggleFav(c.url)}>
+                                  <Star className="w-3.5 h-3.5 mr-2" />
+                                  {isFav ? "Unfavorite" : "Favorite"}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => hideChannel(c.url)}>
+                                  <EyeOff className="w-3.5 h-3.5 mr-2" /> Hide channel
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       );
                     })}
