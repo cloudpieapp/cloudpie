@@ -76,6 +76,37 @@ const useDebounced = <T,>(value: T, delay = 250) => {
   return v;
 };
 
+/**
+ * Look up the top matching person by name and merge their movie/tv credits.
+ * Returns empty lists when the query doesn't match a real person so short or
+ * generic queries don't derail regular title search.
+ */
+async function fetchPersonFilmography(query: string): Promise<{ movies: TmdbItem[]; tv: TmdbItem[] }> {
+  try {
+    const q = query.trim();
+    if (q.length < 3 || !/\s|^[A-Z]/.test(q)) return { movies: [], tv: [] };
+    const searchRes: any = await tmdb(`/search/person`, { query: q, include_adult: "false" });
+    const person = (searchRes?.results || []).find((p: any) => (p.known_for_department || "").toLowerCase() === "acting")
+      || searchRes?.results?.[0];
+    if (!person?.id) return { movies: [], tv: [] };
+    const credits: any = await tmdb(`/person/${person.id}/combined_credits`);
+    const cast = credits?.cast || [];
+    const movies = cast
+      .filter((c: any) => c.media_type === "movie")
+      .sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0))
+      .slice(0, 24)
+      .map((c: any) => ({ ...c, media_type: "movie" } as TmdbItem));
+    const tv = cast
+      .filter((c: any) => c.media_type === "tv")
+      .sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0))
+      .slice(0, 24)
+      .map((c: any) => ({ ...c, title: c.name, media_type: "tv" } as TmdbItem));
+    return { movies, tv };
+  } catch {
+    return { movies: [], tv: [] };
+  }
+}
+
 const ResultRow = ({ item, onClick }: { item: ResultItem; onClick: () => void }) => {
   const title = (item as any).title || (item as any).name || "Untitled";
   const date = (item as any).release_date || (item as any).first_air_date || "";
