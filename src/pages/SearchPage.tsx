@@ -16,6 +16,7 @@ import {
   discoverTv,
   GENRES,
   img,
+  tmdb,
   type TmdbItem,
 } from "@/lib/tmdb";
 
@@ -182,18 +183,33 @@ const SearchPage = () => {
       const discoverArgs: any = provider?.providerId
         ? { with_watch_providers: provider.providerId, watch_region: "US" }
         : {};
-      const [movies, tv] = await Promise.all([
-        searchQuery.trim() ? searchMovies(searchQuery) : discoverMovies(discoverArgs),
-        searchQuery.trim() ? searchTv(searchQuery) : discoverTv(discoverArgs),
+      // When searching by text, also look up people so that queries like
+      // "Tom Hanks" or "Zendaya" return that actor's filmography.
+      const q = searchQuery.trim();
+      const [movies, tv, personFilmography] = await Promise.all([
+        q ? searchMovies(searchQuery) : discoverMovies(discoverArgs),
+        q ? searchTv(searchQuery) : discoverTv(discoverArgs),
+        q ? fetchPersonFilmography(q) : Promise.resolve<{ movies: TmdbItem[]; tv: TmdbItem[] }>({ movies: [], tv: [] }),
       ]);
+      // Merge person credits into their respective buckets, deduped by id.
+      const seen = new Set<string>();
+      const dedup = (list: TmdbItem[], t: "movie" | "tv") =>
+        list.filter((x) => {
+          const k = `${t}-${x.id}`;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+      const mergedMovies = dedup([...movies, ...personFilmography.movies], "movie");
+      const mergedTv = dedup([...tv, ...personFilmography.tv], "tv");
       const decorated: ResultItem[] = [
-        ...movies.map((m) => {
+        ...mergedMovies.map((m) => {
           let bucket: FilterKey = "movies";
           if (isAnime(m)) bucket = "anime";
           else if (isAnimation(m)) bucket = "animation";
           return { ...m, _type: "movie" as const, _bucket: bucket };
         }),
-        ...tv.map((t) => {
+        ...mergedTv.map((t) => {
           let bucket: FilterKey = "series";
           if (isAnime(t)) bucket = "anime";
           else if (isAnimation(t)) bucket = "animation";
