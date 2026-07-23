@@ -1,70 +1,81 @@
-# 10-Task Implementation Plan
+# 10-Task Single-Pass Plan
 
-A single-pass rollout covering the player, downloads, Live TV, home brand rail, and search. Each task is scoped so it can be shipped together in one go.
+Everything below ships in one go. No task is optional.
 
 ---
 
-### Task 1 — Compact Quality dropdown on mobile
-- In `MoviePlayer.tsx`, replace the full-screen Quality overlay on small screens (`sm:` breakpoint) with a small anchored dropdown (Radix `DropdownMenu`) opening below the Quality button.
-- Keep the labeled "Quality" button; dropdown shows 1080p / 720p / 480p with a check on the active one.
-- Same pattern reused for Subtitles button (small anchored dropdown listing full language names + Off).
-- Persist selection as today.
+### Task 1 — Player gestures + in-app controls
 
-### Task 2 — Player gestures & in-app control buttons
-- Add tap zones over the video:
-  - Double-tap right → +10s, double-tap left → −10s (with a brief arrow+seconds pill).
-  - Left-edge vertical swipe → brightness overlay (CSS filter on the video for web; Capacitor `@capacitor-community/screen-brightness` when running native).
-  - Right-edge vertical swipe → app volume (video element `volume`).
-- Toolbar buttons: Previous episode, Play/Pause, Next episode, plus a small "Preview" button that shows the next-episode still on hover/tap.
-- Buttons hidden when no series context (movies just show Play/Pause + seek).
+- `MoviePlayer.tsx`: add pointer-event tap zones over the `<video>`:
+  - Double-tap right half → +10s, left half → −10s, with a brief centered pill showing arrow + `10s`.
+  - Left edge (0–15% width) vertical swipe → brightness overlay (CSS `filter: brightness()` on web; `@capacitor-community/screen-brightness` when `Capacitor.isNativePlatform()`).
+  - Right edge (85–100%) vertical swipe → `video.volume`.
+- Toolbar row: Previous ep · Play/Pause · Next ep · Preview (hover/tap shows next-episode still from TMDB). Ep buttons hidden if no series context.
+- Remove the Follow-channel banner and all remaining ad CTAs from the player surface.
 
-### Task 3 — Replace "app has ads" CTA with Follow-channel CTA
-- Remove the ads-notice CTA everywhere it renders.
-- Add a slim banner: "We just hit 100 followers — help us grow, follow our channel." Button opens WhatsApp channel URL via `window.open` (Capacitor `Browser.open` on native). Stored dismissal in `localStorage` for 7 days.
+### Task 2 — Resume position persistence
+
+- New `src/lib/resumePositions.ts`: `getResume(id)`, `setResume(id, seconds, duration)` backed by `localStorage` key `bb:resume:v1`.
+- `MoviePlayer.tsx` writes every 5s while playing (both online + offline players), and on `pause`/`ended`/`beforeunload`.
+- On mount, seek to saved position if `>15s` and `<95%` of duration; clear on `ended`.
+- Applies to movie, TV episode (per season/episode id), and offline downloads.
+
+
 
 ### Task 4 — Downloads: bundle subtitles + offline subtitle playback
-- In `DownloadSourceSheet` / `offlineDownloads.ts`:
-  - When starting a download, also fetch every caption from the MovieBox result, convert SRT→VTT, and store each as a Blob in a new `subtitles` IndexedDB store keyed by `videoId + lang`.
-  - Extend `OfflineVideo` with `subtitles: {lang, label}[]`.
-- In the offline player (downloads player), add the same Subtitles dropdown; tracks are built from IndexedDB blobs via `URL.createObjectURL`.
 
-### Task 5 — Downloads page: 3-dot menu + Sort + grouped ordering
-- Replace inline Delete/Queue buttons on each row with a single `⋮` `DropdownMenu` containing: Play, Pause/Resume (queue), Delete, Share.
-- Add a top toolbar: **Sort** dropdown (Recently added, Title A–Z, Size, Category) and **Category** chips (Movies, Series, Anime).
-- Series episodes: group by `seriesTitle`, expandable folders; inside a folder, sort by `season` then `episode` ascending (S1E1 → S1E2 → S2E1…).
+- `offlineDownloads.ts`: bump `DB_VERSION` to `2`, add `subtitles` store (key `[videoId, lang]`), extend `OfflineVideo` with `subtitles: {lang, label}[]`, backfill `[]` on existing rows in `onupgradeneeded`.
+- `DownloadSourceSheet` / start flow: fetch every MovieBox caption, SRT→VTT via existing helper, store Blob per lang.
+- Extract offline player from `MyDownloadsPage.tsx` into `src/components/OfflinePlayer.tsx`. Add the same labeled Subtitles dropdown; tracks built from IndexedDB blobs via `URL.createObjectURL`. Resume position applies here too.
 
-### Task 6 — Downloads player: auto-next episode + Recommendations rail
-- After a downloaded episode ends, look up the same series' next `(season, episode)` in IndexedDB and autoplay it (respect the existing autoplay setting + countdown card).
-- Below the offline player, render a "More like this" rail. Data source: `useEnrichedMetadata` recommendations for the tmdbId, cached to `localStorage` (`bb:recs:v1:<type>-<id>`, 7-day TTL). When offline, read from cache; hide rail if empty.
+### Task 5 — Downloads page: 3-dot menu, sort, grouped series
 
-### Task 7 — Live TV page redesigned as logo cards
-- Rebuild `LiveTVPage.tsx` grid: rounded cards with the channel's official logo centered on a brand-tinted background, name below, "LIVE" pill.
-- Use lovable-assets pointers already in `src/assets/livetv/` and add missing ones (BBC News, CNN, Fox News, Bloomberg, Amazon Prime, Netflix, Disney+, Tubi, DreamWorks, IMAX) from the uploaded reference images via `lovable-assets create` so they're CDN-cached.
-- Preserve current playback wiring; only the card presentation changes.
+- Row action becomes a single `⋮` `DropdownMenu` → Play · Pause/Resume · **Delete** · Share. No inline delete/queue buttons.
+- Top toolbar: **Sort** (Recently added, Title A–Z, Size, Category) + **Category** chips (Movies, Series, Anime).
+- Series episodes grouped under expandable `seriesTitle` folder; inside a folder, sort ascending by `season` then `episode` (S1E1 → S1E2 → S2E1…) — top-to-bottom order feeds auto-next.
 
-### Task 8 — 50 free YouTube live channels via Piped
-- Extend `src/lib/piped.ts` with `getLiveChannel(handle)` and a curated `FREE_LIVE_CHANNELS` array (50 entries: news, sports, music, kids, docs — reusing the prior list).
-- New `useLiveChannels()` hook resolves each channel's current live stream (HLS URL) through the existing `piped-proxy` edge function; cached in React Query for 5 min.
-- Live TV page merges IPTV channels (existing) + Piped channels into the same card grid; each card tags its source.
+### Task 6 — Offline player auto-next + recommendations rail
 
-### Task 9 — Home page "Streaming Universe" rail
-- New `StreamingBrandsRow` on `HomePage.tsx` showing Netflix, Amazon Prime, Tubi, Disney+, DreamWorks, IMAX as logo cards (uses the same cached asset pointers from Task 7).
-- Tapping a card routes to `/search?provider=netflix` (etc.).
+- On `ended`, look up next `(season, episode)` for same `seriesTitle` in IndexedDB and autoplay it (respect `autoplay` setting + existing countdown card).
+- Below the player: `PlayerRecommendations`-style rail sourced from `useEnrichedMetadata` recs for the tmdbId, cached to `localStorage` (`bb:recs:v1:<type>-<id>`, 7-day TTL). Offline reads from cache; hide if empty.
 
-### Task 10 — Smarter search: never blank + provider filter + related fallback
-- In `SearchPage.tsx`:
-  - Read `provider` query param; when present, filter TMDB results by `with_watch_providers` (TMDB provider IDs mapped: Netflix 8, Prime 9, Disney+ 337, Tubi 73, etc.) and label the header ("Netflix picks").
-  - Empty query → render Trending + "Because you watched" (from Continue Watching seeds) + Top by genre so the page is never blank.
-  - Non-empty query with 0 exact hits → fall back to TMDB `search/multi` with fuzzy tokens + `discover` by inferred genre keyword so related results still show, under a "Related results" heading.
-  - Debounce 250ms, cache queries in React Query.
+### Task 7 — Live TV: full iptv-org catalog + Piped + working cards
+
+- New `src/lib/iptvOrg.ts`: fetch `https://iptv-org.github.io/iptv/index.m3u` through the existing `proxy` edge function, parse into `{ name, logo, group, country, url, id }[]`, cache in `localStorage` for 24h.
+- Extend `src/lib/piped.ts` with `getLiveChannel(handle)` and `FREE_LIVE_CHANNELS` (50 curated handles: news/sports/music/kids/docs).
+- New `src/hooks/useLiveChannels.ts` merges iptv-org + Piped-resolved HLS URLs (5-min React Query cache) into one `LiveChannel` list, each tagged `source: 'iptv' | 'youtube'`.
+- Rebuild `LiveTVPage.tsx` as a `ContentCard`-style grid: rounded card, official logo centered on brand-tinted bg, name below, `LIVE` pill, source tag. Category chips by iptv-org `group`, search box, country filter.
+- Each card: **Play** (existing playback wiring preserved) and **Hide stream** (⋮ menu) → persists hidden ids in `localStorage` (`bb:live:hidden:v1`), filtered out of the grid; a small "Show hidden (N)" toggle re-reveals.
+- Upload any still-missing brand/channel logos via `lovable-assets create` so they're CDN-cached and SW-served offline.
+
+### Task 8 — Home "Streaming Universe" rail (finalize)
+
+- `StreamingBrandsRow` already created; ensure it renders on `HomePage.tsx`, uses cached brand asset pointers, and each card routes to `/search?provider=<slug>` (Netflix/Prime/Tubi/Disney+/DreamWorks/IMAX).
+
+### Task 9 — Smarter search: never blank + provider + actor/cast
+
+- `SearchPage.tsx`:
+  - `provider` query param → TMDB discover with `with_watch_providers` (Netflix 8, Prime 9, Disney+ 337, Tubi 73, HBO 384, Apple TV+ 350); header reads "Netflix picks" etc.
+  - Empty query → Trending + "Because you watched" (Continue Watching seeds) + Top-by-genre. Never blank.
+  - Non-empty query: run `search/multi`. If it returns a **person**, fetch `person/{id}/combined_credits` and render an "Movies & shows with {name}" grid alongside title results.
+  - Zero title hits → fuzzy `search/multi` + genre-inferred `discover` under "Related results".
+  - 250ms debounce, React Query cached.
+
+### Task 10 — Cast tap → filmography
+
+- `TmdbCastSection.tsx` / `CastSection.tsx`: each cast avatar becomes a link to `/search?person=<personId>&name=<encoded>`.
+- `SearchPage.tsx` reads `person` param: fetch `person/{id}/combined_credits`, sort by popularity, render grid with header "Movies & shows with {name}". Reuses the same card grid as normal results.
 
 ---
 
 ## Technical notes
-- New/changed files: `MoviePlayer.tsx`, `OfflinePlayer` (extract), `offlineDownloads.ts` (+ subtitles store, schema bump to v2), `MyDownloadsPage.tsx`, `LiveTVPage.tsx`, `HomePage.tsx`, `SearchPage.tsx`, `src/lib/piped.ts`, `src/lib/liveChannels.ts` (new), `src/components/StreamingBrandsRow.tsx` (new), `src/components/FollowChannelBanner.tsx` (new).
-- IndexedDB migration: bump `DB_VERSION` to 2, add `subtitles` store, backfill `subtitles: []` on existing rows.
-- Gestures implemented with plain pointer events (no new deps). Brightness on native only when Capacitor is present.
-- All new brand logos uploaded via `lovable-assets` so they're CDN-cached and available offline through the service worker.
-- Recommendations cache keyed per title in `localStorage`; SW `public/sw.js` already caches API GETs — recs will be re-served offline.
+
+- New files: `src/lib/resumePositions.ts`, `src/lib/iptvOrg.ts`, `src/hooks/useLiveChannels.ts`, `src/components/OfflinePlayer.tsx`.
+- Changed files: `MoviePlayer.tsx`, `MyDownloadsPage.tsx`, `LiveTVPage.tsx`, `HomePage.tsx`, `SearchPage.tsx`, `offlineDownloads.ts`, `DownloadSourceSheet.tsx`, `piped.ts`, `TmdbCastSection.tsx`, `CastSection.tsx`, plus removal of ad CTA imports across the app.
+- IndexedDB migration: v1→v2 adds `subtitles` store, backfills `subtitles: []` on existing `videos` rows in `onupgradeneeded`.
+- Gestures use plain pointer events, no new deps. Capacitor brightness only when native.
+- iptv-org M3U routed through existing `proxy` edge function to avoid CORS; parsed client-side; 24h localStorage cache.
+- Hidden streams and resume positions live in `localStorage` so they survive reloads and offline.
+- All new logos uploaded through `lovable-assets` for CDN + SW offline caching.
 
 Approve and I'll implement all ten in one pass.
