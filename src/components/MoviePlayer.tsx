@@ -68,7 +68,7 @@ const MoviePlayer = ({
 
   // Stable resume-position key for this movie / episode.
   const resumeKey = useMemo(
-    () => resumeIdFor({ type: type === "anime" ? "tv" : type, tmdbId, season, episode }),
+    () => resumeIdFor({ type, tmdbId, season, episode }),
     [type, tmdbId, season, episode],
   );
 
@@ -400,7 +400,11 @@ const MoviePlayer = ({
           </button>
         </div>
       </div>
-      <FollowChannelBanner />
+      {/* Gesture layer sits above the video (top ~85%) so it doesn't cover
+          the native <video> controls at the bottom. */}
+      {phase === "playing" && (
+        <PlayerGestureLayerAnchor videoRef={videoRef} containerRef={containerRef} />
+      )}
     </div>
   );
 };
