@@ -340,6 +340,8 @@ const MoviePlayer = ({
           </video>
         )}
 
+        {phase === "playing" && <PlayerGestureLayer videoRef={videoRef} />}
+
         {/* Loading state: backdrop + title metadata + 3-dot animation */}
         {phase === "loading" && (
           <MetadataLoader title={title} year={year} backdrop={backdrop} poster={poster} />
