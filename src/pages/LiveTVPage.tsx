@@ -380,6 +380,14 @@ const LiveTVPage = () => {
                     style={{ background: "#1F1F1F" }}
                   />
                 </div>
+                {hidden.length > 0 && (
+                  <button
+                    onClick={showAllHidden}
+                    className="w-full text-[10.5px] text-white/70 hover:text-white flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/10 bg-white/[0.03]"
+                  >
+                    <EyeOff className="w-3 h-3" /> Show {hidden.length} hidden channel{hidden.length === 1 ? "" : "s"}
+                  </button>
+                )}
 
                 {/* Category chips */}
                 {!iptv.isLoading && categories.length > 0 && (
