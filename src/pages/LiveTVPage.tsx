@@ -482,21 +482,39 @@ const LiveTVPage = () => {
                               {c.country ? ` · ${c.country}` : ""} · #{c.number}
                             </p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFav(c.url);
-                            }}
-                            className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5 flex-shrink-0"
-                            aria-label="Favorite"
-                          >
-                            <Star
-                              className={`w-3.5 h-3.5 ${
-                                isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"
-                              }`}
-                            />
-                          </button>
+                          <div className="flex items-center gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => toggleFav(c.url)}
+                              className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5"
+                              aria-label="Favorite"
+                            >
+                              <Star
+                                className={`w-3.5 h-3.5 ${
+                                  isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"
+                                }`}
+                              />
+                            </button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5"
+                                  aria-label="Channel options"
+                                >
+                                  <MoreVertical className="w-3.5 h-3.5 text-white/35" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => toggleFav(c.url)}>
+                                  <Star className="w-3.5 h-3.5 mr-2" />
+                                  {isFav ? "Unfavorite" : "Favorite"}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => hideChannel(c.url)}>
+                                  <EyeOff className="w-3.5 h-3.5 mr-2" /> Hide channel
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       );
                     })}
