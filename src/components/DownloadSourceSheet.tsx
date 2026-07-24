@@ -110,6 +110,7 @@ const DownloadSourceSheet = ({
   const [step, setStep] = useState<Step>("choose");
   const [source, setSource] = useState<Source>("fast");
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
+  const [captions, setCaptions] = useState<MovieboxCaption[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
 
@@ -141,6 +142,7 @@ const DownloadSourceSheet = ({
     }
     setResolvedTitle(res.title || title);
     setDownloads(res.downloads);
+    setCaptions(res.captions || []);
     setStep("list");
   };
 
@@ -158,16 +160,24 @@ const DownloadSourceSheet = ({
       setStep("choose");
       setErrorMsg("");
       setDownloads([]);
+      setCaptions([]);
       setResolvedTitle(title);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, itemId]);
 
-  const startFastDownload = (d: MovieboxDownload) => {
+  const startFastDownload = async (d: MovieboxDownload) => {
     const posterUrl = poster || backdrop || undefined;
     const displayTitle = isSeries
       ? `${resolvedTitle} · S${season ?? 1}E${episode ?? 1}`
       : resolvedTitle;
+    toast.success(`Downloading ${resolutionLabel(d.resolution)} · check Downloads`);
+    close(false);
+    // Fire off subtitle + recommendations fetch in parallel with the download.
+    const [subtitles, recommendations] = await Promise.all([
+      fetchOfflineSubtitles(captions),
+      fetchOfflineRecommendations(type, tmdbId),
+    ]);
     void startDownload({
       id: itemId,
       type,
@@ -180,11 +190,11 @@ const DownloadSourceSheet = ({
       backdrop: backdrop || undefined,
       sourceUrl: movieboxProxyUrl(d.url),
       mime: "video/mp4",
+      subtitles,
+      recommendations,
     }).catch(() => {
       toast.error("Download failed. Please try again.");
     });
-    toast.success(`Downloading ${resolutionLabel(d.resolution)} · check Downloads`);
-    close(false);
   };
 
   const startExternalDownload = (d: MovieboxDownload) => {
@@ -205,7 +215,7 @@ const DownloadSourceSheet = ({
   };
 
   const onPick = (d: MovieboxDownload) =>
-    source === "fast" ? startFastDownload(d) : startExternalDownload(d);
+    source === "fast" ? void startFastDownload(d) : startExternalDownload(d);
 
   return (
     <Dialog open={open} onOpenChange={close}>
