@@ -21,8 +21,59 @@ import {
   formatBytes,
   resolutionLabel,
   type MovieboxDownload,
+  type MovieboxCaption,
 } from "@/lib/moviebox";
-import { startDownload } from "@/lib/offlineDownloads";
+import { startDownload, type OfflineSubtitle, type OfflineRecommendation } from "@/lib/offlineDownloads";
+import { movieSimilar, tvSimilar, IMAGE_BASE_URL } from "@/lib/tmdb";
+
+function srtToVtt(srt: string): string {
+  const body = srt.replace(/\r+/g, "").replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+  return `WEBVTT\n\n${body}`;
+}
+
+function languageLabel(code: string): string {
+  try {
+    const dn = new Intl.DisplayNames(["en"], { type: "language" });
+    const name = dn.of(code.split(/[-_]/)[0]);
+    return name || code;
+  } catch {
+    return code;
+  }
+}
+
+async function fetchOfflineSubtitles(captions: MovieboxCaption[]): Promise<OfflineSubtitle[]> {
+  if (!captions?.length) return [];
+  const out: OfflineSubtitle[] = [];
+  await Promise.all(
+    captions.slice(0, 8).map(async (c) => {
+      try {
+        const res = await fetch(movieboxProxyUrl(c.url));
+        if (!res.ok) return;
+        const text = await res.text();
+        const vtt = text.trim().startsWith("WEBVTT") ? text : srtToVtt(text);
+        out.push({ lang: c.lang, label: languageLabel(c.lang), vtt });
+      } catch { /* ignore */ }
+    }),
+  );
+  return out;
+}
+
+async function fetchOfflineRecommendations(
+  type: "movie" | "tv" | "anime",
+  tmdbId: string,
+): Promise<OfflineRecommendation[]> {
+  try {
+    const list = type === "tv" ? await tvSimilar(tmdbId) : await movieSimilar(tmdbId);
+    return (list || []).slice(0, 12).map((it: any) => ({
+      tmdbId: String(it.id),
+      type: (it.mediaType === "tv" ? "tv" : "movie") as "movie" | "tv",
+      title: it.title || it.name || "Untitled",
+      poster: it.poster_path ? `${IMAGE_BASE_URL}/w342${it.poster_path}` : null,
+    }));
+  } catch {
+    return [];
+  }
+}
 
 type Source = "fast" | "external";
 type Step = "choose" | "loading" | "list" | "error" | "redirect";
