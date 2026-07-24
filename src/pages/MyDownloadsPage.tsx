@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown } from "lucide-react";
+import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown, Subtitles } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
@@ -43,6 +43,11 @@ const MyDownloadsPage = () => {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<SortKey>("recent");
   const [category, setCategory] = useState<Category>("all");
+  const [subtitleLang, setSubtitleLang] = useState<string>(() => {
+    try { return localStorage.getItem("bb:subtitle-pref") || "off"; } catch { return "off"; }
+  });
+  const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
+  const [subtitleTrackUrls, setSubtitleTrackUrls] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
@@ -54,6 +59,8 @@ const MyDownloadsPage = () => {
 
   const closePlayer = () => {
     if (playUrl) URL.revokeObjectURL(playUrl);
+    Object.values(subtitleTrackUrls).forEach((u) => URL.revokeObjectURL(u));
+    setSubtitleTrackUrls({});
     setPlayUrl(null);
     setPlaying(null);
   };
@@ -153,6 +160,39 @@ const MyDownloadsPage = () => {
     (v.requestFullscreen?.() ||
       // @ts-ignore
       v.webkitEnterFullscreen?.())?.catch?.(() => {});
+  };
+
+  // Build blob URLs for each stored VTT subtitle when the player opens.
+  useEffect(() => {
+    if (!playing?.subtitles?.length) {
+      setSubtitleTrackUrls({});
+      return;
+    }
+    const map: Record<string, string> = {};
+    for (const s of playing.subtitles) {
+      map[s.lang] = URL.createObjectURL(new Blob([s.vtt], { type: "text/vtt" }));
+    }
+    setSubtitleTrackUrls(map);
+    return () => {
+      Object.values(map).forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [playing]);
+
+  // Toggle the chosen track between "showing" and "disabled" every time it changes.
+  useEffect(() => {
+    const v = document.getElementById("offline-video") as HTMLVideoElement | null;
+    if (!v) return;
+    const t = v.textTracks;
+    for (let i = 0; i < t.length; i++) {
+      const langCode = (t[i] as any).language || t[i].label;
+      t[i].mode = subtitleLang !== "off" && langCode === subtitleLang ? "showing" : "disabled";
+    }
+  }, [subtitleLang, subtitleTrackUrls, playUrl]);
+
+  const pickSubtitle = (lang: string) => {
+    setSubtitleLang(lang);
+    try { localStorage.setItem("bb:subtitle-pref", lang); } catch { /* ignore */ }
+    setSubtitleMenuOpen(false);
   };
 
   const renderRow = (v: OfflineVideo, indent = false) => {
@@ -433,13 +473,53 @@ const MyDownloadsPage = () => {
                       controls
                       autoPlay
                       playsInline
+                      crossOrigin={playing.subtitles?.length ? "anonymous" : undefined}
                       onEnded={playNext}
                       className="absolute inset-0 w-full h-full bg-black"
-                    />
+                    >
+                      {playing.subtitles?.map((s) => (
+                        <track
+                          key={s.lang}
+                          kind="subtitles"
+                          src={subtitleTrackUrls[s.lang]}
+                          srcLang={s.lang}
+                          label={s.label}
+                          default={s.lang === subtitleLang}
+                        />
+                      ))}
+                    </video>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60">
                     <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Offline</span>
                     <span className="text-[10px] text-muted-foreground truncate flex-1">{fmtMB(playing.size)}</span>
+                    {playing.subtitles && playing.subtitles.length > 0 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setSubtitleMenuOpen((v) => !v)}
+                          title="Subtitles"
+                          aria-label="Subtitles"
+                          className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[10px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
+                        >
+                          <Subtitles className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Subtitles</span>
+                        </button>
+                        {subtitleMenuOpen && (
+                          <div className="absolute right-0 bottom-full mb-1 z-40 min-w-[160px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
+                            <button
+                              onClick={() => pickSubtitle("off")}
+                              className={`w-full text-left px-2.5 py-1.5 text-[11px] font-semibold hover:bg-white/10 ${subtitleLang === "off" ? "text-primary" : "text-foreground"}`}
+                            >Off</button>
+                            {playing.subtitles.map((s) => (
+                              <button
+                                key={s.lang}
+                                onClick={() => pickSubtitle(s.lang)}
+                                className={`w-full text-left px-2.5 py-1.5 text-[11px] font-semibold hover:bg-white/10 ${subtitleLang === s.lang ? "text-primary" : "text-foreground"}`}
+                              >{s.label}</button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <button
                       onClick={enterFullscreen}
                       title="Fullscreen (F)"
@@ -450,6 +530,28 @@ const MyDownloadsPage = () => {
                     </button>
                   </div>
                 </div>
+
+                {playing.recommendations && playing.recommendations.length > 0 && (
+                  <section className="mt-4 px-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-2">You might also like</h3>
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                      {playing.recommendations.map((r) => (
+                        <Link
+                          key={r.tmdbId}
+                          to={r.type === "tv" ? `/tv/${r.tmdbId}` : `/movie/${r.tmdbId}`}
+                          className="relative flex-shrink-0 w-[100px] aspect-[2/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"
+                          onClick={closePlayer}
+                        >
+                          {r.poster ? (
+                            <img src={r.poster} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full grid place-items-center text-[10px] text-white/50 p-1 text-center">{r.title}</div>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {/* Mobile suggestions strip */}
                 {suggestions.length > 0 && (

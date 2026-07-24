@@ -23,8 +23,25 @@ export interface OfflineVideo {
   status: "queued" | "downloading" | "paused" | "ready" | "error";
   error?: string;
   blob?: Blob;                 // present once status==="ready"
+  /** Inline WebVTT subtitle tracks captured at download time. */
+  subtitles?: OfflineSubtitle[];
+  /** Cached "you might also like" snapshot (TMDB similar) for offline playback. */
+  recommendations?: OfflineRecommendation[];
   createdAt: number;
   updatedAt: number;
+}
+
+export interface OfflineSubtitle {
+  lang: string;
+  label: string;
+  vtt: string; // full WebVTT text
+}
+
+export interface OfflineRecommendation {
+  tmdbId: string;
+  type: "movie" | "tv" | "anime";
+  title: string;
+  poster?: string | null;
 }
 
 const CHUNK_SIZE = 4 * 1024 * 1024; // 4 MiB
@@ -181,6 +198,8 @@ interface StartArgs {
   backdrop?: string | null;
   sourceUrl: string;
   mime?: string;
+  subtitles?: OfflineSubtitle[];
+  recommendations?: OfflineRecommendation[];
   onProgress?: ProgressFn;
 }
 
@@ -217,6 +236,11 @@ export async function startDownload(args: StartArgs): Promise<OfflineVideo> {
   } else if (meta.status === "ready") {
     return meta;
   }
+
+  // Merge in any newly-supplied subtitles/recommendations (e.g. resume with
+  // richer metadata than the original queued entry had).
+  if (args.subtitles?.length) meta.subtitles = args.subtitles;
+  if (args.recommendations?.length) meta.recommendations = args.recommendations;
 
   // Storage guard
   const { free } = await estimateStorage();

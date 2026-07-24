@@ -21,8 +21,59 @@ import {
   formatBytes,
   resolutionLabel,
   type MovieboxDownload,
+  type MovieboxCaption,
 } from "@/lib/moviebox";
-import { startDownload } from "@/lib/offlineDownloads";
+import { startDownload, type OfflineSubtitle, type OfflineRecommendation } from "@/lib/offlineDownloads";
+import { movieSimilar, tvSimilar, TMDB_IMG } from "@/lib/tmdb";
+
+function srtToVtt(srt: string): string {
+  const body = srt.replace(/\r+/g, "").replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+  return `WEBVTT\n\n${body}`;
+}
+
+function languageLabel(code: string): string {
+  try {
+    const dn = new Intl.DisplayNames(["en"], { type: "language" });
+    const name = dn.of(code.split(/[-_]/)[0]);
+    return name || code;
+  } catch {
+    return code;
+  }
+}
+
+async function fetchOfflineSubtitles(captions: MovieboxCaption[]): Promise<OfflineSubtitle[]> {
+  if (!captions?.length) return [];
+  const out: OfflineSubtitle[] = [];
+  await Promise.all(
+    captions.slice(0, 8).map(async (c) => {
+      try {
+        const res = await fetch(movieboxProxyUrl(c.url));
+        if (!res.ok) return;
+        const text = await res.text();
+        const vtt = text.trim().startsWith("WEBVTT") ? text : srtToVtt(text);
+        out.push({ lang: c.lang, label: languageLabel(c.lang), vtt });
+      } catch { /* ignore */ }
+    }),
+  );
+  return out;
+}
+
+async function fetchOfflineRecommendations(
+  type: "movie" | "tv" | "anime",
+  tmdbId: string,
+): Promise<OfflineRecommendation[]> {
+  try {
+    const list = type === "tv" ? await tvSimilar(tmdbId) : await movieSimilar(tmdbId);
+    return (list || []).slice(0, 12).map((it) => ({
+      tmdbId: String(it.id),
+      type: (it.media_type === "tv" ? "tv" : "movie") as "movie" | "tv",
+      title: it.title || "Untitled",
+      poster: it.poster_path ? `${TMDB_IMG}/w342${it.poster_path}` : null,
+    }));
+  } catch {
+    return [];
+  }
+}
 
 type Source = "fast" | "external";
 type Step = "choose" | "loading" | "list" | "error" | "redirect";
@@ -59,6 +110,7 @@ const DownloadSourceSheet = ({
   const [step, setStep] = useState<Step>("choose");
   const [source, setSource] = useState<Source>("fast");
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
+  const [captions, setCaptions] = useState<MovieboxCaption[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
 
@@ -90,6 +142,7 @@ const DownloadSourceSheet = ({
     }
     setResolvedTitle(res.title || title);
     setDownloads(res.downloads);
+    setCaptions(res.captions || []);
     setStep("list");
   };
 
@@ -107,16 +160,24 @@ const DownloadSourceSheet = ({
       setStep("choose");
       setErrorMsg("");
       setDownloads([]);
+      setCaptions([]);
       setResolvedTitle(title);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, itemId]);
 
-  const startFastDownload = (d: MovieboxDownload) => {
+  const startFastDownload = async (d: MovieboxDownload) => {
     const posterUrl = poster || backdrop || undefined;
     const displayTitle = isSeries
       ? `${resolvedTitle} · S${season ?? 1}E${episode ?? 1}`
       : resolvedTitle;
+    toast.success(`Downloading ${resolutionLabel(d.resolution)} · check Downloads`);
+    close(false);
+    // Fire off subtitle + recommendations fetch in parallel with the download.
+    const [subtitles, recommendations] = await Promise.all([
+      fetchOfflineSubtitles(captions),
+      fetchOfflineRecommendations(type, tmdbId),
+    ]);
     void startDownload({
       id: itemId,
       type,
@@ -129,11 +190,11 @@ const DownloadSourceSheet = ({
       backdrop: backdrop || undefined,
       sourceUrl: movieboxProxyUrl(d.url),
       mime: "video/mp4",
+      subtitles,
+      recommendations,
     }).catch(() => {
       toast.error("Download failed. Please try again.");
     });
-    toast.success(`Downloading ${resolutionLabel(d.resolution)} · check Downloads`);
-    close(false);
   };
 
   const startExternalDownload = (d: MovieboxDownload) => {
@@ -154,7 +215,7 @@ const DownloadSourceSheet = ({
   };
 
   const onPick = (d: MovieboxDownload) =>
-    source === "fast" ? startFastDownload(d) : startExternalDownload(d);
+    source === "fast" ? void startFastDownload(d) : startExternalDownload(d);
 
   return (
     <Dialog open={open} onOpenChange={close}>

@@ -7,6 +7,10 @@ import foxLogo from "@/assets/livetv/foxnews.png.asset.json";
 import msnbcLogo from "@/assets/livetv/msnbc.png.asset.json";
 import cnbcLogo from "@/assets/livetv/cnbc.png.asset.json";
 import bloombergLogo from "@/assets/livetv/bloomberg.png.asset.json";
+import bbcNewsLogo from "@/assets/livetv/bbcnews.png.asset.json";
+import bloomberg2Logo from "@/assets/livetv/bloomberg2.png.asset.json";
+import cnn2Logo from "@/assets/livetv/cnn2.png.asset.json";
+import foxnews2Logo from "@/assets/livetv/foxnews2.png.asset.json";
 
 export interface IptvChannel {
   name: string;
@@ -22,11 +26,15 @@ export interface IptvChannel {
 
 // Official-logo overrides keyed by lowercased channel-name substring match.
 export const OFFICIAL_LOGOS: Array<{ match: RegExp; url: string }> = [
+  { match: /cnn\s*(int|international|world)/i, url: cnn2Logo.url },
   { match: /\bcnn\b/i, url: cnnLogo.url },
+  { match: /bbc\s*news/i, url: bbcNewsLogo.url },
   { match: /\bbbc\b/i, url: bbcLogo.url },
+  { match: /fox\s*news\s*(2|hd)/i, url: foxnews2Logo.url },
   { match: /fox\s*news/i, url: foxLogo.url },
   { match: /\bmsnbc\b/i, url: msnbcLogo.url },
   { match: /\bcnbc\b/i, url: cnbcLogo.url },
+  { match: /bloomberg\s*(originals|tv\s*\+)/i, url: bloomberg2Logo.url },
   { match: /bloomberg/i, url: bloombergLogo.url },
 ];
 

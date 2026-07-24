@@ -328,21 +328,26 @@ const LiveTVPage = () => {
                 </>
               ) : (
                 <div>
-                  <GlobeVisual />
-                  {/* Card grid: quick-pick channels with big logos */}
+                  {iptv.isLoading && (
+                    <div className="w-full aspect-video rounded-xl border border-white/10 bg-[#0e0e0e] grid place-items-center text-white/50 text-xs">
+                      Loading live channels…
+                    </div>
+                  )}
+                  {/* Card grid: all channels with big logos */}
                   {!iptv.isLoading && numbered.length > 0 && (
-                    <div className="mt-4">
+                    <div className="mt-1">
                       <h2 className="text-white text-sm font-bold mb-2 flex items-center gap-1.5">
-                        <Tv className="w-4 h-4" style={{ color: "#E50914" }} /> Channel guide
+                        <Tv className="w-4 h-4" style={{ color: "#E50914" }} /> All channels
                       </h2>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-                        {visibleChannels.slice(0, 40).map((c) => (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
+                        {visibleChannels.map((c) => (
                           <button
                             key={`card-${c.url}-${c.number}`}
                             onClick={() => setActiveChannel(c)}
-                            className="group aspect-[4/3] rounded-xl border border-white/10 bg-[#141414] hover:border-[#E50914]/60 transition-all p-2 flex flex-col items-center justify-center gap-1.5 overflow-hidden"
+                            className="group relative aspect-[4/3] rounded-xl border border-white/10 bg-[#141414] hover:border-[#E50914]/60 transition-all p-2 flex flex-col items-center justify-center gap-1.5 overflow-hidden"
                             aria-label={c.name}
                           >
+                            <span className="absolute top-1 left-1 px-1 py-[1px] rounded text-[8px] font-bold uppercase text-white" style={{ background: "#E50914" }}>LIVE</span>
                             <div className="flex-1 w-full grid place-items-center">
                               {c.logo ? (
                                 <img
