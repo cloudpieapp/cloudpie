@@ -67,7 +67,7 @@ async function fetchOfflineRecommendations(
     return (list || []).slice(0, 12).map((it) => ({
       tmdbId: String(it.id),
       type: (it.media_type === "tv" ? "tv" : "movie") as "movie" | "tv",
-      title: it.title || it.name || "Untitled",
+      title: it.title || "Untitled",
       poster: it.poster_path ? `${TMDB_IMG}/w342${it.poster_path}` : null,
     }));
   } catch {
