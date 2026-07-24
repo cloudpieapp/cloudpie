@@ -64,9 +64,9 @@ async function fetchOfflineRecommendations(
 ): Promise<OfflineRecommendation[]> {
   try {
     const list = type === "tv" ? await tvSimilar(tmdbId) : await movieSimilar(tmdbId);
-    return (list || []).slice(0, 12).map((it: any) => ({
+    return (list || []).slice(0, 12).map((it) => ({
       tmdbId: String(it.id),
-      type: (it.mediaType === "tv" ? "tv" : "movie") as "movie" | "tv",
+      type: (it.media_type === "tv" ? "tv" : "movie") as "movie" | "tv",
       title: it.title || it.name || "Untitled",
       poster: it.poster_path ? `${TMDB_IMG}/w342${it.poster_path}` : null,
     }));
