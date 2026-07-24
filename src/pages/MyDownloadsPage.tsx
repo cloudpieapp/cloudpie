@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown } from "lucide-react";
+import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown, Subtitles } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
@@ -43,6 +43,11 @@ const MyDownloadsPage = () => {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<SortKey>("recent");
   const [category, setCategory] = useState<Category>("all");
+  const [subtitleLang, setSubtitleLang] = useState<string>(() => {
+    try { return localStorage.getItem("bb:subtitle-pref") || "off"; } catch { return "off"; }
+  });
+  const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
+  const [subtitleTrackUrls, setSubtitleTrackUrls] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
@@ -54,6 +59,8 @@ const MyDownloadsPage = () => {
 
   const closePlayer = () => {
     if (playUrl) URL.revokeObjectURL(playUrl);
+    Object.values(subtitleTrackUrls).forEach((u) => URL.revokeObjectURL(u));
+    setSubtitleTrackUrls({});
     setPlayUrl(null);
     setPlaying(null);
   };
