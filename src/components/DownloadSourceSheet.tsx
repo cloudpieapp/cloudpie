@@ -24,7 +24,7 @@ import {
   type MovieboxCaption,
 } from "@/lib/moviebox";
 import { startDownload, type OfflineSubtitle, type OfflineRecommendation } from "@/lib/offlineDownloads";
-import { movieSimilar, tvSimilar, IMAGE_BASE_URL } from "@/lib/tmdb";
+import { movieSimilar, tvSimilar, TMDB_IMG } from "@/lib/tmdb";
 
 function srtToVtt(srt: string): string {
   const body = srt.replace(/\r+/g, "").replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
@@ -68,7 +68,7 @@ async function fetchOfflineRecommendations(
       tmdbId: String(it.id),
       type: (it.mediaType === "tv" ? "tv" : "movie") as "movie" | "tv",
       title: it.title || it.name || "Untitled",
-      poster: it.poster_path ? `${IMAGE_BASE_URL}/w342${it.poster_path}` : null,
+      poster: it.poster_path ? `${TMDB_IMG}/w342${it.poster_path}` : null,
     }));
   } catch {
     return [];
