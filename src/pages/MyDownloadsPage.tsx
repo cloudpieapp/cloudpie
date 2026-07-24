@@ -162,6 +162,39 @@ const MyDownloadsPage = () => {
       v.webkitEnterFullscreen?.())?.catch?.(() => {});
   };
 
+  // Build blob URLs for each stored VTT subtitle when the player opens.
+  useEffect(() => {
+    if (!playing?.subtitles?.length) {
+      setSubtitleTrackUrls({});
+      return;
+    }
+    const map: Record<string, string> = {};
+    for (const s of playing.subtitles) {
+      map[s.lang] = URL.createObjectURL(new Blob([s.vtt], { type: "text/vtt" }));
+    }
+    setSubtitleTrackUrls(map);
+    return () => {
+      Object.values(map).forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [playing]);
+
+  // Toggle the chosen track between "showing" and "disabled" every time it changes.
+  useEffect(() => {
+    const v = document.getElementById("offline-video") as HTMLVideoElement | null;
+    if (!v) return;
+    const t = v.textTracks;
+    for (let i = 0; i < t.length; i++) {
+      const langCode = (t[i] as any).language || t[i].label;
+      t[i].mode = subtitleLang !== "off" && langCode === subtitleLang ? "showing" : "disabled";
+    }
+  }, [subtitleLang, subtitleTrackUrls, playUrl]);
+
+  const pickSubtitle = (lang: string) => {
+    setSubtitleLang(lang);
+    try { localStorage.setItem("bb:subtitle-pref", lang); } catch { /* ignore */ }
+    setSubtitleMenuOpen(false);
+  };
+
   const renderRow = (v: OfflineVideo, indent = false) => {
     const pct = v.size > 0 ? Math.min(100, Math.round((v.downloaded / v.size) * 100)) : 0;
     const ready = v.status === "ready";
