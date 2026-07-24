@@ -473,13 +473,53 @@ const MyDownloadsPage = () => {
                       controls
                       autoPlay
                       playsInline
+                      crossOrigin={playing.subtitles?.length ? "anonymous" : undefined}
                       onEnded={playNext}
                       className="absolute inset-0 w-full h-full bg-black"
-                    />
+                    >
+                      {playing.subtitles?.map((s) => (
+                        <track
+                          key={s.lang}
+                          kind="subtitles"
+                          src={subtitleTrackUrls[s.lang]}
+                          srcLang={s.lang}
+                          label={s.label}
+                          default={s.lang === subtitleLang}
+                        />
+                      ))}
+                    </video>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60">
                     <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Offline</span>
                     <span className="text-[10px] text-muted-foreground truncate flex-1">{fmtMB(playing.size)}</span>
+                    {playing.subtitles && playing.subtitles.length > 0 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setSubtitleMenuOpen((v) => !v)}
+                          title="Subtitles"
+                          aria-label="Subtitles"
+                          className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[10px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
+                        >
+                          <Subtitles className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Subtitles</span>
+                        </button>
+                        {subtitleMenuOpen && (
+                          <div className="absolute right-0 bottom-full mb-1 z-40 min-w-[160px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
+                            <button
+                              onClick={() => pickSubtitle("off")}
+                              className={`w-full text-left px-2.5 py-1.5 text-[11px] font-semibold hover:bg-white/10 ${subtitleLang === "off" ? "text-primary" : "text-foreground"}`}
+                            >Off</button>
+                            {playing.subtitles.map((s) => (
+                              <button
+                                key={s.lang}
+                                onClick={() => pickSubtitle(s.lang)}
+                                className={`w-full text-left px-2.5 py-1.5 text-[11px] font-semibold hover:bg-white/10 ${subtitleLang === s.lang ? "text-primary" : "text-foreground"}`}
+                              >{s.label}</button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <button
                       onClick={enterFullscreen}
                       title="Fullscreen (F)"
@@ -490,6 +530,28 @@ const MyDownloadsPage = () => {
                     </button>
                   </div>
                 </div>
+
+                {playing.recommendations && playing.recommendations.length > 0 && (
+                  <section className="mt-4 px-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-2">You might also like</h3>
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                      {playing.recommendations.map((r) => (
+                        <Link
+                          key={r.tmdbId}
+                          to={r.type === "tv" ? `/tv/${r.tmdbId}` : `/movie/${r.tmdbId}`}
+                          className="relative flex-shrink-0 w-[100px] aspect-[2/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"
+                          onClick={closePlayer}
+                        >
+                          {r.poster ? (
+                            <img src={r.poster} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full grid place-items-center text-[10px] text-white/50 p-1 text-center">{r.title}</div>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {/* Mobile suggestions strip */}
                 {suggestions.length > 0 && (
