@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
+import DedicatedAppDialog from "@/components/DedicatedAppDialog";
 import { useQuery } from "@tanstack/react-query";
 import { fetchIptvChannels, type IptvChannel } from "@/lib/iptv";
 import ProgrammeLineup from "@/components/ProgrammeLineup";
