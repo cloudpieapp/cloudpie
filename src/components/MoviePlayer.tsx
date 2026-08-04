@@ -19,6 +19,19 @@ import PlayerGestureLayer from "@/components/PlayerGestureLayer";
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
 
+// Titles that stream better from FastStreams (Smashystream) — these open on
+// source 2 by default. TMDB ids: Spider-Man Brand New Day, The Odyssey,
+// Supergirl (TV), The Mentalist (TV).
+const FASTSTREAM_DEFAULT_IDS = new Set(["969681", "1368337", "62688", "1622"]);
+
+type PlayerSource = "app" | "fast";
+
+function smashyUrl(type: "movie" | "tv", tmdbId: string, season: number, episode: number) {
+  return type === "tv"
+    ? `https://player.smashy.stream/tv/${tmdbId}?s=${season}&e=${episode}`
+    : `https://player.smashy.stream/movie/${tmdbId}`;
+}
+
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
 // still typecheck. The value is ignored — MovieBox is the only source now.
 export type ServerId = "moviebox";
