@@ -65,6 +65,9 @@ const MoviePlayer = ({
   nextItem,
 }: Props) => {
   const [phase, setPhase] = useState<"loading" | "select" | "playing" | "error">("loading");
+  const [source, setSource] = useState<PlayerSource>(() =>
+    FASTSTREAM_DEFAULT_IDS.has(String(tmdbId)) ? "fast" : "app",
+  );
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [captions, setCaptions] = useState<MovieboxCaption[]>([]);
   const [selectedUrl, setSelectedUrl] = useState<string>("");
@@ -125,9 +128,14 @@ const MoviePlayer = ({
     };
   }, [type, tmdbId]);
 
+  // Keep the default source in sync when navigating between titles.
+  useEffect(() => {
+    setSource(FASTSTREAM_DEFAULT_IDS.has(String(tmdbId)) ? "fast" : "app");
+  }, [tmdbId]);
+
   // Resolve MovieBox stream URLs whenever the title / episode changes.
   useEffect(() => {
-    if (!title) return;
+    if (!title || source === "fast") return;
     let active = true;
     setPhase("loading");
     setDownloads([]);
@@ -157,7 +165,7 @@ const MoviePlayer = ({
     return () => {
       active = false;
     };
-  }, [title, year, type, tmdbId, season, episode]);
+  }, [title, year, type, tmdbId, season, episode, source]);
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
     const v = videoRef.current;
