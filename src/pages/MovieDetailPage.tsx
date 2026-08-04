@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Play, ArrowLeft, Calendar, Clock, Film, Bookmark, BookmarkCheck } from "lucide-react";
-import { toast } from "sonner";
-import { toggleMyList, isInMyList } from "@/hooks/useMyList";
+import { Star, Play, ArrowLeft, Calendar, Clock, Film } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
@@ -22,8 +20,6 @@ const MovieDetailPage = () => {
   const popular = usePopularMovies();
   const topRated = useTopRatedMovies();
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
-  const listId = `movie-${id}`;
-  const [saved, setSaved] = useState(() => isInMyList(listId));
 
   if (isLoading || !data) {
     return (
@@ -147,28 +143,6 @@ const MovieDetailPage = () => {
                   poster={img(data.poster_path, "w500")}
                   backdrop={img(data.backdrop_path, "w780")}
                 />
-                <button
-                  onClick={() => {
-                    const added = toggleMyList({
-                      id: listId,
-                      title: data.title,
-                      thumbnail: img(data.backdrop_path, "w780") || img(data.poster_path, "w500") || "",
-                      channel: "Movie",
-                      views: "",
-                      duration: "",
-                    });
-                    setSaved(added);
-                    if (added) {
-                      toast.success("Saved", { description: "Check your downloads page to find it." });
-                    } else {
-                      toast("Removed from watchlist");
-                    }
-                  }}
-                  className="flex items-center gap-2 font-bold px-6 py-3 rounded-lg text-sm bg-secondary text-secondary-foreground transition-transform hover:scale-105"
-                >
-                  {saved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-                  {saved ? "In Watchlist" : "Add to Watchlist"}
-                </button>
               </div>
             </div>
 

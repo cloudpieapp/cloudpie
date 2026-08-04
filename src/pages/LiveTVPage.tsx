@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import DedicatedAppDialog from "@/components/DedicatedAppDialog";
 import { useQuery } from "@tanstack/react-query";
 import { fetchIptvChannels, type IptvChannel } from "@/lib/iptv";
 import ProgrammeLineup from "@/components/ProgrammeLineup";
@@ -253,12 +252,6 @@ const LiveTVPage = () => {
 
   return (
     <AppLayout>
-      <DedicatedAppDialog
-        storageKey="bb:livetv-app-dialog"
-        title="We have a dedicated live TV app!"
-        description="OpenCast TV is our new app built just for watching live TV channels. Proceed to open it?"
-        url="https://opencasttv.lovable.app/"
-      />
       <SEO
         title={activeChannel ? `${activeChannel.name} – Live TV – BingBloom` : "Live TV – BingBloom"}
         description="Watch global live TV channels — news, sports, entertainment and more — free on BingBloom."
