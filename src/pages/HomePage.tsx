@@ -7,6 +7,7 @@ import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
 import StreamingBrandsRow from "@/components/StreamingBrandsRow";
+import NewMoviesBanner from "@/components/NewMoviesBanner";
 import {
   useTrendingMovies,
   useTrendingTv,
@@ -68,6 +69,8 @@ const HomePage = () => {
           ],
         }}
       />
+
+      <NewMoviesBanner />
 
       <TmdbHero item={heroItem} type="movie" isLoading={trendingMovies.isLoading} />
 
