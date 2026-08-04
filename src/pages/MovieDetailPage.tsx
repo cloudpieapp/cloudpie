@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Play, ArrowLeft, Calendar, Clock, Film } from "lucide-react";
+import { Star, Play, ArrowLeft, Calendar, Clock, Film, Bookmark, BookmarkCheck } from "lucide-react";
+import { toast } from "sonner";
+import { toggleMyList, isInMyList } from "@/hooks/useMyList";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
@@ -20,6 +22,8 @@ const MovieDetailPage = () => {
   const popular = usePopularMovies();
   const topRated = useTopRatedMovies();
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const listId = `movie-${id}`;
+  const [saved, setSaved] = useState(() => isInMyList(listId));
 
   if (isLoading || !data) {
     return (
