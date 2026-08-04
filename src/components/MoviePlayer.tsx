@@ -28,8 +28,8 @@ type PlayerSource = "app" | "fast";
 
 function smashyUrl(type: "movie" | "tv", tmdbId: string, season: number, episode: number) {
   return type === "tv"
-    ? `https://player.smashy.stream/tv/${tmdbId}?s=${season}&e=${episode}`
-    : `https://player.smashy.stream/movie/${tmdbId}`;
+    ? `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${season}&episode=${episode}`
+    : `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`;
 }
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
