@@ -332,8 +332,23 @@ const MoviePlayer = ({
         className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
         style={{ contain: "layout paint" }}
       >
+        {/* FastStreams (Smashystream) embed — sandboxed so it cannot redirect
+            the page or open pop-ups, while still allowing fullscreen. */}
+        {source === "fast" && (
+          <iframe
+            key={smashyUrl(type, tmdbId, season, episode)}
+            src={smashyUrl(type, tmdbId, season, episode)}
+            title={title ? `Watch ${title}` : "FastStreams player"}
+            className="absolute inset-0 w-full h-full border-0 bg-black"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowFullScreen
+            referrerPolicy="origin"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock"
+          />
+        )}
+
         {/* Native video player once a quality has been picked */}
-        {phase === "playing" && selectedUrl && (
+        {source === "app" && phase === "playing" && selectedUrl && (
           <video
             ref={videoRef}
             key={selectedUrl}
@@ -361,15 +376,15 @@ const MoviePlayer = ({
           </video>
         )}
 
-        {phase === "playing" && <PlayerGestureLayer videoRef={videoRef} />}
+        {source === "app" && phase === "playing" && <PlayerGestureLayer videoRef={videoRef} />}
 
         {/* Loading state: backdrop + title metadata + 3-dot animation */}
-        {phase === "loading" && (
+        {source === "app" && phase === "loading" && (
           <MetadataLoader title={title} year={year} backdrop={backdrop} poster={poster} />
         )}
 
         {/* Quality selector shown before playback starts */}
-        {phase === "select" && (
+        {source === "app" && phase === "select" && (
           <QualitySelector
             downloads={downloads}
             backdrop={backdrop}
@@ -381,23 +396,41 @@ const MoviePlayer = ({
         )}
 
         {/* Coming-soon / error state */}
-        {phase === "error" && (
+        {source === "app" && phase === "error" && (
           <PlayerBrandLoader variant="coming-soon" label="Coming soon" />
         )}
 
         {/* Up Next card — only shows once we detect the video actually ended */}
-        {ended && nextItem && onNext && (
+        {source === "app" && ended && nextItem && onNext && (
           <UpNextCard item={nextItem} onNext={onNext} autoplay={getSetting("autoplay")} />
         )}
       </div>
 
       {/* Toolbar: Download + Fullscreen */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          {([
+            { id: "app" as PlayerSource, label: "BingBloom" },
+            { id: "fast" as PlayerSource, label: "FastStreams" },
+          ]).map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSource(s.id)}
+              className={`h-8 sm:h-9 px-2.5 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold border transition ${
+                source === s.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "text-foreground border-border/60 hover:bg-foreground/10"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
         <div className="flex items-center gap-1.5 ml-auto">
-          {phase === "playing" && downloads.length > 1 && (
+          {source === "app" && phase === "playing" && downloads.length > 1 && (
             <QualityMenu downloads={downloads} current={selectedRes} onPick={pickQuality} />
           )}
-          {phase === "playing" && captions.length > 0 && (
+          {source === "app" && phase === "playing" && captions.length > 0 && (
             <SubtitleMenu captions={captions} current={subtitleLang} onPick={pickSubtitle} />
           )}
           {title && (
