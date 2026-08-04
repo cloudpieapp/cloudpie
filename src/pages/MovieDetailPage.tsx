@@ -147,6 +147,28 @@ const MovieDetailPage = () => {
                   poster={img(data.poster_path, "w500")}
                   backdrop={img(data.backdrop_path, "w780")}
                 />
+                <button
+                  onClick={() => {
+                    const added = toggleMyList({
+                      id: listId,
+                      title: data.title,
+                      thumbnail: img(data.backdrop_path, "w780") || img(data.poster_path, "w500") || "",
+                      channel: "Movie",
+                      views: "",
+                      duration: "",
+                    });
+                    setSaved(added);
+                    if (added) {
+                      toast.success("Saved", { description: "Check your downloads page to find it." });
+                    } else {
+                      toast("Removed from watchlist");
+                    }
+                  }}
+                  className="flex items-center gap-2 font-bold px-6 py-3 rounded-lg text-sm bg-secondary text-secondary-foreground transition-transform hover:scale-105"
+                >
+                  {saved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                  {saved ? "In Watchlist" : "Add to Watchlist"}
+                </button>
               </div>
             </div>
 
