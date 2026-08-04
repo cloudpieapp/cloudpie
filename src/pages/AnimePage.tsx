@@ -4,6 +4,7 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
 import InlineAdRow from "@/components/InlineAdRow";
+import DedicatedAppDialog from "@/components/DedicatedAppDialog";
 import { fetchList, type TmdbItem } from "@/lib/tmdb";
 
 // 25 anime category rows powered by TMDB discover (genre 16 + Japanese origin + keywords).
@@ -70,6 +71,12 @@ const AnimePage = () => {
   };
   return (
     <AppLayout>
+      <DedicatedAppDialog
+        storageKey="bb:anime-app-dialog"
+        title="We have a dedicated anime app!"
+        description="NowAnime is our new app built just for watching and downloading anime. Proceed to open it?"
+        url="https://nowanime.lovable.app"
+      />
       <SEO
         title="Anime – BingBloom"
         description="25 anime collections — trending, top-rated, isekai, mecha, romance, slice of life, sports and more. Stream anime free."
