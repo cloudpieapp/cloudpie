@@ -1,3 +1,4 @@
+import { fn, SUPABASE_ANON_KEY } from "@/lib/supabaseConfig";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Hls from "hls.js";

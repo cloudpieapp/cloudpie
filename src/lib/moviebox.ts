@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 // Client helper for the "Fast Downloads" source (MovieBox via the
 // moviebox-resolve edge function). Resolves direct MP4 URLs and wraps them in
 // the proxy edge function so the browser can fetch them (the CDN requires a

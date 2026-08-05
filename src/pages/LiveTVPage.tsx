@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Hls from "hls.js";
 import { Radio, Tv, Search, Star, ChevronLeft, Globe2, EyeOff, MoreVertical } from "lucide-react";

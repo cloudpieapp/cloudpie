@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 import type { IptvChannel } from "./iptv";
 
 export interface YouTubeLiveDef {

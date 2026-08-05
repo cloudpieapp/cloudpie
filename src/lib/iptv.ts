@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 // IPTV-org M3U parser + curated official-logo overrides.
 // Source: https://iptv-org.github.io/iptv/index.m3u (CORS-enabled)
 
