@@ -1,4 +1,4 @@
-import { Home, Film, Flame, Drama, Podcast, CloudDownload } from "lucide-react";
+import { Home, Film, Flame, Drama, Podcast, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const tabs = [
@@ -7,8 +7,9 @@ const tabs = [
   { to: "/movies", icon: Film, label: "Movies", match: (p: string) => p.startsWith("/movies") || p.startsWith("/tv") },
   { to: "/anime", icon: Drama, label: "Anime", match: (p: string) => p.startsWith("/anime") },
   { to: "/live-tv", icon: Podcast, label: "Live", match: (p: string) => p.startsWith("/live-tv") },
-  { to: "/my-downloads", icon: CloudDownload, label: "Downloads", match: (p: string) => p.startsWith("/my-downloads") || p.startsWith("/download") },
+  { to: "/library", icon: Library, label: "Library", match: (p: string) => p.startsWith("/library") || p.startsWith("/my-downloads") || p.startsWith("/download") },
 ];
+
 
 const BottomNav = () => {
   const { pathname } = useLocation();
