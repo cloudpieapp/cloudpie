@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "136857c3-e7b3-4d94-83d8-5dbc93179e84",
-  "project_id": "1fc3d6bd-6115-45e2-a722-e5728e781cdd",
-  "url": "/__l5e/assets-v1/136857c3-e7b3-4d94-83d8-5dbc93179e84/bloomberg2.png",
-  "r2_key": "a/v1/1fc3d6bd-6115-45e2-a722-e5728e781cdd/136857c3-e7b3-4d94-83d8-5dbc93179e84/bloomberg2.png",
-  "original_filename": "bloomberg2.png",
-  "size": 12984,
   "content_type": "image/png",
-  "created_at": "2026-07-21T08:02:45Z"
+  "created_at": "2026-07-21T08:02:45Z",
+  "original_filename": "bloomberg2.png",
+  "project_id": "1301ff95-3edf-4f6c-b808-9c8c957f31e7",
+  "r2_key": "a/v1/1301ff95-3edf-4f6c-b808-9c8c957f31e7/136857c3-e7b3-4d94-83d8-5dbc93179e84/bloomberg2.png",
+  "size": 12984,
+  "url": "/__l5e/assets-v1/136857c3-e7b3-4d94-83d8-5dbc93179e84/bloomberg2.png",
+  "version": 1
 }
