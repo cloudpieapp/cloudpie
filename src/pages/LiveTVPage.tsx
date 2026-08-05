@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Hls from "hls.js";
 import { Radio, Tv, Search, Star, ChevronLeft, Globe2, EyeOff, MoreVertical } from "lucide-react";
@@ -22,9 +23,9 @@ const LiveChannelPlayer = ({ channel }: { channel: IptvChannel }) => {
 
   const proxyUrl = useMemo(() => {
     if (isYouTube) return "";
-    const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(channel.url)}`;
+    return `${fn("proxy")}?any=1&url=${encodeURIComponent(channel.url)}`;
   }, [channel.url, isYouTube]);
+
 
   useEffect(() => {
     if (isYouTube) return;

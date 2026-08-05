@@ -1,3 +1,4 @@
+import { fn } from "@/lib/supabaseConfig";
 // IPTV-org M3U parser + curated official-logo overrides.
 // Source: https://iptv-org.github.io/iptv/index.m3u (CORS-enabled)
 
@@ -95,9 +96,9 @@ export const CURATED_SPORTS_CHANNELS: IptvChannel[] = [
 ];
 
 const proxiedStreamUrl = (url: string) => {
-  const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(url)}`;
+  return `${fn("proxy")}?any=1&url=${encodeURIComponent(url)}`;
 };
+
 
 const attr = (line: string, key: string) => {
   const m = new RegExp(`${key}="([^"]*)"`).exec(line);
