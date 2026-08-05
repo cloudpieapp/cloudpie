@@ -134,6 +134,24 @@ const MovieDetailPage = () => {
                 >
                   <Play className="w-4 h-4 fill-current" /> Watch Now
                 </Link>
+                <button
+                  onClick={() => {
+                    const added = toggleMyList({
+                      id: `movie/${data.id}`,
+                      title: data.title,
+                      thumbnail: poster || img(data.backdrop_path, "w780") || "/placeholder.svg",
+                      channel: "Movie",
+                      views: "",
+                      duration: runtime || "",
+                    });
+                    setInList(added);
+                    toast.success(added ? "Added to your watchlist" : "Removed from your watchlist");
+                  }}
+                  className="flex items-center gap-2 font-bold px-6 py-3 rounded-lg text-sm bg-secondary text-secondary-foreground transition-transform hover:scale-105"
+                >
+                  {inList ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {inList ? "In Watchlist" : "Add to Watchlist"}
+                </button>
                 <DownloadButton
                   id={`movie-${data.id}`}
                   type="movie"
@@ -144,6 +162,7 @@ const MovieDetailPage = () => {
                   backdrop={img(data.backdrop_path, "w780")}
                 />
               </div>
+
             </div>
 
           </div>
