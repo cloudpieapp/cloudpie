@@ -153,15 +153,15 @@ const VideoPlayer = ({
           params.episode = String(episode ?? 1);
         }
         const qs = new URLSearchParams(params).toString();
-        const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        const url = `https://${projectRef}.supabase.co/functions/v1/vidsrc-stream?${qs}`;
+        const url = `${fn("vidsrc-stream")}?${qs}`;
         // Retry edge function up to 3x on 5xx (cold-start / transient runtime errors)
         let res: Response | null = null;
         let lastStatus = 0;
         for (let attempt = 0; attempt < 3; attempt++) {
           res = await fetch(url, {
-            headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+            headers: { apikey: SUPABASE_ANON_KEY },
           });
+
           lastStatus = res.status;
           if (res.ok) break;
           // 5xx → backoff and retry; 4xx → break and surface the error

@@ -103,10 +103,10 @@ export const buildYouTubeChannels = (): YouTubeChannel[] =>
 
 export async function resolveYouTubeHls(handle: string): Promise<string | null> {
   try {
-    const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const res = await fetch(
-      `https://${ref}.supabase.co/functions/v1/youtube-live-resolver?handle=${encodeURIComponent(handle)}`,
+      `${fn("youtube-live-resolver")}?handle=${encodeURIComponent(handle)}`,
     );
+
     if (!res.ok) return null;
     const data = await res.json();
     return data.url || null;

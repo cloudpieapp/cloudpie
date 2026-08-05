@@ -22,9 +22,9 @@ const LiveChannelPlayer = ({ channel }: { channel: IptvChannel }) => {
 
   const proxyUrl = useMemo(() => {
     if (isYouTube) return "";
-    const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(channel.url)}`;
+    return `${fn("proxy")}?any=1&url=${encodeURIComponent(channel.url)}`;
   }, [channel.url, isYouTube]);
+
 
   useEffect(() => {
     if (isYouTube) return;

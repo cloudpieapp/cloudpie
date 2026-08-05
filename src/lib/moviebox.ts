@@ -100,9 +100,9 @@ function writeCache(key: string, value: MovieboxResult) {
 // Wrap a MovieBox CDN URL through the proxy edge function (adds the required
 // Referer + permissive CORS so the browser can download/stream it).
 export function movieboxProxyUrl(url: string): string {
-  const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  return `https://${ref}.supabase.co/functions/v1/proxy?url=${encodeURIComponent(url)}`;
+  return `${fn("proxy")}?url=${encodeURIComponent(url)}`;
 }
+
 
 export function formatBytes(bytes: number): string {
   if (!bytes || bytes <= 0) return "";

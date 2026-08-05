@@ -1,9 +1,11 @@
 // Centralized TMDB API client. Routes through the `tmdb-proxy` edge function
 // so the TMDB_API_KEY stays server-side. Returns normalized shapes.
 
-const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-const PROXY_BASE = `https://${PROJECT_REF}.supabase.co/functions/v1/tmdb-proxy`;
+import { SUPABASE_ANON_KEY, fn } from "./supabaseConfig";
+
+const SUPABASE_KEY = SUPABASE_ANON_KEY;
+const PROXY_BASE = fn("tmdb-proxy");
+
 
 export const TMDB_IMG = "https://image.tmdb.org/t/p";
 
