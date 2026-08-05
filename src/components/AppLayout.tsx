@@ -4,6 +4,8 @@ import TopBar from "./TopBar";
 import BottomNav from "./BottomNav";
 import Footer from "./Footer";
 import InlineAdRow from "./InlineAdRow";
+import ExternalSiteDialog from "./ExternalSiteDialog";
+
 
 
 interface AppLayoutProps {
