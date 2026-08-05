@@ -23,6 +23,12 @@ const MovieDetailPage = () => {
   const popular = usePopularMovies();
   const topRated = useTopRatedMovies();
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [inList, setInList] = useState(false);
+
+  useEffect(() => {
+    if (id) setInList(isInMyList(`movie/${id}`));
+  }, [id]);
+
 
   if (isLoading || !data) {
     return (
