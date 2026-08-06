@@ -154,15 +154,38 @@ export const searchTv = (query: string, year?: number) =>
     `/search/tv?query=${encodeURIComponent(query)}&include_adult=false${year ? `&first_air_date_year=${year}` : ""}`,
     "tv",
   );
-export const discoverMovies = (params: { genreId?: number; year?: number } = {}) => {
-  const qs = new URLSearchParams({ sort_by: "popularity.desc", include_adult: "false" });
+export interface DiscoverParams {
+  genreId?: number;
+  year?: number;
+  /** TMDB watch-provider id (requires watch_region). */
+  with_watch_providers?: number | string;
+  watch_region?: string;
+  /** TMDB company id — used for studio filters like DreamWorks / IMAX. */
+  with_companies?: number | string;
+  sort_by?: string;
+}
+
+const discoverQs = (params: DiscoverParams) => {
+  const qs = new URLSearchParams({
+    sort_by: params.sort_by || "popularity.desc",
+    include_adult: "false",
+  });
   if (params.genreId) qs.set("with_genres", String(params.genreId));
+  if (params.with_watch_providers) {
+    qs.set("with_watch_providers", String(params.with_watch_providers));
+    qs.set("watch_region", params.watch_region || "US");
+  }
+  if (params.with_companies) qs.set("with_companies", String(params.with_companies));
+  return qs;
+};
+
+export const discoverMovies = (params: DiscoverParams = {}) => {
+  const qs = discoverQs(params);
   if (params.year) qs.set("primary_release_year", String(params.year));
   return fetchList(`/discover/movie?${qs.toString()}`, "movie");
 };
-export const discoverTv = (params: { genreId?: number; year?: number } = {}) => {
-  const qs = new URLSearchParams({ sort_by: "popularity.desc", include_adult: "false" });
-  if (params.genreId) qs.set("with_genres", String(params.genreId));
+export const discoverTv = (params: DiscoverParams = {}) => {
+  const qs = discoverQs(params);
   if (params.year) qs.set("first_air_date_year", String(params.year));
   return fetchList(`/discover/tv?${qs.toString()}`, "tv");
 };
