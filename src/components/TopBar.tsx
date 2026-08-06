@@ -15,7 +15,7 @@ const primaryNav = [
 ];
 
 const drawerExtras = [
-  { to: "/my-downloads", label: "Downloads", icon: Download },
+  { to: "/library", label: "Library", icon: Download },
   { to: "/my-list", label: "Watchlist", icon: Bookmark },
   { to: "/liked", label: "Liked", icon: Heart },
   { to: "/settings", label: "Settings", icon: Settings },
@@ -153,11 +153,11 @@ const TopBar = () => {
               <User className="h-4 w-4" />
             </Link>
             <Link
-              to="/my-downloads"
-              aria-label="Downloads"
+              to="/library"
+              aria-label="Library"
               className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[12px] font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary/60"
             >
-              <Download className="h-3.5 w-3.5" /> Downloads
+              <Download className="h-3.5 w-3.5" /> Library
             </Link>
             <div className="hidden md:block"><ThemeToggle /></div>
             <Link
