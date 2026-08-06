@@ -18,7 +18,9 @@ import {
   img,
   tmdb,
   type TmdbItem,
+  type DiscoverParams,
 } from "@/lib/tmdb";
+import { trackSearch } from "@/lib/analytics";
 
 type ResultItem = TmdbItem & { _type: "movie" | "tv"; _bucket: FilterKey };
 type FilterKey = "all" | "movies" | "series" | "anime" | "animation";
