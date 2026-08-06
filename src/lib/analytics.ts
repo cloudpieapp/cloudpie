@@ -104,12 +104,11 @@ export const trackEvent = (name: string, props: Props = {}) => {
     }
   };
   // Keep tracking off the critical rendering path.
-  if ("requestIdleCallback" in window) {
-    (window as unknown as { requestIdleCallback: (cb: () => void, o?: unknown) => void })
-      .requestIdleCallback(send, { timeout: 1200 });
-  } else {
-    window.setTimeout(send, 0);
-  }
+  const idle = (window as unknown as {
+    requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void;
+  }).requestIdleCallback;
+  if (typeof idle === "function") idle(send, { timeout: 1200 });
+  else window.setTimeout(send, 0);
 };
 
 /**
