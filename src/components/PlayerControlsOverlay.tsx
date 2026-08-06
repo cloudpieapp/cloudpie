@@ -227,16 +227,25 @@ const PlayerControlsOverlay = ({
 
   return (
     <div
-      className={`absolute inset-0 z-30 select-none transition-opacity duration-300 ease-out ${
-        visible ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className="absolute inset-0 z-30 select-none"
       onPointerMove={wake}
       onPointerDown={wake}
       onClick={(e) => {
+        // A tap on the empty area wakes hidden controls, or toggles playback
+        // when they are already showing.
+        if (!visible) {
+          wake();
+          return;
+        }
         if (e.target === e.currentTarget) togglePlay();
       }}
       onMouseEnter={wake}
     >
+      <div
+        className={`absolute inset-0 transition-opacity duration-300 ease-out ${
+          visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
       {/* Dim layer for contrast */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/25 to-black/80 pointer-events-none" />
 
