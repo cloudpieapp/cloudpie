@@ -245,6 +245,9 @@ const PlayerControlsOverlay = ({
         className={`absolute inset-0 transition-opacity duration-300 ease-out ${
           visible ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) togglePlay();
+        }}
       >
       {/* Dim layer for contrast */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/25 to-black/80 pointer-events-none" />
@@ -434,6 +437,7 @@ const PlayerControlsOverlay = ({
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
