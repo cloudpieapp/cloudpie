@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown, Subtitles } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
@@ -15,6 +15,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
 
 function fmtMB(bytes: number) {
   if (!bytes) return "";
@@ -48,6 +49,7 @@ const MyDownloadsPage = () => {
   });
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
   const [subtitleTrackUrls, setSubtitleTrackUrls] = useState<Record<string, string>>({});
+  const offlineVideoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
@@ -154,8 +156,23 @@ const MyDownloadsPage = () => {
     if (suggestions[0]) playOffline(suggestions[0]);
   };
 
+  // Previous episode of the same series that is available offline.
+  const prevEpisode = useMemo(() => {
+    if (playing?.type !== "tv") return undefined;
+    const sameSeries = offline
+      .filter((v) => v.type === "tv" && v.tmdbId === playing.tmdbId && v.status === "ready" && v.id !== playing.id)
+      .sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
+    return sameSeries
+      .filter(
+        (v) =>
+          (v.season ?? 0) < (playing.season ?? 0) ||
+          ((v.season ?? 0) === (playing.season ?? 0) && (v.episode ?? 0) < (playing.episode ?? 0)),
+      )
+      .pop();
+  }, [offline, playing]);
+
   const enterFullscreen = () => {
-    const v = document.getElementById("offline-video") as HTMLVideoElement | null;
+    const v = offlineVideoRef.current;
     if (!v) return;
     (v.requestFullscreen?.() ||
       // @ts-ignore
@@ -180,7 +197,7 @@ const MyDownloadsPage = () => {
 
   // Toggle the chosen track between "showing" and "disabled" every time it changes.
   useEffect(() => {
-    const v = document.getElementById("offline-video") as HTMLVideoElement | null;
+    const v = offlineVideoRef.current;
     if (!v) return;
     const t = v.textTracks;
     for (let i = 0; i < t.length; i++) {
@@ -469,8 +486,8 @@ const MyDownloadsPage = () => {
                   <div className="relative w-full aspect-video bg-black overflow-hidden">
                     <video
                       id="offline-video"
+                      ref={offlineVideoRef}
                       src={playUrl}
-                      controls
                       autoPlay
                       playsInline
                       crossOrigin={playing.subtitles?.length ? "anonymous" : undefined}
@@ -488,6 +505,19 @@ const MyDownloadsPage = () => {
                         />
                       ))}
                     </video>
+                    <PlayerControlsOverlay
+                      videoRef={offlineVideoRef}
+                      sourceKey={playUrl}
+                      title={playing.title}
+                      subtitle={
+                        playing.type === "tv" && playing.season
+                          ? `S${playing.season} · E${playing.episode} · Offline`
+                          : "Offline"
+                      }
+                      onPrev={prevEpisode ? () => playOffline(prevEpisode) : undefined}
+                      onNext={playNext}
+                      onToggleFullscreen={enterFullscreen}
+                    />
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60">
                     <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Offline</span>
