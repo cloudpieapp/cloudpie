@@ -3,7 +3,6 @@ import SEO from "@/components/SEO";
 import TmdbHero from "@/components/TmdbHero";
 import TmdbRow from "@/components/TmdbRow";
 import TmdbContinueRow from "@/components/TmdbContinueRow";
-import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
 import StreamingBrandsRow from "@/components/StreamingBrandsRow";
@@ -76,8 +75,6 @@ const HomePage = () => {
 
       <CategoryChips />
 
-      <StreamingBrandsRow />
-
       {/* Ad #1 */}
       <InlineAdRow count={4} />
 
@@ -90,7 +87,7 @@ const HomePage = () => {
       <InlineAdRow count={4} />
 
       <TmdbRow title="Trending TV Shows" items={trendingTv.data} isLoading={trendingTv.isLoading} type="tv" viewAll="/tv" ranked />
-      <LiveTvRow />
+      <StreamingBrandsRow />
       <TmdbRow title="Now Playing" items={nowPlaying.data} isLoading={nowPlaying.isLoading} type="movie" />
       <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} type="movie" />
       <TmdbRow title="Top Rated Movies" items={topRated.data} isLoading={topRated.isLoading} type="movie" />

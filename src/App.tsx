@@ -11,6 +11,7 @@ import OfflineBanner from "@/components/OfflineBanner";
 import WhatsAppPopup from "@/components/WhatsAppPopup";
 
 import MaintenanceNotice from "@/components/MaintenanceNotice";
+import RouteAnalytics from "@/components/RouteAnalytics";
 
 import HomePage from "./pages/HomePage";
 import FollowUsPage from "./pages/FollowUsPage";
@@ -134,6 +135,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteAnalytics />
         <MaintenanceNotice />
         
         

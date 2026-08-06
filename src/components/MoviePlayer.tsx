@@ -15,6 +15,8 @@ import {
 import { getSetting } from "@/hooks/useSettings";
 import { getResume, setResume, resumeIdFor } from "@/lib/resumePositions";
 import PlayerGestureLayer from "@/components/PlayerGestureLayer";
+import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
+import { trackMediaView } from "@/lib/analytics";
 
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
@@ -61,6 +63,7 @@ const MoviePlayer = ({
   year,
   poster,
   backdrop,
+  onPrev,
   onNext,
   nextItem,
 }: Props) => {
@@ -117,6 +120,13 @@ const MoviePlayer = ({
       onHide();
     };
   }, [phase, resumeKey]);
+
+  // Record each movie / episode view exactly once per title change.
+  useEffect(() => {
+    if (!tmdbId) return;
+    trackMediaView({ type, id: String(tmdbId), title, season: type === "tv" ? season : undefined, episode: type === "tv" ? episode : undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tmdbId, type, season, episode]);
 
   useEffect(() => {
     let active = true;
@@ -355,7 +365,6 @@ const MoviePlayer = ({
             src={selectedUrl}
             poster={backdrop || poster || undefined}
             className="absolute inset-0 w-full h-full bg-black"
-            controls
             autoPlay
             playsInline
             controlsList="nodownload"
@@ -377,6 +386,21 @@ const MoviePlayer = ({
         )}
 
         {source === "app" && phase === "playing" && <PlayerGestureLayer videoRef={videoRef} />}
+
+        {/* Premium control overlay — auto-hiding, center playback cluster */}
+        {source === "app" && phase === "playing" && selectedUrl && (
+          <PlayerControlsOverlay
+            videoRef={videoRef}
+            sourceKey={selectedUrl}
+            title={title}
+            subtitle={
+              type === "tv" ? `S${season} · E${episode}${year ? ` · ${year}` : ""}` : year || undefined
+            }
+            onPrev={onPrev}
+            onNext={onNext}
+            onToggleFullscreen={toggleFullscreen}
+          />
+        )}
 
         {/* Loading state: backdrop + title metadata + 3-dot animation */}
         {source === "app" && phase === "loading" && (

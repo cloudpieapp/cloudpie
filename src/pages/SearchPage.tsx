@@ -18,7 +18,9 @@ import {
   img,
   tmdb,
   type TmdbItem,
+  type DiscoverParams,
 } from "@/lib/tmdb";
+import { trackSearch } from "@/lib/analytics";
 
 type ResultItem = TmdbItem & { _type: "movie" | "tv"; _bucket: FilterKey };
 type FilterKey = "all" | "movies" | "series" | "anime" | "animation";
@@ -209,10 +211,16 @@ const SearchPage = () => {
   });
 
   const { data: results = [], isFetching } = useQuery<ResultItem[]>({
-    queryKey: ["mixed-search", searchQuery, provider?.providerId ?? 0],
+    queryKey: ["mixed-search", searchQuery, providerSlug],
     queryFn: async () => {
-      const discoverArgs: any = provider?.providerId
-        ? { with_watch_providers: provider.providerId, watch_region: "US" }
+      // Explore cards (Netflix, Prime, Disney+, DreamWorks, IMAX, …) filter the
+      // TMDB catalogue by watch provider or, for studios, by company id.
+      const discoverArgs: DiscoverParams = provider
+        ? provider.providerId
+          ? { with_watch_providers: provider.providerId, watch_region: "US" }
+          : provider.companyId
+            ? { with_companies: provider.companyId }
+            : {}
         : {};
       // When searching by text, also look up people so that queries like
       // "Tom Hanks" or "Zendaya" return that actor's filmography.
@@ -287,6 +295,7 @@ const SearchPage = () => {
   );
 
   const handleSearch = (q: string) => {
+    trackSearch(q);
     setSearchQuery(q.trim());
     setSearchParams(q.trim() ? { q: q.trim() } : {});
     setSuggestOpen(false);
