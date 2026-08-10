@@ -60,18 +60,30 @@ const ProfilePage = () => {
             <div className="flex-1">
               {user ? (
                 <>
-                  <h1 className="text-xl font-bold text-foreground">{user.firstName} {user.lastName}</h1>
+                  <h1 className="text-xl font-bold text-foreground">{displayName}</h1>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <button
+                    onClick={handleSignOut}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-medium text-foreground"
+                  >
+                    <LogOut className="h-3.5 w-3.5" /> Sign out
+                  </button>
                 </>
               ) : (
                 <>
                   <h1 className="text-xl font-bold text-foreground">Guest User</h1>
                   <p className="text-xs text-muted-foreground mb-2">Create a free account</p>
-                  <Link to="/register" className="inline-flex gradient-bb text-primary-foreground text-xs font-medium px-4 py-2 rounded-xl">
-                    Sign Up Free
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link to="/register" className="inline-flex gradient-bb text-primary-foreground text-xs font-medium px-4 py-2 rounded-xl">
+                      Sign Up Free
+                    </Link>
+                    <Link to="/signin" className="inline-flex border border-border text-foreground text-xs font-medium px-4 py-2 rounded-xl">
+                      Sign In
+                    </Link>
+                  </div>
                 </>
               )}
+
             </div>
           </div>
 
