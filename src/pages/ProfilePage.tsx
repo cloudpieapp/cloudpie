@@ -113,6 +113,8 @@ const ProfilePage = () => {
           </div>
         )}
         <DailyChallenge />
+        <CommunityLinks className="mt-4" />
+
 
 
         <div className="space-y-1.5 mb-6">
