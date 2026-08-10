@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/supabase/db";
 
 export function useLikeCount(videoId: string | undefined) {
   const [count, setCount] = useState(0);
@@ -8,7 +9,7 @@ export function useLikeCount(videoId: string | undefined) {
 
   const fetchCount = useCallback(async () => {
     if (!videoId) return;
-    const { data } = await supabase
+    const { data } = await db
       .from("likes")
       .select("count")
       .eq("video_id", videoId)

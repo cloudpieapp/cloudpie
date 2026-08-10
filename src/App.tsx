@@ -8,12 +8,13 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
-import WhatsAppPopup from "@/components/WhatsAppPopup";
 
 import MaintenanceNotice from "@/components/MaintenanceNotice";
 import RouteAnalytics from "@/components/RouteAnalytics";
 
 import HomePage from "./pages/HomePage";
+import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import FollowUsPage from "./pages/FollowUsPage";
 import MoviesPage from "./pages/MoviesPage";
 import TVPage from "./pages/TVPage";
@@ -129,7 +130,6 @@ const App = () => {
     client={queryClient}
     persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
   >
-    <WhatsAppPopup />
     <OfflineBanner />
     <TooltipProvider>
       <Toaster />
@@ -141,8 +141,10 @@ const App = () => {
         
         <Routes>
           <Route path="/welcome" element={<Navigate to="/home" replace />} />
-          <Route path="/signin" element={<Navigate to="/home" replace />} />
-          <Route path="/register" element={<Navigate to="/home" replace />} />
+          <Route path="/signin" element={<AuthPage initialMode="signin" />} />
+          <Route path="/register" element={<AuthPage initialMode="signup" />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/onboarding/phone" element={<Navigate to="/home" replace />} />
           <Route path="/onboarding/genres" element={<Navigate to="/home" replace />} />
           <Route path="/onboarding/titles" element={<Navigate to="/home" replace />} />

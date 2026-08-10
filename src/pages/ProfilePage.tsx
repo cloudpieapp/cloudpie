@@ -1,10 +1,11 @@
-import { User, Heart, Clock, Settings, ChevronRight, Film, Eye, CloudDownload, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { User, Heart, Clock, Settings, ChevronRight, Film, Eye, CloudDownload, Mail, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import DailyChallenge from "@/components/DailyChallenge";
+import CommunityLinks from "@/components/CommunityLinks";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
-import { useUser, logoutUser } from "@/hooks/useUserStore";
+import { useAuth, signOutUser } from "@/hooks/useAuth";
 import { useLikedVideos } from "@/hooks/useLikedVideos";
 import { useMyList } from "@/hooks/useMyList";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
@@ -14,16 +15,30 @@ import logoImg from "/logo.png";
 
 const ProfilePage = () => {
   const { canInstall, isInstalled, install } = useInstallPrompt();
-  const user = useUser();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const likedVideos = useLikedVideos();
   const myList = useMyList();
   const continueWatching = useContinueWatching();
+
+  const displayName =
+    (user?.user_metadata?.display_name as string | undefined) ||
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "";
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    toast.success("Signed out.");
+    navigate("/signin");
+  };
 
   const stats = [
     { label: "Watched", value: continueWatching.length, icon: Eye },
     { label: "Watchlist", value: myList.length, icon: Film },
     { label: "Liked", value: likedVideos.length, icon: Heart },
   ];
+
 
   const menuItems = [
     { icon: Heart, label: "My List", desc: `${myList.length} saved`, to: "/my-list" },
@@ -45,18 +60,30 @@ const ProfilePage = () => {
             <div className="flex-1">
               {user ? (
                 <>
-                  <h1 className="text-xl font-bold text-foreground">{user.firstName} {user.lastName}</h1>
+                  <h1 className="text-xl font-bold text-foreground">{displayName}</h1>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <button
+                    onClick={handleSignOut}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-medium text-foreground"
+                  >
+                    <LogOut className="h-3.5 w-3.5" /> Sign out
+                  </button>
                 </>
               ) : (
                 <>
                   <h1 className="text-xl font-bold text-foreground">Guest User</h1>
                   <p className="text-xs text-muted-foreground mb-2">Create a free account</p>
-                  <Link to="/register" className="inline-flex gradient-bb text-primary-foreground text-xs font-medium px-4 py-2 rounded-xl">
-                    Sign Up Free
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link to="/register" className="inline-flex gradient-bb text-primary-foreground text-xs font-medium px-4 py-2 rounded-xl">
+                      Sign Up Free
+                    </Link>
+                    <Link to="/signin" className="inline-flex border border-border text-foreground text-xs font-medium px-4 py-2 rounded-xl">
+                      Sign In
+                    </Link>
+                  </div>
                 </>
               )}
+
             </div>
           </div>
 
@@ -86,6 +113,8 @@ const ProfilePage = () => {
           </div>
         )}
         <DailyChallenge />
+        <CommunityLinks className="mt-4" />
+
 
 
         <div className="space-y-1.5 mb-6">

@@ -57,6 +57,7 @@ const PlayerControlsOverlay = ({
   onNext,
   onToggleFullscreen,
   topRight,
+  bottomRight,
   hideDelay = 3500,
 }: Props) => {
   const [visible, setVisible] = useState(true);
@@ -424,6 +425,9 @@ const PlayerControlsOverlay = ({
               }}
               className="hidden sm:block w-20 accent-[#E50914]"
             />
+            {/* Subtitles / quality / download / share / watchlist live here,
+                right next to the volume control. */}
+            {bottomRight}
             {onToggleFullscreen && (
               <button
                 type="button"

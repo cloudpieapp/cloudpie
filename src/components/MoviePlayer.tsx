@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Expand, WifiOff, CloudDownload, Play, Settings, Subtitles } from "lucide-react";
+import { WifiOff, CloudDownload, Play, Settings, Subtitles, Share2, Check, Plus, Download } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
-import DownloadButton from "@/components/DownloadButton";
+import { toggleMyList, isInMyList } from "@/hooks/useMyList";
+import DownloadSourceSheet from "@/components/DownloadSourceSheet";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 import {
   resolveMovieboxDownloads,
@@ -120,6 +122,49 @@ const MoviePlayer = ({
       onHide();
     };
   }, [phase, resumeKey]);
+
+  // ---- In-player actions: download, share, watchlist -----------------------
+  const listItemId = `${type}-${tmdbId}`;
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [inList, setInList] = useState(() => isInMyList(listItemId));
+
+  useEffect(() => {
+    setInList(isInMyList(listItemId));
+  }, [listItemId]);
+
+  const shareLink = useCallback(async () => {
+    const url =
+      type === "tv"
+        ? `${window.location.origin}/watch/tv/${tmdbId}/${season}/${episode}`
+        : `${window.location.origin}/watch/movie/${tmdbId}`;
+    const shareTitle = title || "BingBloom";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: shareTitle, url });
+        return;
+      }
+    } catch {
+      /* user cancelled — fall through to copying */
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied — share it to let anyone watch this.");
+    } catch {
+      toast.error("Couldn't copy the link.");
+    }
+  }, [type, tmdbId, season, episode, title]);
+
+  const toggleWatchlist = useCallback(() => {
+    const added = toggleMyList({
+      id: listItemId,
+      title: title || "Untitled",
+      thumbnail: poster || backdrop || "",
+      channel: type === "tv" ? "TV Show" : "Movie",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    setInList(added);
+    toast.success(added ? "Added to your watchlist" : "Removed from your watchlist");
+  }, [listItemId, title, poster, backdrop, type]);
 
   // Record each movie / episode view exactly once per title change.
   useEffect(() => {
@@ -399,6 +444,28 @@ const MoviePlayer = ({
             onPrev={onPrev}
             onNext={onNext}
             onToggleFullscreen={toggleFullscreen}
+            bottomRight={
+              <>
+                {captions.length > 0 && (
+                  <SubtitleMenu overlay captions={captions} current={subtitleLang} onPick={pickSubtitle} />
+                )}
+                {downloads.length > 1 && (
+                  <QualityMenu overlay downloads={downloads} current={selectedRes} onPick={pickQuality} />
+                )}
+                <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
+                  <Download className="h-4 w-4" />
+                </PlayerIconButton>
+                <PlayerIconButton label="Share" onClick={shareLink}>
+                  <Share2 className="h-4 w-4" />
+                </PlayerIconButton>
+                <PlayerIconButton
+                  label={inList ? "Remove from watchlist" : "Add to watchlist"}
+                  onClick={toggleWatchlist}
+                >
+                  {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                </PlayerIconButton>
+              </>
+            }
           />
         )}
 
@@ -430,7 +497,8 @@ const MoviePlayer = ({
         )}
       </div>
 
-      {/* Toolbar: Download + Fullscreen */}
+      {/* Toolbar: source switcher only — quality, subtitles, download, share
+          and watchlist now live inside the player overlay. */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
         <div className="flex items-center gap-1.5">
           {([
@@ -450,36 +518,21 @@ const MoviePlayer = ({
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1.5 ml-auto">
-          {source === "app" && phase === "playing" && downloads.length > 1 && (
-            <QualityMenu downloads={downloads} current={selectedRes} onPick={pickQuality} />
-          )}
-          {source === "app" && phase === "playing" && captions.length > 0 && (
-            <SubtitleMenu captions={captions} current={subtitleLang} onPick={pickSubtitle} />
-          )}
-          {title && (
-            <DownloadButton
-              size="sm"
-              type={type}
-              tmdbId={tmdbId}
-              title={title}
-              year={year}
-              poster={poster}
-              backdrop={backdrop}
-              season={type === "tv" ? season : undefined}
-              episode={type === "tv" ? episode : undefined}
-            />
-          )}
-          <button
-            onClick={toggleFullscreen}
-            title="Fullscreen (F)"
-            aria-label="Fullscreen"
-            className="grid place-items-center h-7 w-7 rounded-md text-foreground hover:bg-foreground/10 border border-border/60"
-          >
-            <Expand className="w-3.5 h-3.5" />
-          </button>
-        </div>
       </div>
+
+      <DownloadSourceSheet
+        open={downloadOpen}
+        onOpenChange={setDownloadOpen}
+        type={type}
+        tmdbId={tmdbId}
+        title={title || "Untitled"}
+        year={year}
+        season={type === "tv" ? season : undefined}
+        episode={type === "tv" ? episode : undefined}
+        itemId={`${type}-${tmdbId}${type === "tv" ? `-s${season}-e${episode}` : ""}`}
+        poster={poster}
+        backdrop={backdrop}
+      />
       {/* Gesture layer sits above the video (top ~85%) so it doesn't cover
           the native <video> controls at the bottom. */}
       {/* Gesture overlay renders inside the shell in a portal-free way via
@@ -683,18 +736,42 @@ function srtToVtt(srt: string): string {
   return `WEBVTT\n\n${body}`;
 }
 
+/** Circular, glassy icon button used inside the player control overlay. */
+const PlayerIconButton = ({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    type="button"
+    title={label}
+    aria-label={label}
+    onClick={onClick}
+    className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+  >
+    {children}
+  </button>
+);
+
 const ToolbarMenu = ({
   icon,
   label,
   options,
   currentKey,
   onPick,
+  overlay,
 }: {
   icon: React.ReactNode;
   label: string;
   options: { key: string; label: string }[];
   currentKey: string;
   onPick: (key: string) => void;
+  /** Render as a circular glass button for use inside the player overlay. */
+  overlay?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -712,13 +789,21 @@ const ToolbarMenu = ({
         onClick={() => setOpen((v) => !v)}
         title={label}
         aria-label={label}
-        className="inline-flex items-center gap-1 h-8 sm:h-9 px-2 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
+        className={
+          overlay
+            ? "grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+            : "inline-flex items-center gap-1 h-8 sm:h-9 px-2 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold text-foreground hover:bg-foreground/10 border border-border/60"
+        }
       >
         {icon}
-        <span className="hidden xs:inline sm:inline">{label}</span>
+        {!overlay && <span className="hidden xs:inline sm:inline">{label}</span>}
       </button>
       {open && (
-        <div className="absolute right-0 bottom-full mb-1.5 z-40 min-w-[180px] rounded-md border border-border/60 bg-background shadow-xl overflow-hidden">
+        <div
+          className={`absolute right-0 bottom-full mb-1.5 z-40 min-w-[180px] rounded-md shadow-xl overflow-hidden ${
+            overlay ? "border border-white/15 bg-black/85 backdrop-blur-xl" : "border border-border/60 bg-background"
+          }`}
+        >
           <p className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white/50 bg-white/5">{label}</p>
           <div className="max-h-56 overflow-y-auto">
             {options.map((opt) => {
@@ -745,10 +830,12 @@ const QualityMenu = ({
   downloads,
   current,
   onPick,
+  overlay,
 }: {
   downloads: MovieboxDownload[];
   current: number;
   onPick: (d: MovieboxDownload) => void;
+  overlay?: boolean;
 }) => {
   const options = useMemo(
     () => downloads.map((d) => ({ key: String(d.resolution), label: resolutionLabel(d.resolution) })),
@@ -756,6 +843,7 @@ const QualityMenu = ({
   );
   return (
     <ToolbarMenu
+      overlay={overlay}
       icon={<Settings className="w-4 h-4" />}
       label="Quality"
       options={options}
@@ -772,10 +860,12 @@ const SubtitleMenu = ({
   captions,
   current,
   onPick,
+  overlay,
 }: {
   captions: MovieboxCaption[];
   current: string;
   onPick: (lang: string) => void;
+  overlay?: boolean;
 }) => {
   const options = useMemo(
     () => [
@@ -786,6 +876,7 @@ const SubtitleMenu = ({
   );
   return (
     <ToolbarMenu
+      overlay={overlay}
       icon={<Subtitles className="w-4 h-4" />}
       label="Subtitles"
       options={options}

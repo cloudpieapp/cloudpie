@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageCircle, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/supabase/db";
 
 interface UserComment {
   id: string;
@@ -24,7 +25,7 @@ const UserCommentsSection = ({ videoId }: { videoId: string }) => {
   })();
 
   const fetchComments = useCallback(async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("comments")
       .select("*")
       .eq("video_id", videoId)
@@ -59,7 +60,7 @@ const UserCommentsSection = ({ videoId }: { videoId: string }) => {
       setPosting(false);
       return;
     }
-    await supabase.from("comments").insert({
+    await db.from("comments").insert({
       video_id: videoId,
       author_name: userName,
       comment_text: text.trim(),

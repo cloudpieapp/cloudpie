@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/supabase/db";
 
 export type MediaType = "movie" | "tv";
 
@@ -22,7 +23,7 @@ export async function getCachedStream(
   episode?: number,
 ): Promise<StreamSource | null> {
   try {
-    const q = supabase
+    const q = db
       .from("stream_sources")
       .select("*")
       .eq("tmdb_id", tmdbId)
