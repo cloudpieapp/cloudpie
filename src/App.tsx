@@ -13,6 +13,8 @@ import MaintenanceNotice from "@/components/MaintenanceNotice";
 import RouteAnalytics from "@/components/RouteAnalytics";
 
 import HomePage from "./pages/HomePage";
+import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import FollowUsPage from "./pages/FollowUsPage";
 import MoviesPage from "./pages/MoviesPage";
 import TVPage from "./pages/TVPage";
