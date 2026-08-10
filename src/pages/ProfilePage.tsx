@@ -1,10 +1,11 @@
-import { User, Heart, Clock, Settings, ChevronRight, Film, Eye, CloudDownload, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { User, Heart, Clock, Settings, ChevronRight, Film, Eye, CloudDownload, Mail, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import DailyChallenge from "@/components/DailyChallenge";
+import CommunityLinks from "@/components/CommunityLinks";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
-import { useUser, logoutUser } from "@/hooks/useUserStore";
+import { useAuth, signOutUser } from "@/hooks/useAuth";
 import { useLikedVideos } from "@/hooks/useLikedVideos";
 import { useMyList } from "@/hooks/useMyList";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
@@ -14,16 +15,30 @@ import logoImg from "/logo.png";
 
 const ProfilePage = () => {
   const { canInstall, isInstalled, install } = useInstallPrompt();
-  const user = useUser();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const likedVideos = useLikedVideos();
   const myList = useMyList();
   const continueWatching = useContinueWatching();
+
+  const displayName =
+    (user?.user_metadata?.display_name as string | undefined) ||
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "";
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    toast.success("Signed out.");
+    navigate("/signin");
+  };
 
   const stats = [
     { label: "Watched", value: continueWatching.length, icon: Eye },
     { label: "Watchlist", value: myList.length, icon: Film },
     { label: "Liked", value: likedVideos.length, icon: Heart },
   ];
+
 
   const menuItems = [
     { icon: Heart, label: "My List", desc: `${myList.length} saved`, to: "/my-list" },
