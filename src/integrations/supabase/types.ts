@@ -14,54 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      comments: {
-        Row: {
-          author_name: string
-          comment_text: string
-          created_at: string
-          id: string
-          user_id: string | null
-          video_id: string
-        }
-        Insert: {
-          author_name?: string
-          comment_text: string
-          created_at?: string
-          id?: string
-          user_id?: string | null
-          video_id: string
-        }
-        Update: {
-          author_name?: string
-          comment_text?: string
-          created_at?: string
-          id?: string
-          user_id?: string | null
-          video_id?: string
-        }
-        Relationships: []
-      }
-      likes: {
-        Row: {
-          count: number
-          id: string
-          updated_at: string | null
-          video_id: string
-        }
-        Insert: {
-          count?: number
-          id?: string
-          updated_at?: string | null
-          video_id: string
-        }
-        Update: {
-          count?: number
-          id?: string
-          updated_at?: string | null
-          video_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -86,45 +38,6 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      stream_sources: {
-        Row: {
-          created_at: string
-          episode: number | null
-          id: string
-          media_type: string
-          season: number | null
-          server: string
-          tmdb_id: string
-          url: string
-          verified_at: string
-          working: boolean
-        }
-        Insert: {
-          created_at?: string
-          episode?: number | null
-          id?: string
-          media_type: string
-          season?: number | null
-          server: string
-          tmdb_id: string
-          url: string
-          verified_at?: string
-          working?: boolean
-        }
-        Update: {
-          created_at?: string
-          episode?: number | null
-          id?: string
-          media_type?: string
-          season?: number | null
-          server?: string
-          tmdb_id?: string
-          url?: string
-          verified_at?: string
-          working?: boolean
         }
         Relationships: []
       }
