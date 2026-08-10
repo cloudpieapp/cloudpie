@@ -34,6 +34,8 @@ interface Props {
   onToggleFullscreen?: () => void;
   /** Extra controls rendered in the top-right (quality, subtitles, …). */
   topRight?: ReactNode;
+  /** Extra controls rendered in the bottom bar, next to the volume control. */
+  bottomRight?: ReactNode;
   hideDelay?: number;
 }
 
