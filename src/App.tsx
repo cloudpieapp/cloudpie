@@ -141,8 +141,10 @@ const App = () => {
         
         <Routes>
           <Route path="/welcome" element={<Navigate to="/home" replace />} />
-          <Route path="/signin" element={<Navigate to="/home" replace />} />
-          <Route path="/register" element={<Navigate to="/home" replace />} />
+          <Route path="/signin" element={<AuthPage initialMode="signin" />} />
+          <Route path="/register" element={<AuthPage initialMode="signup" />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/onboarding/phone" element={<Navigate to="/home" replace />} />
           <Route path="/onboarding/genres" element={<Navigate to="/home" replace />} />
           <Route path="/onboarding/titles" element={<Navigate to="/home" replace />} />
