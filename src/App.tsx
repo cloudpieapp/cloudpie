@@ -8,7 +8,6 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
-import WhatsAppPopup from "@/components/WhatsAppPopup";
 
 import MaintenanceNotice from "@/components/MaintenanceNotice";
 import RouteAnalytics from "@/components/RouteAnalytics";
@@ -129,7 +128,6 @@ const App = () => {
     client={queryClient}
     persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
   >
-    <WhatsAppPopup />
     <OfflineBanner />
     <TooltipProvider>
       <Toaster />

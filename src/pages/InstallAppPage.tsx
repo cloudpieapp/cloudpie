@@ -4,6 +4,7 @@ import { ChevronLeft, Download, Star, Share2, Shield, Smartphone, Check, Chevron
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
+import CommunityLinks from "@/components/CommunityLinks";
 import apkAsset from "@/assets/bingbloom-app.apk.asset.json";
 
 const SCREENSHOTS = [
@@ -92,6 +93,9 @@ const InstallAppPage = () => {
             <Share2 className="w-3.5 h-3.5 text-foreground" />
           </button>
         </div>
+
+        <CommunityLinks className="mb-4" />
+
 
         {/* Install help / permissions accordion */}
         <button

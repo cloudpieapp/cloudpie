@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Star, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/supabase/db";
 
 interface UserComment {
   id: string;
@@ -25,7 +26,7 @@ const ReviewSection = ({ videoId }: { videoId: string }) => {
   })();
 
   const fetchReviews = useCallback(async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("comments")
       .select("*")
       .eq("video_id", videoId)
@@ -55,7 +56,7 @@ const ReviewSection = ({ videoId }: { videoId: string }) => {
       return;
     }
     const starPrefix = rating > 0 ? `${"★".repeat(rating)}${"☆".repeat(5 - rating)} ` : "";
-    await supabase.from("comments").insert({
+    await db.from("comments").insert({
       video_id: videoId,
       author_name: userName,
       comment_text: starPrefix + text.trim(),
