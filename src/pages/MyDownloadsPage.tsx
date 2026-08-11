@@ -66,14 +66,102 @@ const MyDownloadsPage = () => {
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
   const [subtitleTrackUrls, setSubtitleTrackUrls] = useState<Record<string, string>>({});
   const offlineVideoRef = useRef<HTMLVideoElement>(null);
+  const offlineShellRef = useRef<HTMLDivElement>(null);
+  const [offlineFs, setOfflineFs] = useState(false);
+  // Progressive (watch-while-downloading) state
+  const [partial, setPartial] = useState(false);
+  const [playableBytes, setPlayableBytes] = useState(0);
+  const [totalBytes, setTotalBytes] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  const resumeAtRef = useRef<{ time: number; play: boolean } | null>(null);
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
-    const url = await getDownloadBlobUrl(v.id);
-    if (!url) { toast.error("This download isn't ready yet."); return; }
+    const src = await getPlayableSource(v.id);
+    if (!src) {
+      toast.error(
+        v.status === "ready"
+          ? "This download isn't ready yet."
+          : "Not enough downloaded yet — watch when the download has more data.",
+      );
+      return;
+    }
+    if (playUrl) URL.revokeObjectURL(playUrl);
     setPlaying(v);
-    setPlayUrl(url);
+    setPlayUrl(src.url);
+    setPartial(src.partial);
+    setPlayableBytes(src.bytes);
+    setTotalBytes(src.total);
+    setNote(src.partial ? "Playing the downloaded part…" : null);
+    resumeAtRef.current = null;
   };
+
+  /** Rebuilds the media source from the freshly downloaded bytes, keeping the
+   *  current playback position. The download itself is never restarted. */
+  const growPartialSource = async () => {
+    const cur = playing;
+    if (!cur) return false;
+    const src = await getPlayableSource(cur.id);
+    if (!src) return false;
+    if (src.bytes <= playableBytes && src.partial) return false;
+    const v = offlineVideoRef.current;
+    resumeAtRef.current = { time: v?.currentTime ?? 0, play: v ? !v.paused : true };
+    const old = playUrl;
+    setPlayUrl(src.url);
+    setPartial(src.partial);
+    setPlayableBytes(src.bytes);
+    setTotalBytes(src.total);
+    if (old) window.setTimeout(() => URL.revokeObjectURL(old), 1500);
+    return true;
+  };
+
+  // While playing a partially downloaded file, keep extending the playable
+  // range as more data lands, and auto-resume when a stall is resolved.
+  useEffect(() => {
+    if (!playing || !partial) return;
+    let stop = false;
+    const iv = window.setInterval(async () => {
+      if (stop) return;
+      const bytes = await getPlayableBytes(playing.id);
+      const v = offlineVideoRef.current;
+      const nearEnd =
+        v && v.duration > 0 && totalBytes > 0
+          ? v.currentTime >= v.duration * (playableBytes / totalBytes) - 5
+          : false;
+      if (bytes > playableBytes && (nearEnd || (v?.paused && note))) {
+        await growPartialSource();
+      } else {
+        setPlayableBytes(bytes);
+      }
+    }, 4000);
+    return () => {
+      stop = true;
+      window.clearInterval(iv);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, partial, playableBytes, totalBytes, note]);
+
+  // Restore the position after the source was swapped for a longer prefix.
+  const onOfflineMeta = () => {
+    const v = offlineVideoRef.current;
+    const target = resumeAtRef.current;
+    if (!v || !target) return;
+    resumeAtRef.current = null;
+    try {
+      v.currentTime = target.time;
+    } catch {
+      /* ignore */
+    }
+    if (target.play) v.play().catch(() => {});
+    setNote(partial ? "Playing the downloaded part…" : null);
+  };
+
+  const maxSeekTime = (() => {
+    const v = offlineVideoRef.current;
+    if (!partial || !v || !v.duration || !totalBytes) return undefined;
+    return Math.max(5, v.duration * (playableBytes / totalBytes) - 1);
+  })();
+
 
   const closePlayer = () => {
     if (playUrl) URL.revokeObjectURL(playUrl);
