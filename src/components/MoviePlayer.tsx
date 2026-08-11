@@ -421,7 +421,9 @@ const MoviePlayer = ({
       <div
         ref={containerRef}
         tabIndex={-1}
-        className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
+        className={`relative overflow-hidden bb-player-shell outline-none bg-black ${
+          isFullscreen ? "w-full h-full bb-fs" : "w-full aspect-video"
+        }`}
         style={{ contain: "layout paint" }}
       >
         {/* FastStreams (Smashystream) embed — sandboxed so it cannot redirect
