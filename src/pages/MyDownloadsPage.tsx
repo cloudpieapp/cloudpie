@@ -28,11 +28,17 @@ import {
 import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
 
 function fmtMB(bytes: number) {
-  if (!bytes) return "";
-  const mb = bytes / 1024 / 1024;
-  if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
-  return `${mb.toFixed(0)} MB`;
+  return bytes ? formatBytes(bytes) : "";
 }
+
+const STATUS_LABEL: Record<OfflineVideo["status"], string> = {
+  queued: "Queued",
+  downloading: "Downloading",
+  paused: "Paused",
+  ready: "Downloaded",
+  error: "Failed",
+};
+
 
 interface SeriesFolder {
   key: string;
