@@ -205,10 +205,12 @@
   background: #000;
   border-radius: 0;
 }
-.bb-player-shell:fullscreen > video,
-.bb-player-shell:-webkit-full-screen > video,
-.bb-player-shell:fullscreen > iframe,
-.bb-player-shell:-webkit-full-screen > iframe {
+.bb-player-shell:fullscreen video,
+.bb-player-shell:-webkit-full-screen video,
+.bb-player-shell.bb-fs video,
+.bb-player-shell:fullscreen iframe,
+.bb-player-shell:-webkit-full-screen iframe,
+.bb-player-shell.bb-fs iframe {
   position: absolute;
   inset: 0;
   width: 100%;
