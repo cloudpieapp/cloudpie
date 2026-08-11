@@ -280,13 +280,47 @@ const MyDownloadsPage = () => {
       .pop();
   }, [offline, playing]);
 
-  const enterFullscreen = () => {
-    const v = offlineVideoRef.current;
-    if (!v) return;
-    (v.requestFullscreen?.() ||
-      // @ts-ignore
-      v.webkitEnterFullscreen?.())?.catch?.(() => {});
+  // The player shell — not the video, not the viewport — is the fullscreen
+  // element, so the overlay controls stay anchored to the video box.
+  const enterFullscreen = async () => {
+    const shell = offlineShellRef.current as
+      | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
+      | null;
+    if (!shell) return;
+    const active =
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement;
+    try {
+      if (!active) {
+        if (shell.requestFullscreen) await shell.requestFullscreen();
+        else await shell.webkitRequestFullscreen?.();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        await (document as any).webkitExitFullscreen?.();
+      }
+    } catch {
+      /* fullscreen not permitted */
+    }
   };
+
+  useEffect(() => {
+    const onFs = () => {
+      const el =
+        document.fullscreenElement ||
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        null;
+      setOfflineFs(Boolean(el && offlineShellRef.current && el === offlineShellRef.current));
+    };
+    onFs();
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      document.removeEventListener("webkitfullscreenchange", onFs);
+    };
+  }, []);
+
 
   // Build blob URLs for each stored VTT subtitle when the player opens.
   useEffect(() => {
