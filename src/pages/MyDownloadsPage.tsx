@@ -169,6 +169,11 @@ const MyDownloadsPage = () => {
     setSubtitleTrackUrls({});
     setPlayUrl(null);
     setPlaying(null);
+    setPartial(false);
+    setPlayableBytes(0);
+    setTotalBytes(0);
+    setNote(null);
+    resumeAtRef.current = null;
   };
 
   const refresh = async () => {
