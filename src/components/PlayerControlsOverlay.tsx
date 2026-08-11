@@ -251,15 +251,23 @@ const PlayerControlsOverlay = ({
     else wake();
   };
 
+  const seekLimit =
+    typeof maxSeekTime === "number" && maxSeekTime > 0 ? maxSeekTime : duration;
   const pct = duration > 0 ? ((seekPreview ?? current) / duration) * 100 : 0;
+  const playablePct =
+    duration > 0 && typeof maxSeekTime === "number" && maxSeekTime > 0
+      ? Math.min(100, (maxSeekTime / duration) * 100)
+      : 100;
 
   const onScrub = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
+    const val = Math.min(Number(e.target.value), seekLimit || Infinity);
     setSeekPreview(val);
   };
   const commitScrub = () => {
     const v = videoRef.current;
-    if (v && seekPreview !== null) v.currentTime = seekPreview;
+    if (v && seekPreview !== null) {
+      v.currentTime = Math.min(seekPreview, seekLimit || Infinity);
+    }
     setSeekPreview(null);
     wake();
   };
@@ -269,6 +277,7 @@ const PlayerControlsOverlay = ({
 
   return (
     <div
+      ref={rootRef}
       className="absolute inset-0 z-30 select-none"
       onPointerMove={wake}
       onPointerDown={wake}
@@ -283,6 +292,7 @@ const PlayerControlsOverlay = ({
       }}
       onMouseEnter={wake}
     >
+      {mounted && (
       <div
         className={`absolute inset-0 transition-opacity duration-300 ease-out ${
           visible ? "opacity-100" : "opacity-0 pointer-events-none"
