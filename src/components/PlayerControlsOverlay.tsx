@@ -192,7 +192,8 @@ const PlayerControlsOverlay = ({
     (delta: number) => {
       const v = videoRef.current;
       if (!v) return;
-      const max = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : Infinity;
+      let max = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : Infinity;
+      if (typeof maxSeekTime === "number" && maxSeekTime > 0) max = Math.min(max, maxSeekTime);
       v.currentTime = Math.max(0, Math.min(max, (v.currentTime || 0) + delta));
       setPill({ dir: delta > 0 ? "fwd" : "back" });
       window.setTimeout(() => setPill(null), 600);
