@@ -359,10 +359,12 @@ const MyDownloadsPage = () => {
     const pct = v.size > 0 ? Math.min(100, Math.round((v.downloaded / v.size) * 100)) : 0;
     const ready = v.status === "ready";
     const downloading = v.status === "downloading" || v.status === "queued";
+    // Playable while downloading once enough contiguous data exists.
+    const canWatch = ready || v.downloaded >= MIN_PARTIAL_BYTES;
     return (
       <li key={v.id} className={`flex items-center gap-3 p-2 rounded-xl bg-card ${indent ? "ml-3" : ""}`}>
         <button
-          onClick={() => ready && playOffline(v)}
+          onClick={() => canWatch && playOffline(v)}
           className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0 group"
         >
           {v.poster && <img src={v.poster} alt={v.title} loading="lazy" className="w-full h-full object-cover" />}
@@ -381,22 +383,69 @@ const MyDownloadsPage = () => {
           <h3 className="text-xs font-bold text-foreground truncate">
             {indent && v.episode ? `Episode ${v.episode}` : v.title}
           </h3>
+
           {ready ? (
-            <p className="text-[10px] text-emerald-500 mt-0.5">Available offline · {fmtMB(v.size)}</p>
-          ) : v.status === "error" ? (
-            <p className="text-[10px] text-primary mt-0.5">Download failed</p>
-          ) : v.status === "paused" ? (
-            <p className="text-[10px] text-muted-foreground mt-0.5">Paused · {pct}%</p>
-          ) : (
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              Downloading · {pct}% {v.size ? `of ${fmtMB(v.size)}` : ""}
+            <p className="text-[10px] text-emerald-500 mt-0.5 font-semibold">
+              Downloaded · {formatBytes(v.size)}
             </p>
+          ) : v.status === "error" ? (
+            <p className="text-[10px] text-primary mt-0.5 font-semibold">
+              Failed{v.error ? ` · ${v.error}` : ""}
+            </p>
+          ) : (
+            <>
+              <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
+                {STATUS_LABEL[v.status]}
+              </p>
+              <p className="text-[10.5px] text-foreground mt-0.5 tabular-nums font-semibold">
+                {formatBytes(v.downloaded)}
+                {v.size > 0 ? ` / ${formatBytes(v.size)}` : ""}
+                <span className="ml-2 text-muted-foreground font-normal">{pct}%</span>
+              </p>
+            </>
           )}
+
           {!ready && v.status !== "error" && (
             <div className="mt-1.5 h-1 w-full rounded-full bg-foreground/10 overflow-hidden">
               <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
             </div>
           )}
+
+          {/* Inline state-aware actions */}
+          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+            <button
+              onClick={() => canWatch && playOffline(v)}
+              disabled={!canWatch}
+              className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold bg-primary text-primary-foreground disabled:opacity-40"
+            >
+              <Play className="w-3 h-3" /> Watch
+            </button>
+            {downloading && (
+              <button
+                onClick={() => { pauseDownload(v.id); toast.success("Paused"); }}
+                className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-foreground"
+              >
+                <Pause className="w-3 h-3" /> Pause
+              </button>
+            )}
+            {(v.status === "paused" || v.status === "error") && (
+              <button
+                onClick={() => { resumeDownload(v.id); toast.success("Resuming"); }}
+                className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-foreground"
+              >
+                <PlayCircle className="w-3 h-3" /> Resume
+              </button>
+            )}
+            <button
+              onClick={() => removeOne(v.id)}
+              className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-primary"
+            >
+              <Trash2 className="w-3 h-3" /> Delete
+            </button>
+            {!ready && !canWatch && (
+              <span className="text-[9.5px] text-muted-foreground">Watch when more has downloaded</span>
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
