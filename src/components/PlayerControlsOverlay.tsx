@@ -199,7 +199,7 @@ const PlayerControlsOverlay = ({
       window.setTimeout(() => setPill(null), 600);
       wake();
     },
-    [videoRef, wake],
+    [videoRef, wake, maxSeekTime],
   );
 
   // Keyboard / TV-remote support. Any key also wakes the overlay.
