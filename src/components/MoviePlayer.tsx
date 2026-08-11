@@ -312,12 +312,48 @@ const MoviePlayer = ({
     if (match) pickQuality(match);
   }, [phase, downloads, pickQuality]);
 
+  // Fullscreen is driven by the player shell itself: the shell is the
+  // fullscreen element, so the video/iframe fills it and the control overlay
+  // (absolutely positioned inside the same box) anchors to the video — never
+  // to the app viewport.
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const read = () =>
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+      null;
+    const onFsChange = () => {
+      const el = read();
+      setIsFullscreen(Boolean(el && containerRef.current && el === containerRef.current));
+      if (!el) {
+        try {
+          (screen as unknown as { orientation?: { unlock?: () => void } }).orientation?.unlock?.();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    onFsChange();
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
+    };
+  }, []);
+
   const toggleFullscreen = async () => {
-    const el = containerRef.current;
+    const el = containerRef.current as
+      | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
+      | null;
     if (!el) return;
+    const active =
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement;
     try {
-      if (!document.fullscreenElement) {
-        await el.requestFullscreen?.();
+      if (!active) {
+        if (el.requestFullscreen) await el.requestFullscreen();
+        else await el.webkitRequestFullscreen?.();
         try {
           const orientation = (screen as any).orientation;
           if (orientation && typeof orientation.lock === "function") {
@@ -332,7 +368,8 @@ const MoviePlayer = ({
         } catch {
           /* ignore */
         }
-        await document.exitFullscreen?.();
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else await (document as any).webkitExitFullscreen?.();
       }
     } catch {
       /* fullscreen not permitted */
