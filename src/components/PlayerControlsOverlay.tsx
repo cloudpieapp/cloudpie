@@ -62,9 +62,13 @@ const PlayerControlsOverlay = ({
   onToggleFullscreen,
   topRight,
   bottomRight,
+  note,
+  maxSeekTime,
   hideDelay = 3500,
 }: Props) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(true);
   const [paused, setPaused] = useState(true);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
