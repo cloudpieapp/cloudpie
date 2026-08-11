@@ -3,7 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown, Subtitles } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
+import {
+  getAllDownloads,
+  deleteDownload,
+  pauseDownload,
+  resumeDownload,
+  getPlayableSource,
+  getPlayableBytes,
+  formatBytes,
+  MIN_PARTIAL_BYTES,
+  type OfflineVideo,
+} from "@/lib/offlineDownloads";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -18,11 +28,17 @@ import {
 import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
 
 function fmtMB(bytes: number) {
-  if (!bytes) return "";
-  const mb = bytes / 1024 / 1024;
-  if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
-  return `${mb.toFixed(0)} MB`;
+  return bytes ? formatBytes(bytes) : "";
 }
+
+const STATUS_LABEL: Record<OfflineVideo["status"], string> = {
+  queued: "Queued",
+  downloading: "Downloading",
+  paused: "Paused",
+  ready: "Downloaded",
+  error: "Failed",
+};
+
 
 interface SeriesFolder {
   key: string;
@@ -50,14 +66,102 @@ const MyDownloadsPage = () => {
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
   const [subtitleTrackUrls, setSubtitleTrackUrls] = useState<Record<string, string>>({});
   const offlineVideoRef = useRef<HTMLVideoElement>(null);
+  const offlineShellRef = useRef<HTMLDivElement>(null);
+  const [offlineFs, setOfflineFs] = useState(false);
+  // Progressive (watch-while-downloading) state
+  const [partial, setPartial] = useState(false);
+  const [playableBytes, setPlayableBytes] = useState(0);
+  const [totalBytes, setTotalBytes] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  const resumeAtRef = useRef<{ time: number; play: boolean } | null>(null);
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
-    const url = await getDownloadBlobUrl(v.id);
-    if (!url) { toast.error("This download isn't ready yet."); return; }
+    const src = await getPlayableSource(v.id);
+    if (!src) {
+      toast.error(
+        v.status === "ready"
+          ? "This download isn't ready yet."
+          : "Not enough downloaded yet — watch when the download has more data.",
+      );
+      return;
+    }
+    if (playUrl) URL.revokeObjectURL(playUrl);
     setPlaying(v);
-    setPlayUrl(url);
+    setPlayUrl(src.url);
+    setPartial(src.partial);
+    setPlayableBytes(src.bytes);
+    setTotalBytes(src.total);
+    setNote(src.partial ? "Playing the downloaded part…" : null);
+    resumeAtRef.current = null;
   };
+
+  /** Rebuilds the media source from the freshly downloaded bytes, keeping the
+   *  current playback position. The download itself is never restarted. */
+  const growPartialSource = async () => {
+    const cur = playing;
+    if (!cur) return false;
+    const src = await getPlayableSource(cur.id);
+    if (!src) return false;
+    if (src.bytes <= playableBytes && src.partial) return false;
+    const v = offlineVideoRef.current;
+    resumeAtRef.current = { time: v?.currentTime ?? 0, play: v ? !v.paused : true };
+    const old = playUrl;
+    setPlayUrl(src.url);
+    setPartial(src.partial);
+    setPlayableBytes(src.bytes);
+    setTotalBytes(src.total);
+    if (old) window.setTimeout(() => URL.revokeObjectURL(old), 1500);
+    return true;
+  };
+
+  // While playing a partially downloaded file, keep extending the playable
+  // range as more data lands, and auto-resume when a stall is resolved.
+  useEffect(() => {
+    if (!playing || !partial) return;
+    let stop = false;
+    const iv = window.setInterval(async () => {
+      if (stop) return;
+      const bytes = await getPlayableBytes(playing.id);
+      const v = offlineVideoRef.current;
+      const nearEnd =
+        v && v.duration > 0 && totalBytes > 0
+          ? v.currentTime >= v.duration * (playableBytes / totalBytes) - 5
+          : false;
+      if (bytes > playableBytes && (nearEnd || (v?.paused && note))) {
+        await growPartialSource();
+      } else {
+        setPlayableBytes(bytes);
+      }
+    }, 4000);
+    return () => {
+      stop = true;
+      window.clearInterval(iv);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, partial, playableBytes, totalBytes, note]);
+
+  // Restore the position after the source was swapped for a longer prefix.
+  const onOfflineMeta = () => {
+    const v = offlineVideoRef.current;
+    const target = resumeAtRef.current;
+    if (!v || !target) return;
+    resumeAtRef.current = null;
+    try {
+      v.currentTime = target.time;
+    } catch {
+      /* ignore */
+    }
+    if (target.play) v.play().catch(() => {});
+    setNote(partial ? "Playing the downloaded part…" : null);
+  };
+
+  const maxSeekTime = (() => {
+    const v = offlineVideoRef.current;
+    if (!partial || !v || !v.duration || !totalBytes) return undefined;
+    return Math.max(5, v.duration * (playableBytes / totalBytes) - 1);
+  })();
+
 
   const closePlayer = () => {
     if (playUrl) URL.revokeObjectURL(playUrl);
@@ -65,6 +169,11 @@ const MyDownloadsPage = () => {
     setSubtitleTrackUrls({});
     setPlayUrl(null);
     setPlaying(null);
+    setPartial(false);
+    setPlayableBytes(0);
+    setTotalBytes(0);
+    setNote(null);
+    resumeAtRef.current = null;
   };
 
   const refresh = async () => {
@@ -171,13 +280,47 @@ const MyDownloadsPage = () => {
       .pop();
   }, [offline, playing]);
 
-  const enterFullscreen = () => {
-    const v = offlineVideoRef.current;
-    if (!v) return;
-    (v.requestFullscreen?.() ||
-      // @ts-ignore
-      v.webkitEnterFullscreen?.())?.catch?.(() => {});
+  // The player shell — not the video, not the viewport — is the fullscreen
+  // element, so the overlay controls stay anchored to the video box.
+  const enterFullscreen = async () => {
+    const shell = offlineShellRef.current as
+      | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
+      | null;
+    if (!shell) return;
+    const active =
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement;
+    try {
+      if (!active) {
+        if (shell.requestFullscreen) await shell.requestFullscreen();
+        else await shell.webkitRequestFullscreen?.();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        await (document as any).webkitExitFullscreen?.();
+      }
+    } catch {
+      /* fullscreen not permitted */
+    }
   };
+
+  useEffect(() => {
+    const onFs = () => {
+      const el =
+        document.fullscreenElement ||
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        null;
+      setOfflineFs(Boolean(el && offlineShellRef.current && el === offlineShellRef.current));
+    };
+    onFs();
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      document.removeEventListener("webkitfullscreenchange", onFs);
+    };
+  }, []);
+
 
   // Build blob URLs for each stored VTT subtitle when the player opens.
   useEffect(() => {
@@ -216,10 +359,12 @@ const MyDownloadsPage = () => {
     const pct = v.size > 0 ? Math.min(100, Math.round((v.downloaded / v.size) * 100)) : 0;
     const ready = v.status === "ready";
     const downloading = v.status === "downloading" || v.status === "queued";
+    // Playable while downloading once enough contiguous data exists.
+    const canWatch = ready || v.downloaded >= MIN_PARTIAL_BYTES;
     return (
       <li key={v.id} className={`flex items-center gap-3 p-2 rounded-xl bg-card ${indent ? "ml-3" : ""}`}>
         <button
-          onClick={() => ready && playOffline(v)}
+          onClick={() => canWatch && playOffline(v)}
           className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0 group"
         >
           {v.poster && <img src={v.poster} alt={v.title} loading="lazy" className="w-full h-full object-cover" />}
@@ -238,22 +383,69 @@ const MyDownloadsPage = () => {
           <h3 className="text-xs font-bold text-foreground truncate">
             {indent && v.episode ? `Episode ${v.episode}` : v.title}
           </h3>
+
           {ready ? (
-            <p className="text-[10px] text-emerald-500 mt-0.5">Available offline · {fmtMB(v.size)}</p>
-          ) : v.status === "error" ? (
-            <p className="text-[10px] text-primary mt-0.5">Download failed</p>
-          ) : v.status === "paused" ? (
-            <p className="text-[10px] text-muted-foreground mt-0.5">Paused · {pct}%</p>
-          ) : (
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              Downloading · {pct}% {v.size ? `of ${fmtMB(v.size)}` : ""}
+            <p className="text-[10px] text-emerald-500 mt-0.5 font-semibold">
+              Downloaded · {formatBytes(v.size)}
             </p>
+          ) : v.status === "error" ? (
+            <p className="text-[10px] text-primary mt-0.5 font-semibold">
+              Failed{v.error ? ` · ${v.error}` : ""}
+            </p>
+          ) : (
+            <>
+              <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
+                {STATUS_LABEL[v.status]}
+              </p>
+              <p className="text-[10.5px] text-foreground mt-0.5 tabular-nums font-semibold">
+                {formatBytes(v.downloaded)}
+                {v.size > 0 ? ` / ${formatBytes(v.size)}` : ""}
+                <span className="ml-2 text-muted-foreground font-normal">{pct}%</span>
+              </p>
+            </>
           )}
+
           {!ready && v.status !== "error" && (
             <div className="mt-1.5 h-1 w-full rounded-full bg-foreground/10 overflow-hidden">
               <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
             </div>
           )}
+
+          {/* Inline state-aware actions */}
+          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+            <button
+              onClick={() => canWatch && playOffline(v)}
+              disabled={!canWatch}
+              className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold bg-primary text-primary-foreground disabled:opacity-40"
+            >
+              <Play className="w-3 h-3" /> Watch
+            </button>
+            {downloading && (
+              <button
+                onClick={() => { pauseDownload(v.id); toast.success("Paused"); }}
+                className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-foreground"
+              >
+                <Pause className="w-3 h-3" /> Pause
+              </button>
+            )}
+            {(v.status === "paused" || v.status === "error") && (
+              <button
+                onClick={() => { resumeDownload(v.id); toast.success("Resuming"); }}
+                className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-foreground"
+              >
+                <PlayCircle className="w-3 h-3" /> Resume
+              </button>
+            )}
+            <button
+              onClick={() => removeOne(v.id)}
+              className="inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-bold border border-border text-primary"
+            >
+              <Trash2 className="w-3 h-3" /> Delete
+            </button>
+            {!ready && !canWatch && (
+              <span className="text-[9.5px] text-muted-foreground">Watch when more has downloaded</span>
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -483,7 +675,12 @@ const MyDownloadsPage = () => {
             <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
               <div className="min-w-0">
                 <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
-                  <div className="relative w-full aspect-video bg-black overflow-hidden">
+                  <div
+                    ref={offlineShellRef}
+                    className={`bb-player-shell bg-black overflow-hidden ${
+                      offlineFs ? "w-full h-full bb-fs" : "w-full aspect-video"
+                    }`}
+                  >
                     <video
                       id="offline-video"
                       ref={offlineVideoRef}
@@ -491,7 +688,24 @@ const MyDownloadsPage = () => {
                       autoPlay
                       playsInline
                       crossOrigin={playing.subtitles?.length ? "anonymous" : undefined}
-                      onEnded={playNext}
+                      onLoadedMetadata={onOfflineMeta}
+                      onWaiting={() => {
+                        if (partial) setNote("Downloading more…");
+                      }}
+                      onPlaying={() => {
+                        if (partial) setNote("Playing the downloaded part…");
+                      }}
+                      onEnded={async () => {
+                        // A partial file "ends" at the downloaded prefix — try to
+                        // extend it instead of jumping to the next title.
+                        if (partial) {
+                          setNote("Downloading more…");
+                          const grew = await growPartialSource();
+                          if (grew) return;
+                          return;
+                        }
+                        playNext();
+                      }}
                       className="absolute inset-0 w-full h-full bg-black"
                     >
                       {playing.subtitles?.map((s) => (
@@ -514,14 +728,22 @@ const MyDownloadsPage = () => {
                           ? `S${playing.season} · E${playing.episode} · Offline`
                           : "Offline"
                       }
+                      note={note ?? undefined}
+                      maxSeekTime={maxSeekTime}
                       onPrev={prevEpisode ? () => playOffline(prevEpisode) : undefined}
                       onNext={playNext}
                       onToggleFullscreen={enterFullscreen}
                     />
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60">
-                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Offline</span>
-                    <span className="text-[10px] text-muted-foreground truncate flex-1">{fmtMB(playing.size)}</span>
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+                      {partial ? "Downloading" : "Offline"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate flex-1 tabular-nums">
+                      {partial
+                        ? `${formatBytes(playableBytes)} / ${formatBytes(totalBytes || playing.size)} ready`
+                        : formatBytes(playing.size)}
+                    </span>
                     {playing.subtitles && playing.subtitles.length > 0 && (
                       <div className="relative">
                         <button

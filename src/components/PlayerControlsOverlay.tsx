@@ -36,6 +36,10 @@ interface Props {
   topRight?: ReactNode;
   /** Extra controls rendered in the bottom bar, next to the volume control. */
   bottomRight?: ReactNode;
+  /** Transient status message (e.g. "Downloading this part…"). */
+  note?: string;
+  /** Upper bound for seeking, in seconds (partially downloaded media). */
+  maxSeekTime?: number;
   hideDelay?: number;
 }
 
@@ -58,9 +62,13 @@ const PlayerControlsOverlay = ({
   onToggleFullscreen,
   topRight,
   bottomRight,
+  note,
+  maxSeekTime,
   hideDelay = 3500,
 }: Props) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(true);
   const [paused, setPaused] = useState(true);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -135,11 +143,42 @@ const PlayerControlsOverlay = ({
     };
   }, [videoRef, sourceKey, wake]);
 
+  // Fullscreen state — driven by the browser event so the app button and the
+  // device/browser fullscreen controls stay in sync.
   useEffect(() => {
-    const onFs = () => setIsFs(Boolean(document.fullscreenElement));
+    const fsEl = () =>
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+      null;
+    const onFs = () => setIsFs(Boolean(fsEl()));
+    onFs();
     document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      document.removeEventListener("webkitfullscreenchange", onFs);
+    };
   }, []);
+
+  // Unmount the control elements entirely once the fade-out has finished, so
+  // nothing sits over the video while the overlay is hidden.
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      return;
+    }
+    const t = window.setTimeout(() => setMounted(false), 320);
+    return () => window.clearTimeout(t);
+  }, [visible]);
+
+  // Hide the cursor on the owning player shell while idle.
+  useEffect(() => {
+    const shell = rootRef.current?.closest(".bb-player-shell");
+    if (!shell) return;
+    shell.classList.toggle("bb-idle", !visible);
+    return () => shell.classList.remove("bb-idle");
+  }, [visible]);
+
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
@@ -153,13 +192,14 @@ const PlayerControlsOverlay = ({
     (delta: number) => {
       const v = videoRef.current;
       if (!v) return;
-      const max = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : Infinity;
+      let max = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : Infinity;
+      if (typeof maxSeekTime === "number" && maxSeekTime > 0) max = Math.min(max, maxSeekTime);
       v.currentTime = Math.max(0, Math.min(max, (v.currentTime || 0) + delta));
       setPill({ dir: delta > 0 ? "fwd" : "back" });
       window.setTimeout(() => setPill(null), 600);
       wake();
     },
-    [videoRef, wake],
+    [videoRef, wake, maxSeekTime],
   );
 
   // Keyboard / TV-remote support. Any key also wakes the overlay.
@@ -212,15 +252,23 @@ const PlayerControlsOverlay = ({
     else wake();
   };
 
+  const seekLimit =
+    typeof maxSeekTime === "number" && maxSeekTime > 0 ? maxSeekTime : duration;
   const pct = duration > 0 ? ((seekPreview ?? current) / duration) * 100 : 0;
+  const playablePct =
+    duration > 0 && typeof maxSeekTime === "number" && maxSeekTime > 0
+      ? Math.min(100, (maxSeekTime / duration) * 100)
+      : 100;
 
   const onScrub = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
+    const val = Math.min(Number(e.target.value), seekLimit || Infinity);
     setSeekPreview(val);
   };
   const commitScrub = () => {
     const v = videoRef.current;
-    if (v && seekPreview !== null) v.currentTime = seekPreview;
+    if (v && seekPreview !== null) {
+      v.currentTime = Math.min(seekPreview, seekLimit || Infinity);
+    }
     setSeekPreview(null);
     wake();
   };
@@ -230,6 +278,7 @@ const PlayerControlsOverlay = ({
 
   return (
     <div
+      ref={rootRef}
       className="absolute inset-0 z-30 select-none"
       onPointerMove={wake}
       onPointerDown={wake}
@@ -244,6 +293,7 @@ const PlayerControlsOverlay = ({
       }}
       onMouseEnter={wake}
     >
+      {mounted && (
       <div
         className={`absolute inset-0 transition-opacity duration-300 ease-out ${
           visible ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -359,6 +409,12 @@ const PlayerControlsOverlay = ({
         </div>
       )}
 
+      {note && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-16 rounded-full bg-black/75 px-3.5 py-1.5 text-[11px] font-semibold text-white pointer-events-none">
+          {note}
+        </div>
+      )}
+
       {/* Bottom bar — scrubber, time, volume, fullscreen */}
       <div
         className="absolute bottom-0 inset-x-0 px-3 pb-2.5 sm:px-4 sm:pb-3.5"
@@ -369,6 +425,12 @@ const PlayerControlsOverlay = ({
       >
         <div className="relative h-6 flex items-center">
           <div className="absolute inset-x-0 h-[3px] rounded-full bg-white/25" />
+          {playablePct < 100 && (
+            <div
+              className="absolute h-[3px] rounded-full bg-white/45"
+              style={{ width: `${playablePct}%` }}
+            />
+          )}
           <div
             className="absolute h-[3px] rounded-full bg-[#E50914]"
             style={{ width: `${pct}%` }}
@@ -445,6 +507,7 @@ const PlayerControlsOverlay = ({
         </div>
       </div>
       </div>
+      )}
     </div>
   );
 };
