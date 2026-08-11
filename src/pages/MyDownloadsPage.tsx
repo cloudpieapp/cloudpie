@@ -3,7 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle, Expand, MoreVertical, ArrowUpDown, Subtitles } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
+import {
+  getAllDownloads,
+  deleteDownload,
+  pauseDownload,
+  resumeDownload,
+  getPlayableSource,
+  getPlayableBytes,
+  formatBytes,
+  MIN_PARTIAL_BYTES,
+  type OfflineVideo,
+} from "@/lib/offlineDownloads";
 import { toast } from "sonner";
 import {
   DropdownMenu,
