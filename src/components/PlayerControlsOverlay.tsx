@@ -36,6 +36,10 @@ interface Props {
   topRight?: ReactNode;
   /** Extra controls rendered in the bottom bar, next to the volume control. */
   bottomRight?: ReactNode;
+  /** Transient status message (e.g. "Downloading this part…"). */
+  note?: string;
+  /** Upper bound for seeking, in seconds (partially downloaded media). */
+  maxSeekTime?: number;
   hideDelay?: number;
 }
 
