@@ -398,3 +398,98 @@ export async function startDownload(args: StartArgs): Promise<OfflineVideo> {
     activeControllers.delete(id);
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Human readable sizes + progressive (watch-while-downloading) support
+ * ------------------------------------------------------------------ */
+
+/** Formats bytes as KB / MB / GB. */
+export function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
+  const gb = 1024 ** 3;
+  const mb = 1024 ** 2;
+  const kb = 1024;
+  if (bytes >= gb) return `${(bytes / gb).toFixed(bytes / gb >= 10 ? 1 : 2)} GB`;
+  if (bytes >= mb) return `${Math.round(bytes / mb)} MB`;
+  return `${Math.max(1, Math.round(bytes / kb))} KB`;
+}
+
+/** Minimum bytes required before partial playback is offered. */
+export const MIN_PARTIAL_BYTES = 6 * 1024 * 1024;
+
+/**
+ * Concatenates the contiguous, already-downloaded chunks of a video (stopping
+ * at the first gap) into a single blob. Used for progressive playback while a
+ * download is still running — the player and downloader share the same data,
+ * nothing is re-fetched.
+ */
+export async function getContiguousData(
+  id: string,
+): Promise<{ blob: Blob; bytes: number } | null> {
+  const meta = await getDownload(id);
+  if (!meta) return null;
+  if (meta.status === "ready" && meta.blob) {
+    return { blob: meta.blob, bytes: meta.blob.size };
+  }
+  const db = await openDb();
+  const chunks: { index: number; blob: Blob }[] = await new Promise((resolve, reject) => {
+    const t = db.transaction(STORE_CHUNKS, "readonly");
+    const store = t.objectStore(STORE_CHUNKS);
+    const out: { index: number; blob: Blob }[] = [];
+    const req = store.openCursor();
+    req.onsuccess = () => {
+      const cur = req.result;
+      if (cur) {
+        const k = cur.key as [string, number];
+        if (k[0] === id) {
+          const val = cur.value as { index: number; blob: Blob };
+          out.push({ index: val.index, blob: val.blob });
+        }
+        cur.continue();
+      } else {
+        resolve(out.sort((a, b) => a.index - b.index));
+      }
+    };
+    req.onerror = () => reject(req.error);
+  });
+  if (!chunks.length) return null;
+  // Stop at the first missing index so we never claim more data than exists.
+  const contiguous: Blob[] = [];
+  let expected = 0;
+  let bytes = 0;
+  for (const c of chunks) {
+    if (c.index !== expected) break;
+    contiguous.push(c.blob);
+    bytes += c.blob.size;
+    expected++;
+  }
+  if (!contiguous.length) return null;
+  return { blob: new Blob(contiguous, { type: meta.mime || "video/mp4" }), bytes };
+}
+
+/**
+ * Returns an object URL for whatever is currently playable — the finished file
+ * when the download completed, otherwise the contiguous downloaded prefix.
+ */
+export async function getPlayableSource(
+  id: string,
+): Promise<{ url: string; bytes: number; total: number; partial: boolean } | null> {
+  const meta = await getDownload(id);
+  if (!meta) return null;
+  const data = await getContiguousData(id);
+  if (!data) return null;
+  const partial = !(meta.status === "ready" && meta.blob);
+  if (partial && data.bytes < MIN_PARTIAL_BYTES) return null;
+  return {
+    url: URL.createObjectURL(data.blob),
+    bytes: data.bytes,
+    total: meta.size || data.bytes,
+    partial,
+  };
+}
+
+/** How many contiguous bytes are playable right now. */
+export async function getPlayableBytes(id: string): Promise<number> {
+  const data = await getContiguousData(id);
+  return data?.bytes ?? 0;
+}
