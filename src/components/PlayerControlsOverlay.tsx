@@ -143,11 +143,42 @@ const PlayerControlsOverlay = ({
     };
   }, [videoRef, sourceKey, wake]);
 
+  // Fullscreen state — driven by the browser event so the app button and the
+  // device/browser fullscreen controls stay in sync.
   useEffect(() => {
-    const onFs = () => setIsFs(Boolean(document.fullscreenElement));
+    const fsEl = () =>
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+      null;
+    const onFs = () => setIsFs(Boolean(fsEl()));
+    onFs();
     document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      document.removeEventListener("webkitfullscreenchange", onFs);
+    };
   }, []);
+
+  // Unmount the control elements entirely once the fade-out has finished, so
+  // nothing sits over the video while the overlay is hidden.
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      return;
+    }
+    const t = window.setTimeout(() => setMounted(false), 320);
+    return () => window.clearTimeout(t);
+  }, [visible]);
+
+  // Hide the cursor on the owning player shell while idle.
+  useEffect(() => {
+    const shell = rootRef.current?.closest(".bb-player-shell");
+    if (!shell) return;
+    shell.classList.toggle("bb-idle", !visible);
+    return () => shell.classList.remove("bb-idle");
+  }, [visible]);
+
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
