@@ -675,7 +675,12 @@ const MyDownloadsPage = () => {
             <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
               <div className="min-w-0">
                 <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
-                  <div className="relative w-full aspect-video bg-black overflow-hidden">
+                  <div
+                    ref={offlineShellRef}
+                    className={`bb-player-shell bg-black overflow-hidden ${
+                      offlineFs ? "w-full h-full bb-fs" : "w-full aspect-video"
+                    }`}
+                  >
                     <video
                       id="offline-video"
                       ref={offlineVideoRef}
@@ -683,7 +688,24 @@ const MyDownloadsPage = () => {
                       autoPlay
                       playsInline
                       crossOrigin={playing.subtitles?.length ? "anonymous" : undefined}
-                      onEnded={playNext}
+                      onLoadedMetadata={onOfflineMeta}
+                      onWaiting={() => {
+                        if (partial) setNote("Downloading more…");
+                      }}
+                      onPlaying={() => {
+                        if (partial) setNote("Playing the downloaded part…");
+                      }}
+                      onEnded={async () => {
+                        // A partial file "ends" at the downloaded prefix — try to
+                        // extend it instead of jumping to the next title.
+                        if (partial) {
+                          setNote("Downloading more…");
+                          const grew = await growPartialSource();
+                          if (grew) return;
+                          return;
+                        }
+                        playNext();
+                      }}
                       className="absolute inset-0 w-full h-full bg-black"
                     >
                       {playing.subtitles?.map((s) => (
@@ -706,14 +728,22 @@ const MyDownloadsPage = () => {
                           ? `S${playing.season} · E${playing.episode} · Offline`
                           : "Offline"
                       }
+                      note={note ?? undefined}
+                      maxSeekTime={maxSeekTime}
                       onPrev={prevEpisode ? () => playOffline(prevEpisode) : undefined}
                       onNext={playNext}
                       onToggleFullscreen={enterFullscreen}
                     />
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60">
-                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Offline</span>
-                    <span className="text-[10px] text-muted-foreground truncate flex-1">{fmtMB(playing.size)}</span>
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+                      {partial ? "Downloading" : "Offline"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate flex-1 tabular-nums">
+                      {partial
+                        ? `${formatBytes(playableBytes)} / ${formatBytes(totalBytes || playing.size)} ready`
+                        : formatBytes(playing.size)}
+                    </span>
                     {playing.subtitles && playing.subtitles.length > 0 && (
                       <div className="relative">
                         <button
