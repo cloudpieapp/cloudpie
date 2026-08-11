@@ -408,6 +408,12 @@ const PlayerControlsOverlay = ({
         </div>
       )}
 
+      {note && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-16 rounded-full bg-black/75 px-3.5 py-1.5 text-[11px] font-semibold text-white pointer-events-none">
+          {note}
+        </div>
+      )}
+
       {/* Bottom bar — scrubber, time, volume, fullscreen */}
       <div
         className="absolute bottom-0 inset-x-0 px-3 pb-2.5 sm:px-4 sm:pb-3.5"
@@ -418,6 +424,12 @@ const PlayerControlsOverlay = ({
       >
         <div className="relative h-6 flex items-center">
           <div className="absolute inset-x-0 h-[3px] rounded-full bg-white/25" />
+          {playablePct < 100 && (
+            <div
+              className="absolute h-[3px] rounded-full bg-white/45"
+              style={{ width: `${playablePct}%` }}
+            />
+          )}
           <div
             className="absolute h-[3px] rounded-full bg-[#E50914]"
             style={{ width: `${pct}%` }}
@@ -494,6 +506,7 @@ const PlayerControlsOverlay = ({
         </div>
       </div>
       </div>
+      )}
     </div>
   );
 };
