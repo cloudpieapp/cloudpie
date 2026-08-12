@@ -163,7 +163,6 @@ const MoviePlayer = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     setInList(added);
-    toast.success(added ? "Added to your watchlist" : "Removed from your watchlist");
   }, [listItemId, title, poster, backdrop, type]);
 
   // Record each movie / episode view exactly once per title change.

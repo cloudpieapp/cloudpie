@@ -154,7 +154,6 @@ const MovieDetailPage = () => {
                       duration: runtime || "",
                     });
                     setInList(added);
-                    toast.success(added ? "Added to your watchlist" : "Removed from your watchlist");
                   }}
                   className="flex items-center gap-2 font-bold px-6 py-3 rounded-lg text-sm bg-secondary text-secondary-foreground transition-transform hover:scale-105"
                 >
