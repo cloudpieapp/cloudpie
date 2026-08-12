@@ -322,6 +322,7 @@ const PlayerControlsOverlay = ({
             onMouseLeave={() => hold(false)}
             onPointerDown={() => hold(true)}
             onPointerUp={() => hold(false)}
+            onPointerCancel={() => hold(false)}
           >
             {topRight}
           </div>
@@ -428,6 +429,8 @@ const PlayerControlsOverlay = ({
         onMouseLeave={() => hold(false)}
         onPointerDown={() => hold(true)}
         onPointerUp={() => hold(false)}
+        onPointerCancel={() => hold(false)}
+        onPointerLeave={() => hold(false)}
       >
         <div className="relative h-6 flex items-center">
           <div className="absolute inset-x-0 h-[3px] rounded-full bg-white/25" />
