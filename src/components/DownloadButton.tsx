@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Download } from "lucide-react";
+import { getDownload } from "@/lib/offlineDownloads";
 import DownloadSourceSheet from "./DownloadSourceSheet";
 
 interface Props {
@@ -18,6 +19,23 @@ interface Props {
 const DownloadButton = ({ type, tmdbId, title, year, season, episode, poster, backdrop, size = "md" }: Props) => {
   const itemId = `${type}-${tmdbId}${season ? `-s${season}-e${episode ?? 1}` : ""}`;
   const [sourceOpen, setSourceOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Poll the offline store so the button shows a tick once the title is
+  // queued / downloading / downloaded (replaces the old toast).
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      const d = await getDownload(itemId);
+      if (active) setSaved(Boolean(d));
+    };
+    void check();
+    const iv = window.setInterval(check, 2000);
+    return () => {
+      active = false;
+      window.clearInterval(iv);
+    };
+  }, [itemId]);
 
   const sheet = (
     <DownloadSourceSheet
@@ -44,7 +62,11 @@ const DownloadButton = ({ type, tmdbId, title, year, season, episode, poster, ba
           className="w-6 h-6 grid place-items-center rounded-full bg-black/70 hover:bg-[#E50914] transition-colors"
           aria-label="Download episode"
         >
-          <Download className="w-3 h-3 text-white" strokeWidth={2.5} />
+          {saved ? (
+            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+          ) : (
+            <Download className="w-3 h-3 text-white" strokeWidth={2.5} />
+          )}
         </button>
         {sheet}
       </>
@@ -61,8 +83,8 @@ const DownloadButton = ({ type, tmdbId, title, year, season, episode, poster, ba
         className={`inline-flex items-center gap-2 rounded-lg font-semibold text-white transition-all hover:scale-[1.02] ${padding}`}
         style={{ background: "#E50914" }}
       >
-        <Download className={icon} />
-        Download
+        {saved ? <Check className={icon} strokeWidth={3} /> : <Download className={icon} />}
+        {saved ? "Downloaded" : "Download"}
       </button>
       {sheet}
     </>

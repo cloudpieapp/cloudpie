@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Star, Play, ArrowLeft, Calendar, Clock, Film, Plus, Check } from "lucide-react";
-import { toast } from "sonner";
 import { toggleMyList, isInMyList } from "@/hooks/useMyList";
 
 import AppLayout from "@/components/AppLayout";
@@ -154,7 +153,6 @@ const MovieDetailPage = () => {
                       duration: runtime || "",
                     });
                     setInList(added);
-                    toast.success(added ? "Added to your watchlist" : "Removed from your watchlist");
                   }}
                   className="flex items-center gap-2 font-bold px-6 py-3 rounded-lg text-sm bg-secondary text-secondary-foreground transition-transform hover:scale-105"
                 >

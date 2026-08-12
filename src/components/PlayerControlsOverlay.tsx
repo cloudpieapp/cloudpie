@@ -322,18 +322,23 @@ const PlayerControlsOverlay = ({
             onMouseLeave={() => hold(false)}
             onPointerDown={() => hold(true)}
             onPointerUp={() => hold(false)}
+            onPointerCancel={() => hold(false)}
           >
             {topRight}
           </div>
         )}
       </div>
 
-      {/* Center playback cluster */}
+      {/* Center playback cluster — the wrapper never captures the pointer so
+          idling anywhere over the video still fades the controls out. */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div
-        className="absolute inset-0 flex items-center justify-center gap-2 sm:gap-5 md:gap-7"
+        className="flex items-center justify-center gap-2 sm:gap-5 md:gap-7 pointer-events-auto"
         onMouseEnter={() => hold(true)}
         onMouseLeave={() => hold(false)}
+        onPointerCancel={() => hold(false)}
       >
+
         <button
           type="button"
           aria-label="Previous episode"
@@ -398,6 +403,8 @@ const PlayerControlsOverlay = ({
           <SkipForward className="h-5 w-5 fill-current" />
         </button>
       </div>
+      </div>
+
 
       {pill && (
         <div
@@ -422,6 +429,8 @@ const PlayerControlsOverlay = ({
         onMouseLeave={() => hold(false)}
         onPointerDown={() => hold(true)}
         onPointerUp={() => hold(false)}
+        onPointerCancel={() => hold(false)}
+        onPointerLeave={() => hold(false)}
       >
         <div className="relative h-6 flex items-center">
           <div className="absolute inset-x-0 h-[3px] rounded-full bg-white/25" />

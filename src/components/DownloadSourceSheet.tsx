@@ -171,7 +171,6 @@ const DownloadSourceSheet = ({
     const displayTitle = isSeries
       ? `${resolvedTitle} · S${season ?? 1}E${episode ?? 1}`
       : resolvedTitle;
-    toast.success(`Downloading ${resolutionLabel(d.resolution)} · check Downloads`);
     close(false);
     // Fire off subtitle + recommendations fetch in parallel with the download.
     const [subtitles, recommendations] = await Promise.all([
