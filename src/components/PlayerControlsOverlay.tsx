@@ -402,6 +402,8 @@ const PlayerControlsOverlay = ({
           <SkipForward className="h-5 w-5 fill-current" />
         </button>
       </div>
+      </div>
+
 
       {pill && (
         <div
