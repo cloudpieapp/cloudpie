@@ -328,12 +328,16 @@ const PlayerControlsOverlay = ({
         )}
       </div>
 
-      {/* Center playback cluster */}
+      {/* Center playback cluster — the wrapper never captures the pointer so
+          idling anywhere over the video still fades the controls out. */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div
-        className="absolute inset-0 flex items-center justify-center gap-2 sm:gap-5 md:gap-7"
+        className="flex items-center justify-center gap-2 sm:gap-5 md:gap-7 pointer-events-auto"
         onMouseEnter={() => hold(true)}
         onMouseLeave={() => hold(false)}
+        onPointerCancel={() => hold(false)}
       >
+
         <button
           type="button"
           aria-label="Previous episode"
