@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Star, Play, ArrowLeft, Calendar, Clock, Film, Plus, Check } from "lucide-react";
-import { toast } from "sonner";
 import { toggleMyList, isInMyList } from "@/hooks/useMyList";
 
 import AppLayout from "@/components/AppLayout";
