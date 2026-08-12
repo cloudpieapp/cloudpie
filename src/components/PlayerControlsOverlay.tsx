@@ -90,10 +90,7 @@ const PlayerControlsOverlay = ({
   const scheduleHide = useCallback(() => {
     clearHideTimer();
     hideTimerRef.current = window.setTimeout(() => {
-      if (interactingRef.current) {
-        scheduleHide();
-        return;
-      }
+      if (interactingRef.current) return;
       setVisible(false);
       hideTimerRef.current = null;
     }, hideDelay);
