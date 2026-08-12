@@ -68,7 +68,6 @@ const PlayerControlsOverlay = ({
 }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
-  const [mounted, setMounted] = useState(true);
   const [paused, setPaused] = useState(true);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -78,28 +77,49 @@ const PlayerControlsOverlay = ({
   const [isFs, setIsFs] = useState(false);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
   const [pill, setPill] = useState<{ dir: "fwd" | "back" } | null>(null);
-  const holdRef = useRef(false);
-  const timer = useRef<number | null>(null);
+  const interactingRef = useRef(false);
+  const hideTimerRef = useRef<number | null>(null);
 
-  /** Show the controls and (re)start the inactivity countdown. */
+  const clearHideTimer = useCallback(() => {
+    if (hideTimerRef.current !== null) {
+      window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleHide = useCallback(() => {
+    clearHideTimer();
+    hideTimerRef.current = window.setTimeout(() => {
+      if (interactingRef.current) return;
+      setVisible(false);
+      hideTimerRef.current = null;
+    }, hideDelay);
+  }, [clearHideTimer, hideDelay]);
+
+  /** Every real user input reveals the chrome and restarts one idle timer. */
   const wake = useCallback(() => {
     setVisible(true);
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      // Never hide while the user is actively interacting or while paused.
-      if (holdRef.current) return;
-      const v = videoRef.current;
-      if (v && v.paused) return;
-      setVisible(false);
-    }, hideDelay);
-  }, [hideDelay, videoRef]);
+    scheduleHide();
+  }, [scheduleHide]);
+
+  const beginInteraction = useCallback(() => {
+    interactingRef.current = true;
+    clearHideTimer();
+    setVisible(true);
+  }, [clearHideTimer]);
+
+  const endInteraction = useCallback(() => {
+    interactingRef.current = false;
+    scheduleHide();
+  }, [scheduleHide]);
 
   useEffect(() => {
     wake();
     return () => {
-      if (timer.current) window.clearTimeout(timer.current);
+      clearHideTimer();
+      interactingRef.current = false;
     };
-  }, [wake, sourceKey]);
+  }, [clearHideTimer, wake, sourceKey]);
 
   // Sync overlay state with the underlying media element.
   useEffect(() => {
@@ -113,33 +133,37 @@ const PlayerControlsOverlay = ({
     const onTime = () => setCurrent(v.currentTime || 0);
     const onMeta = () => setDuration(v.duration || 0);
     const onWaiting = () => setBuffering(true);
-    const onPlaying = () => {
+    const onPlay = () => {
       setBuffering(false);
       sync();
       wake();
     };
+    const onPause = () => {
+      sync();
+      wake();
+    };
+    const onCanPlay = () => setBuffering(false);
     sync();
     onMeta();
-    v.addEventListener("play", sync);
-    v.addEventListener("pause", () => {
-      sync();
-      setVisible(true);
-    });
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("durationchange", onMeta);
     v.addEventListener("volumechange", sync);
     v.addEventListener("waiting", onWaiting);
-    v.addEventListener("playing", onPlaying);
-    v.addEventListener("canplay", () => setBuffering(false));
+    v.addEventListener("playing", onPlay);
+    v.addEventListener("canplay", onCanPlay);
     return () => {
-      v.removeEventListener("play", sync);
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("loadedmetadata", onMeta);
       v.removeEventListener("durationchange", onMeta);
       v.removeEventListener("volumechange", sync);
       v.removeEventListener("waiting", onWaiting);
-      v.removeEventListener("playing", onPlaying);
+      v.removeEventListener("playing", onPlay);
+      v.removeEventListener("canplay", onCanPlay);
     };
   }, [videoRef, sourceKey, wake]);
 
@@ -159,17 +183,6 @@ const PlayerControlsOverlay = ({
       document.removeEventListener("webkitfullscreenchange", onFs);
     };
   }, []);
-
-  // Unmount the control elements entirely once the fade-out has finished, so
-  // nothing sits over the video while the overlay is hidden.
-  useEffect(() => {
-    if (visible) {
-      setMounted(true);
-      return;
-    }
-    const t = window.setTimeout(() => setMounted(false), 320);
-    return () => window.clearTimeout(t);
-  }, [visible]);
 
   // Hide the cursor on the owning player shell while idle.
   useEffect(() => {
@@ -246,12 +259,6 @@ const PlayerControlsOverlay = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [seekBy, togglePlay, videoRef, wake]);
 
-  const hold = (on: boolean) => {
-    holdRef.current = on;
-    if (on) setVisible(true);
-    else wake();
-  };
-
   const seekLimit =
     typeof maxSeekTime === "number" && maxSeekTime > 0 ? maxSeekTime : duration;
   const pct = duration > 0 ? ((seekPreview ?? current) / duration) * 100 : 0;
@@ -279,7 +286,7 @@ const PlayerControlsOverlay = ({
   return (
     <div
       ref={rootRef}
-      className="absolute inset-0 z-30 select-none"
+      className="absolute inset-0 z-30 select-none touch-manipulation"
       onPointerMove={wake}
       onPointerDown={wake}
       onClick={(e) => {
@@ -292,11 +299,12 @@ const PlayerControlsOverlay = ({
         if (e.target === e.currentTarget) togglePlay();
       }}
       onMouseEnter={wake}
+      onPointerCancel={endInteraction}
     >
-      {mounted && (
       <div
-        className={`absolute inset-0 transition-opacity duration-300 ease-out ${
-          visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        aria-hidden={!visible}
+        className={`absolute inset-0 transition-[opacity,visibility] duration-300 ease-out ${
+          visible ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         onClick={(e) => {
           if (e.target === e.currentTarget) togglePlay();
@@ -318,11 +326,11 @@ const PlayerControlsOverlay = ({
         {topRight && (
           <div
             className="flex items-center gap-1.5"
-            onMouseEnter={() => hold(true)}
-            onMouseLeave={() => hold(false)}
-            onPointerDown={() => hold(true)}
-            onPointerUp={() => hold(false)}
-            onPointerCancel={() => hold(false)}
+            onPointerDown={beginInteraction}
+            onPointerUp={endInteraction}
+            onPointerCancel={endInteraction}
+            onFocusCapture={beginInteraction}
+            onBlurCapture={endInteraction}
           >
             {topRight}
           </div>
@@ -334,9 +342,11 @@ const PlayerControlsOverlay = ({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div
         className="flex items-center justify-center gap-2 sm:gap-5 md:gap-7 pointer-events-auto"
-        onMouseEnter={() => hold(true)}
-        onMouseLeave={() => hold(false)}
-        onPointerCancel={() => hold(false)}
+        onPointerDown={beginInteraction}
+        onPointerUp={endInteraction}
+        onPointerCancel={endInteraction}
+        onFocusCapture={beginInteraction}
+        onBlurCapture={endInteraction}
       >
 
         <button
@@ -425,12 +435,11 @@ const PlayerControlsOverlay = ({
       {/* Bottom bar — scrubber, time, volume, fullscreen */}
       <div
         className="absolute bottom-0 inset-x-0 px-3 pb-2.5 sm:px-4 sm:pb-3.5"
-        onMouseEnter={() => hold(true)}
-        onMouseLeave={() => hold(false)}
-        onPointerDown={() => hold(true)}
-        onPointerUp={() => hold(false)}
-        onPointerCancel={() => hold(false)}
-        onPointerLeave={() => hold(false)}
+        onPointerDown={beginInteraction}
+        onPointerUp={endInteraction}
+        onPointerCancel={endInteraction}
+        onFocusCapture={beginInteraction}
+        onBlurCapture={endInteraction}
       >
         <div className="relative h-6 flex items-center">
           <div className="absolute inset-x-0 h-[3px] rounded-full bg-white/25" />
@@ -516,7 +525,6 @@ const PlayerControlsOverlay = ({
         </div>
       </div>
       </div>
-      )}
     </div>
   );
 };
