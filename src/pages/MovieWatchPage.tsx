@@ -134,9 +134,9 @@ const MovieWatchPage = () => {
                 </div>
 
                 <div className="mt-2 -mx-4 lg:mx-0 space-y-0.5">
-                  <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} type="movie" />
-                  <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" />
-                  <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="movie" ranked />
+                  <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} isError={trending.isError} onRetry={trending.refetch} type="movie" />
+                  <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} isError={popular.isError} onRetry={popular.refetch} type="movie" />
+                  <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} isError={topRated.isError} onRetry={topRated.refetch} type="movie" ranked />
                 </div>
 
                 <div className="mt-2 -mx-4 lg:mx-0">
