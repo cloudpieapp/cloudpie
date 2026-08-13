@@ -1,8 +1,8 @@
 // Central backend config. Falls back to the generated client values so the app
 // keeps working when the VITE_* env vars are missing (e.g. after a remix).
-const FALLBACK_URL = "https://hdhjoegjghurgoujjbkj.supabase.co";
+const FALLBACK_URL = "https://afdgiwuweggbtgtduhvb.supabase.co";
 const FALLBACK_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkaGpvZWdqZ2h1cmdvdWpqYmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMTg1OTksImV4cCI6MjA5NjY5NDU5OX0.7kco3LAxWdq_flbTtTraTFLxs5OlXDQRbLFQ2Wk7Pv4";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmZGdpd3V3ZWdnYnRndGR1aHZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1ODEyNTYsImV4cCI6MjEwMjE1NzI1Nn0.BbsnYvCxoN3NkHkfVaGMIMZkmOnJF__EaesMwuojhJE";
 
 const envUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const envRef = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
