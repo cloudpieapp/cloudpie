@@ -19,6 +19,8 @@ import { getResume, setResume, resumeIdFor } from "@/lib/resumePositions";
 import PlayerGestureLayer from "@/components/PlayerGestureLayer";
 import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
 import { trackMediaView } from "@/lib/analytics";
+import { getStoredStreams, saveStreams } from "@/lib/videoStreams";
+
 
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
