@@ -29,16 +29,15 @@ const GenrePage = () => {
   const { data: movies = [], isLoading } = useQuery({
     queryKey: ["tmdb-genre", genre],
     queryFn: async () => {
-      let url: string;
+      let path: string;
       if (genre === "trending") {
-        url = `${TMDB_BASE}/trending/movie/week?api_key=${TMDB_KEY}`;
+        path = `/trending/movie/week`;
       } else if (genre === "new-releases") {
-        url = `${TMDB_BASE}/movie/now_playing?api_key=${TMDB_KEY}`;
+        path = `/movie/now_playing`;
       } else {
-        url = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&with_genres=${info.id}&sort_by=popularity.desc`;
+        path = `/discover/movie?with_genres=${info.id}&sort_by=popularity.desc`;
       }
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await tmdb<any>(path);
       return (data.results || []).map((m: any) => ({
         id: `tmdb-${m.id}`,
         tmdbId: m.id,
@@ -50,8 +49,9 @@ const GenrePage = () => {
         backdrop: m.backdrop_path ? `${TMDB_IMG}/w780${m.backdrop_path}` : "",
       }));
     },
-    enabled: !!TMDB_KEY,
+    staleTime: 1000 * 60 * 30,
   });
+
 
   return (
     <AppLayout>
