@@ -67,19 +67,75 @@ const normalize = (raw: any, fallbackType?: "movie" | "tv"): TmdbItem => ({
   media_type: raw.media_type || fallbackType,
 });
 
+// ---------------- Request cache + in-flight dedupe ----------------
+const CACHE_TTL_MS = 30 * 60 * 1000;
+const memCache = new Map<string, { at: number; value: any }>();
+const inflight = new Map<string, Promise<any>>();
+
+function readCache(key: string): any | undefined {
+  const hit = memCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+  if (hit) memCache.delete(key);
+  try {
+    const raw = sessionStorage.getItem(`bb:tmdb:${key}`);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { at: number; value: any };
+    if (Date.now() - parsed.at > CACHE_TTL_MS) return undefined;
+    memCache.set(key, parsed);
+    return parsed.value;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeCache(key: string, value: any) {
+  const entry = { at: Date.now(), value };
+  memCache.set(key, entry);
+  try { sessionStorage.setItem(`bb:tmdb:${key}`, JSON.stringify(entry)); } catch { /* quota — memory only */ }
+}
+
 export async function tmdb<T = any>(path: string, params: Record<string, string | number> = {}): Promise<T> {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  const search = new URLSearchParams(
-    Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
-  );
-  const qs = search.toString();
-  const url = `${PROXY_BASE}${normalized}${qs ? `?${qs}` : ""}`;
-  const res = await fetch(url, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-  });
-  if (!res.ok) throw new Error(`TMDB ${res.status}`);
-  return res.json();
+  const [pathname, existingQs = ""] = normalized.split("?");
+  const search = new URLSearchParams(existingQs);
+  for (const [k, v] of Object.entries(params)) search.set(k, String(v));
+  if (!search.has("language")) search.set("language", "en-US");
+
+  const cacheKey = `${pathname}?${search.toString()}`;
+  const cached = readCache(cacheKey);
+  if (cached !== undefined) return cached as T;
+  const pending = inflight.get(cacheKey);
+  if (pending) return pending as Promise<T>;
+
+  const key = tmdbKey();
+  const run = (async () => {
+    let res: Response;
+    if (key) {
+      const qs = new URLSearchParams(search);
+      qs.set("api_key", key);
+      res = await fetch(`${TMDB_BASE}${pathname}?${qs.toString()}`, {
+        headers: { Accept: "application/json" },
+      });
+    } else {
+      // No client key configured — fall back to the edge proxy.
+      res = await fetch(`${PROXY_BASE}${pathname}?${search.toString()}`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      });
+    }
+    if (!res.ok) throw new Error(`TMDB ${res.status}`);
+    const json = await res.json();
+    writeCache(cacheKey, json);
+    return json;
+  })();
+
+  inflight.set(cacheKey, run);
+  try {
+    return (await run) as T;
+  } finally {
+    inflight.delete(cacheKey);
+  }
 }
+
 
 export async function fetchList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
   const data = await tmdb<TmdbList>(path);
