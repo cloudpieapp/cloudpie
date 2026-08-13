@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      video_streams: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          episode_number: number | null
+          expires_at: string | null
+          headers: Json | null
+          id: string
+          is_active: boolean
+          language: string | null
+          priority: number
+          quality: string | null
+          season_number: number | null
+          source_name: string
+          stream_url: string
+          subtitle_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          episode_number?: number | null
+          expires_at?: string | null
+          headers?: Json | null
+          id?: string
+          is_active?: boolean
+          language?: string | null
+          priority?: number
+          quality?: string | null
+          season_number?: number | null
+          source_name: string
+          stream_url: string
+          subtitle_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          episode_number?: number | null
+          expires_at?: string | null
+          headers?: Json | null
+          id?: string
+          is_active?: boolean
+          language?: string | null
+          priority?: number
+          quality?: string | null
+          season_number?: number | null
+          source_name?: string
+          stream_url?: string
+          subtitle_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

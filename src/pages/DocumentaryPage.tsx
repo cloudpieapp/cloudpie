@@ -22,9 +22,9 @@ const DocumentaryPage = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Documentary</h1>
         <p className="text-sm text-muted-foreground mt-1">Real stories, real people — explore the world</p>
       </div>
-      <TmdbRow title="Trending Documentaries" items={movies.data} isLoading={movies.isLoading} type="movie" />
-      <TmdbRow title="Documentary Series" items={tv.data} isLoading={tv.isLoading} type="tv" />
-      <TmdbRow title="Top Rated" items={top.data} isLoading={top.isLoading} type="movie" />
+      <TmdbRow title="Trending Documentaries" items={movies.data} isLoading={movies.isLoading} isError={movies.isError} onRetry={movies.refetch} type="movie" />
+      <TmdbRow title="Documentary Series" items={tv.data} isLoading={tv.isLoading} isError={tv.isError} onRetry={tv.refetch} type="tv" />
+      <TmdbRow title="Top Rated" items={top.data} isLoading={top.isLoading} isError={top.isError} onRetry={top.refetch} type="movie" />
     </AppLayout>
   );
 };

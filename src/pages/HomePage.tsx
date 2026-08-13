@@ -80,40 +80,40 @@ const HomePage = () => {
 
       <TmdbContinueRow />
 
-      <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" viewAll="/movies" />
-      <TmdbRow title="Trending Movies" items={trendingMovies.data} isLoading={trendingMovies.isLoading} type="movie" viewAll="/movies" ranked />
+      <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} isError={popular.isError} onRetry={popular.refetch} type="movie" viewAll="/movies" />
+      <TmdbRow title="Trending Movies" items={trendingMovies.data} isLoading={trendingMovies.isLoading} isError={trendingMovies.isError} onRetry={trendingMovies.refetch} type="movie" viewAll="/movies" ranked />
 
       {/* Ad #2 */}
       <InlineAdRow count={4} />
 
-      <TmdbRow title="Trending TV Shows" items={trendingTv.data} isLoading={trendingTv.isLoading} type="tv" viewAll="/tv" ranked />
+      <TmdbRow title="Trending TV Shows" items={trendingTv.data} isLoading={trendingTv.isLoading} isError={trendingTv.isError} onRetry={trendingTv.refetch} type="tv" viewAll="/tv" ranked />
       <StreamingBrandsRow />
-      <TmdbRow title="Now Playing" items={nowPlaying.data} isLoading={nowPlaying.isLoading} type="movie" />
-      <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} type="movie" />
-      <TmdbRow title="Top Rated Movies" items={topRated.data} isLoading={topRated.isLoading} type="movie" />
-      <TmdbRow title="Popular TV Shows" items={popularTv.data} isLoading={popularTv.isLoading} type="tv" />
+      <TmdbRow title="Now Playing" items={nowPlaying.data} isLoading={nowPlaying.isLoading} isError={nowPlaying.isError} onRetry={nowPlaying.refetch} type="movie" />
+      <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} isError={upcoming.isError} onRetry={upcoming.refetch} type="movie" />
+      <TmdbRow title="Top Rated Movies" items={topRated.data} isLoading={topRated.isLoading} isError={topRated.isError} onRetry={topRated.refetch} type="movie" />
+      <TmdbRow title="Popular TV Shows" items={popularTv.data} isLoading={popularTv.isLoading} isError={popularTv.isError} onRetry={popularTv.refetch} type="tv" />
 
       {/* Ad #3 */}
       <InlineAdRow count={4} />
 
-      <TmdbRow title="Top Rated TV" items={topRatedTv.data} isLoading={topRatedTv.isLoading} type="tv" />
-      <TmdbRow title="Airing Today" items={airingToday.data} isLoading={airingToday.isLoading} type="tv" />
-      <TmdbRow title="On the Air" items={onAir.data} isLoading={onAir.isLoading} type="tv" />
-      <TmdbRow title="Action & Adventure" items={action.data} isLoading={action.isLoading} type="movie" />
-      <TmdbRow title="Drama" items={drama.data} isLoading={drama.isLoading} type="movie" />
-      <TmdbRow title="Comedy" items={comedy.data} isLoading={comedy.isLoading} type="movie" />
+      <TmdbRow title="Top Rated TV" items={topRatedTv.data} isLoading={topRatedTv.isLoading} isError={topRatedTv.isError} onRetry={topRatedTv.refetch} type="tv" />
+      <TmdbRow title="Airing Today" items={airingToday.data} isLoading={airingToday.isLoading} isError={airingToday.isError} onRetry={airingToday.refetch} type="tv" />
+      <TmdbRow title="On the Air" items={onAir.data} isLoading={onAir.isLoading} isError={onAir.isError} onRetry={onAir.refetch} type="tv" />
+      <TmdbRow title="Action & Adventure" items={action.data} isLoading={action.isLoading} isError={action.isError} onRetry={action.refetch} type="movie" />
+      <TmdbRow title="Drama" items={drama.data} isLoading={drama.isLoading} isError={drama.isError} onRetry={drama.refetch} type="movie" />
+      <TmdbRow title="Comedy" items={comedy.data} isLoading={comedy.isLoading} isError={comedy.isError} onRetry={comedy.refetch} type="movie" />
 
       {/* Ad #4 */}
       <InlineAdRow count={4} />
 
-      <TmdbRow title="Horror" items={horror.data} isLoading={horror.isLoading} type="movie" />
-      <TmdbRow title="Sci-Fi" items={scifi.data} isLoading={scifi.isLoading} type="movie" />
-      <TmdbRow title="Romance" items={romance.data} isLoading={romance.isLoading} type="movie" />
-      <TmdbRow title="Thriller" items={thriller.data} isLoading={thriller.isLoading} type="movie" />
-      <TmdbRow title="Animated Movies" items={animationMovies.data} isLoading={animationMovies.isLoading} type="movie" viewAll="/animation" />
-      <TmdbRow title="Animated Series" items={animationTv.data} isLoading={animationTv.isLoading} type="tv" />
-      <TmdbRow title="Documentaries" items={docMovies.data} isLoading={docMovies.isLoading} type="movie" viewAll="/documentary" />
-      <TmdbRow title="Documentary Series" items={docTv.data} isLoading={docTv.isLoading} type="tv" />
+      <TmdbRow title="Horror" items={horror.data} isLoading={horror.isLoading} isError={horror.isError} onRetry={horror.refetch} type="movie" />
+      <TmdbRow title="Sci-Fi" items={scifi.data} isLoading={scifi.isLoading} isError={scifi.isError} onRetry={scifi.refetch} type="movie" />
+      <TmdbRow title="Romance" items={romance.data} isLoading={romance.isLoading} isError={romance.isError} onRetry={romance.refetch} type="movie" />
+      <TmdbRow title="Thriller" items={thriller.data} isLoading={thriller.isLoading} isError={thriller.isError} onRetry={thriller.refetch} type="movie" />
+      <TmdbRow title="Animated Movies" items={animationMovies.data} isLoading={animationMovies.isLoading} isError={animationMovies.isError} onRetry={animationMovies.refetch} type="movie" viewAll="/animation" />
+      <TmdbRow title="Animated Series" items={animationTv.data} isLoading={animationTv.isLoading} isError={animationTv.isError} onRetry={animationTv.refetch} type="tv" />
+      <TmdbRow title="Documentaries" items={docMovies.data} isLoading={docMovies.isLoading} isError={docMovies.isError} onRetry={docMovies.refetch} type="movie" viewAll="/documentary" />
+      <TmdbRow title="Documentary Series" items={docTv.data} isLoading={docTv.isLoading} isError={docTv.isError} onRetry={docTv.refetch} type="tv" />
     </AppLayout>
   );
 };

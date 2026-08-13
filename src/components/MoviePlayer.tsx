@@ -19,6 +19,8 @@ import { getResume, setResume, resumeIdFor } from "@/lib/resumePositions";
 import PlayerGestureLayer from "@/components/PlayerGestureLayer";
 import PlayerControlsOverlay from "@/components/PlayerControlsOverlay";
 import { trackMediaView } from "@/lib/analytics";
+import { getStoredStreams, saveStreams } from "@/lib/videoStreams";
+
 
 const QUALITY_PREF_KEY = "bb:mb:quality-pref";
 const SUBTITLE_PREF_KEY = "bb:mb:subtitle-pref";
@@ -187,7 +189,8 @@ const MoviePlayer = ({
     setSource(FASTSTREAM_DEFAULT_IDS.has(String(tmdbId)) ? "fast" : "app");
   }, [tmdbId]);
 
-  // Resolve MovieBox stream URLs whenever the title / episode changes.
+  // Resolve stream URLs whenever the title / episode changes.
+  // 1) database cache (video_streams)  2) external source, then cache it.
   useEffect(() => {
     if (!title || source === "fast") return;
     let active = true;
@@ -198,7 +201,35 @@ const MoviePlayer = ({
     setSelectedRes(0);
     setEnded(false);
     setErrorReason("");
+    const streamKey = {
+      contentId: String(tmdbId),
+      contentType: (type === "tv" ? "episode" : "movie") as "episode" | "movie",
+      season: type === "tv" ? season : null,
+      episode: type === "tv" ? episode : null,
+    };
     (async () => {
+      // --- 1. Cached streams from the database ---
+      const stored = await getStoredStreams(streamKey);
+      if (!active) return;
+      if (stored.length > 0) {
+        setDownloads(
+          stored.map((s) => ({
+            resolution: parseInt(String(s.quality || "").replace(/\D/g, ""), 10) || 0,
+            url: s.stream_url,
+            size: 0,
+            format: "mp4",
+          })),
+        );
+        setCaptions(
+          stored
+            .filter((s) => !!s.subtitle_url)
+            .map((s) => ({ lang: s.language || "en", url: s.subtitle_url as string })),
+        );
+        setPhase("select");
+        return;
+      }
+
+      // --- 2. Resolve from the external source, then persist ---
       const res = await resolveMovieboxDownloads({
         title,
         year,
@@ -215,11 +246,25 @@ const MoviePlayer = ({
       setDownloads(res.downloads);
       setCaptions(res.captions || []);
       setPhase("select");
+
+      const firstCaption = res.captions?.[0];
+      saveStreams(
+        streamKey,
+        res.downloads.slice(0, 6).map((d, i) => ({
+          source_name: `moviebox-${d.resolution || i}p`,
+          stream_url: d.url,
+          quality: d.resolution ? `${d.resolution}p` : null,
+          language: "en",
+          subtitle_url: firstCaption?.url ?? null,
+          priority: 100 - (d.resolution || 0) / 10,
+        })),
+      );
     })();
     return () => {
       active = false;
     };
   }, [title, year, type, tmdbId, season, episode, source]);
+
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
     const v = videoRef.current;
