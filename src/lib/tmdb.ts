@@ -1,10 +1,29 @@
-// Centralized TMDB API client. Routes through the `tmdb-proxy` edge function
-// so the TMDB_API_KEY stays server-side. Returns normalized shapes.
+// Centralized TMDB API client.
+//
+// Browsing/list requests hit https://api.themoviedb.org/3 DIRECTLY with a v3
+// API key (VITE_TMDB_API_KEY, or a key saved in localStorage under
+// "bb:tmdb-key"). This keeps the app working when the edge-function quota is
+// exhausted. The `tmdb-proxy` edge function is only used as a last-resort
+// fallback when no client key is configured.
 
 import { SUPABASE_ANON_KEY, fn } from "./supabaseConfig";
 
 const SUPABASE_KEY = SUPABASE_ANON_KEY;
 const PROXY_BASE = fn("tmdb-proxy");
+const TMDB_BASE = "https://api.themoviedb.org/3";
+
+const LS_KEY = "bb:tmdb-key";
+
+export function setTmdbApiKey(key: string) {
+  try { localStorage.setItem(LS_KEY, key.trim()); } catch { /* ignore */ }
+}
+
+function tmdbKey(): string {
+  const env = (import.meta.env.VITE_TMDB_API_KEY as string | undefined) || "";
+  if (env) return env.trim();
+  try { return (localStorage.getItem(LS_KEY) || "").trim(); } catch { return ""; }
+}
+
 
 
 export const TMDB_IMG = "https://image.tmdb.org/t/p";
