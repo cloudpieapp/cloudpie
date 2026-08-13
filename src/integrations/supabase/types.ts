@@ -10,58 +10,17 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          created_at: string
-          display_name: string | null
-          email: string | null
-          id: string
-          phone: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id: string
-          phone?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      record_stream_source: {
-        Args: {
-          p_episode?: number
-          p_media_type: string
-          p_season?: number
-          p_server: string
-          p_tmdb_id: string
-          p_url: string
-          p_working: boolean
-        }
-        Returns: undefined
-      }
-      toggle_like: {
-        Args: { p_delta: number; p_video_id: string }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
