@@ -10,63 +10,33 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      video_streams: {
+      profiles: {
         Row: {
-          content_id: string
-          content_type: string
           created_at: string
-          episode_number: number | null
-          expires_at: string | null
-          headers: Json | null
+          display_name: string | null
+          email: string | null
           id: string
-          is_active: boolean
-          language: string | null
-          priority: number
-          quality: string | null
-          season_number: number | null
-          source_name: string
-          stream_url: string
-          subtitle_url: string | null
+          phone: string | null
           updated_at: string
         }
         Insert: {
-          content_id: string
-          content_type: string
           created_at?: string
-          episode_number?: number | null
-          expires_at?: string | null
-          headers?: Json | null
-          id?: string
-          is_active?: boolean
-          language?: string | null
-          priority?: number
-          quality?: string | null
-          season_number?: number | null
-          source_name: string
-          stream_url: string
-          subtitle_url?: string | null
+          display_name?: string | null
+          email?: string | null
+          id: string
+          phone?: string | null
           updated_at?: string
         }
         Update: {
-          content_id?: string
-          content_type?: string
           created_at?: string
-          episode_number?: number | null
-          expires_at?: string | null
-          headers?: Json | null
+          display_name?: string | null
+          email?: string | null
           id?: string
-          is_active?: boolean
-          language?: string | null
-          priority?: number
-          quality?: string | null
-          season_number?: number | null
-          source_name?: string
-          stream_url?: string
-          subtitle_url?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -76,7 +46,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_stream_source: {
+        Args: {
+          p_episode?: number
+          p_media_type: string
+          p_season?: number
+          p_server: string
+          p_tmdb_id: string
+          p_url: string
+          p_working: boolean
+        }
+        Returns: undefined
+      }
+      toggle_like: {
+        Args: { p_delta: number; p_video_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

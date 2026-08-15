@@ -40,11 +40,11 @@ const TVPage = () => {
         </Link>
       </div>
 
-      <TmdbRow title="Trending This Week" items={trending.data} isLoading={trending.isLoading} isError={trending.isError} onRetry={trending.refetch} type="tv" />
-      <TmdbRow title="Airing Today" items={airing.data} isLoading={airing.isLoading} isError={airing.isError} onRetry={airing.refetch} type="tv" />
-      <TmdbRow title="On The Air" items={onAir.data} isLoading={onAir.isLoading} isError={onAir.isError} onRetry={onAir.refetch} type="tv" />
-      <TmdbRow title="Popular Series" items={popular.data} isLoading={popular.isLoading} isError={popular.isError} onRetry={popular.refetch} type="tv" />
-      <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} isError={topRated.isError} onRetry={topRated.refetch} type="tv" />
+      <TmdbRow title="Trending This Week" items={trending.data} isLoading={trending.isLoading} type="tv" />
+      <TmdbRow title="Airing Today" items={airing.data} isLoading={airing.isLoading} type="tv" />
+      <TmdbRow title="On The Air" items={onAir.data} isLoading={onAir.isLoading} type="tv" />
+      <TmdbRow title="Popular Series" items={popular.data} isLoading={popular.isLoading} type="tv" />
+      <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="tv" />
     </AppLayout>
   );
 };

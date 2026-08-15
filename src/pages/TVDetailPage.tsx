@@ -251,11 +251,11 @@ const TVDetailPage = () => {
             </div>
           )}
           <div className="-mx-[5%] space-y-0.5">
-            <TmdbRow title="You May Also Like" items={similar.data} isLoading={similar.isLoading} isError={similar.isError} onRetry={similar.refetch} type="tv" />
-            <TmdbRow title="Recommended" items={recommendations.data} isLoading={recommendations.isLoading} isError={recommendations.isError} onRetry={recommendations.refetch} type="tv" />
-            <TmdbRow title="Fan Favorites" items={topRated.data} isLoading={topRated.isLoading} isError={topRated.isError} onRetry={topRated.refetch} type="tv" ranked />
-            <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} isError={trending.isError} onRetry={trending.refetch} type="tv" />
-            <TmdbRow title="Popular Shows" items={popular.data} isLoading={popular.isLoading} isError={popular.isError} onRetry={popular.refetch} type="tv" />
+            <TmdbRow title="You May Also Like" items={similar.data} isLoading={similar.isLoading} type="tv" />
+            <TmdbRow title="Recommended" items={recommendations.data} isLoading={recommendations.isLoading} type="tv" />
+            <TmdbRow title="Fan Favorites" items={topRated.data} isLoading={topRated.isLoading} type="tv" ranked />
+            <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} type="tv" />
+            <TmdbRow title="Popular Shows" items={popular.data} isLoading={popular.isLoading} type="tv" />
           </div>
         </div>
       </div>

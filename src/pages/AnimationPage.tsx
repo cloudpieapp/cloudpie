@@ -22,9 +22,9 @@ const AnimationPage = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Animation</h1>
         <p className="text-sm text-muted-foreground mt-1">Animated movies and series for every age</p>
       </div>
-      <TmdbRow title="Trending Animated Movies" items={movies.data} isLoading={movies.isLoading} isError={movies.isError} onRetry={movies.refetch} type="movie" />
-      <TmdbRow title="Animated Series" items={tv.data} isLoading={tv.isLoading} isError={tv.isError} onRetry={tv.refetch} type="tv" />
-      <TmdbRow title="Top Rated Animation" items={top.data} isLoading={top.isLoading} isError={top.isError} onRetry={top.refetch} type="movie" />
+      <TmdbRow title="Trending Animated Movies" items={movies.data} isLoading={movies.isLoading} type="movie" />
+      <TmdbRow title="Animated Series" items={tv.data} isLoading={tv.isLoading} type="tv" />
+      <TmdbRow title="Top Rated Animation" items={top.data} isLoading={top.isLoading} type="movie" />
     </AppLayout>
   );
 };
