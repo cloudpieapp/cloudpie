@@ -157,7 +157,8 @@ const DownloadSourceSheet = ({
   // Reset to chooser whenever sheet (re)opens.
   useEffect(() => {
     if (open) {
-      setStep("choose");
+      setSource("external");
+      setStep("redirect");
       setErrorMsg("");
       setDownloads([]);
       setCaptions([]);
@@ -298,10 +299,10 @@ const DownloadSourceSheet = ({
             </div>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => setStep("choose")}
+                onClick={() => close(false)}
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
               >
-                Back
+                Cancel
               </button>
               <button
                 onClick={continueToExternal}
@@ -360,10 +361,10 @@ const DownloadSourceSheet = ({
               ))}
             </div>
             <button
-              onClick={() => setStep("choose")}
+              onClick={() => close(false)}
               className="mt-3 w-full px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/5 text-white/70 hover:bg-white/10"
             >
-              ← Change source
+              Close
             </button>
           </div>
         )}
@@ -382,10 +383,10 @@ const DownloadSourceSheet = ({
             </DialogHeader>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => setStep("choose")}
+                onClick={() => close(false)}
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
               >
-                Back
+                Cancel
               </button>
               <button
                 onClick={() => void resolve(source)}
