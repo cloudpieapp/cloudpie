@@ -48,16 +48,16 @@ const normalize = (raw: any, fallbackType?: "movie" | "tv"): TmdbItem => ({
 
 export async function tmdb<T = any>(path: string, params: Record<string, string | number> = {}): Promise<T> {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  const search = new URLSearchParams(
-    Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
-  );
-  const qs = search.toString();
-  const url = `${PROXY_BASE}${normalized}${qs ? `?${qs}` : ""}`;
-  const res = await fetch(url, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-  });
+  const [pathname, existingQs = ""] = normalized.split("?");
+  const search = new URLSearchParams(existingQs);
+  for (const [k, v] of Object.entries(params)) search.set(k, String(v));
+  search.set("api_key", TMDB_API_KEY);
+  if (!search.has("language")) search.set("language", "en-US");
+  const url = `${TMDB_BASE}${pathname}?${search.toString()}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`TMDB ${res.status}`);
   return res.json();
+
 }
 
 export async function fetchList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
