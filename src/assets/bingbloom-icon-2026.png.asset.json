@@ -1,11 +1,11 @@
 {
+  "version": 1,
   "asset_id": "63f8f6f1-65f3-402f-988c-aa3bb4ec64d4",
-  "content_type": "image/png",
-  "created_at": "2026-08-11T16:44:56Z",
-  "original_filename": "bingbloom-icon-2026.png",
-  "project_id": "05f54ab6-b8f2-4fa7-850b-19746faf9117",
-  "r2_key": "a/v1/05f54ab6-b8f2-4fa7-850b-19746faf9117/63f8f6f1-65f3-402f-988c-aa3bb4ec64d4/bingbloom-icon-2026.png",
-  "size": 1382413,
+  "project_id": "1301ff95-3edf-4f6c-b808-9c8c957f31e7",
   "url": "/__l5e/assets-v1/63f8f6f1-65f3-402f-988c-aa3bb4ec64d4/bingbloom-icon-2026.png",
-  "version": 1
+  "r2_key": "a/v1/1301ff95-3edf-4f6c-b808-9c8c957f31e7/63f8f6f1-65f3-402f-988c-aa3bb4ec64d4/bingbloom-icon-2026.png",
+  "original_filename": "bingbloom-icon-2026.png",
+  "size": 1382413,
+  "content_type": "image/png",
+  "created_at": "2026-08-11T16:44:56Z"
 }
