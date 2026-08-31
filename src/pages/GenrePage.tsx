@@ -6,7 +6,7 @@ import type { NormalizedVideo } from "@/hooks/useKenyaContent";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
-const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY || "";
+const TMDB_KEY = "166a2e4d2ced5762795a715ff393d39a";
 
 const GENRE_MAP: Record<string, { name: string; id: number }> = {
   action: { name: "Action", id: 28 },
