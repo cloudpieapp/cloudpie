@@ -1,13 +1,11 @@
-// Centralized TMDB API client. Routes through the `tmdb-proxy` edge function
-// so the TMDB_API_KEY stays server-side. Returns normalized shapes.
+// Centralized TMDB API client. Talks directly to the TMDB v3 API — no backend
+// proxy / edge function involved, so the app works standalone.
 
-import { SUPABASE_ANON_KEY, fn } from "./supabaseConfig";
-
-const SUPABASE_KEY = SUPABASE_ANON_KEY;
-const PROXY_BASE = fn("tmdb-proxy");
-
+const TMDB_API_KEY = "166a2e4d2ced5762795a715ff393d39a";
+const TMDB_BASE = "https://api.themoviedb.org/3";
 
 export const TMDB_IMG = "https://image.tmdb.org/t/p";
+
 
 export const img = (path: string | null | undefined, size: "w200" | "w300" | "w500" | "w780" | "original" = "w500") =>
   path ? `${TMDB_IMG}/${size}${path}` : "";
