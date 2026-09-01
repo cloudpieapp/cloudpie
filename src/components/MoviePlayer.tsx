@@ -39,8 +39,8 @@ const SERVERS: Server[] = [
     label: "VidSrc",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.cc/v2/embed/movie/${id}`,
+        ? `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.sbs/embed/movie/${id}`,
   },
   {
     id: "videasy",
