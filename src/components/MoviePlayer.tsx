@@ -9,7 +9,15 @@ import { trackMediaView } from "@/lib/analytics";
 
 const SERVER_PREF_KEY = "bb:player:server";
 
-type ServerKey = "videasy" | "vidsrc" | "smashy" | "111movies" | "vidlink";
+type ServerKey =
+  | "vidlink"
+  | "vidsrc"
+  | "videasy"
+  | "vidfast"
+  | "111movies"
+  | "movieapi"
+  | "2embed"
+  | "autoembed";
 
 interface Server {
   id: ServerKey;
@@ -19,6 +27,22 @@ interface Server {
 
 const SERVERS: Server[] = [
   {
+    id: "vidlink",
+    label: "VidLink",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
+        : `https://vidlink.pro/movie/${id}`,
+  },
+  {
+    id: "vidsrc",
+    label: "VidSrc",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.cc/v2/embed/movie/${id}`,
+  },
+  {
     id: "videasy",
     label: "Videasy",
     url: (type, id, s, e) =>
@@ -27,20 +51,12 @@ const SERVERS: Server[] = [
         : `https://player.videasy.net/movie/${id}`,
   },
   {
-    id: "vidsrc",
-    label: "VidSrc",
+    id: "vidfast",
+    label: "VidFast",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-  },
-  {
-    id: "smashy",
-    label: "Smashy Streams",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
+        : `https://vidfast.pro/movie/${id}`,
   },
   {
     id: "111movies",
@@ -51,14 +67,31 @@ const SERVERS: Server[] = [
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "vidlink",
-    label: "VidLink",
+    id: "movieapi",
+    label: "MovieAPI",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
-        : `https://vidlink.pro/movie/${id}`,
+        ? `https://moviesapi.club/tv/${id}-${s}-${e}`
+        : `https://moviesapi.club/movie/${id}`,
+  },
+  {
+    id: "2embed",
+    label: "2Embed",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+        : `https://www.2embed.cc/embed/${id}`,
+  },
+  {
+    id: "autoembed",
+    label: "AutoEmbed",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
+        : `https://player.autoembed.cc/embed/movie/${id}`,
   },
 ];
+
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
 // still typecheck.
