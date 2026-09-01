@@ -244,21 +244,25 @@ const MoviePlayer = ({
 
       {/* Toolbar: server switcher + quick actions */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {SERVERS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => pickServer(s.id)}
-              className={`h-8 sm:h-9 px-2.5 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold border transition ${
-                server === s.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "text-foreground border-border/60 hover:bg-foreground/10"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+        <div className="relative">
+          <label className="sr-only" htmlFor="bb-server-select">
+            Server
+          </label>
+          <select
+            id="bb-server-select"
+            value={server}
+            onChange={(e) => pickServer(e.target.value as ServerKey)}
+            className="h-9 appearance-none rounded-md border border-border/60 bg-foreground/5 pl-3 pr-8 text-[12px] font-semibold text-foreground"
+          >
+            {SERVERS.map((s) => (
+              <option key={s.id} value={s.id} className="bg-background text-foreground">
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/70" />
         </div>
+
         <div className="ml-auto flex items-center gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
             <Download className="h-4 w-4" />
