@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { WifiOff, CloudDownload, Share2, Check, Plus, Download } from "lucide-react";
+import { WifiOff, CloudDownload, Share2, Check, Plus, Download, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -9,7 +9,15 @@ import { trackMediaView } from "@/lib/analytics";
 
 const SERVER_PREF_KEY = "bb:player:server";
 
-type ServerKey = "videasy" | "vidsrc" | "smashy" | "111movies" | "vidlink";
+type ServerKey =
+  | "vidlink"
+  | "vidsrc"
+  | "videasy"
+  | "vidfast"
+  | "111movies"
+  | "movieapi"
+  | "2embed"
+  | "autoembed";
 
 interface Server {
   id: ServerKey;
@@ -19,6 +27,22 @@ interface Server {
 
 const SERVERS: Server[] = [
   {
+    id: "vidlink",
+    label: "VidLink",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
+        : `https://vidlink.pro/movie/${id}`,
+  },
+  {
+    id: "vidsrc",
+    label: "VidSrc",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.cc/v2/embed/movie/${id}`,
+  },
+  {
     id: "videasy",
     label: "Videasy",
     url: (type, id, s, e) =>
@@ -27,20 +51,12 @@ const SERVERS: Server[] = [
         : `https://player.videasy.net/movie/${id}`,
   },
   {
-    id: "vidsrc",
-    label: "VidSrc",
+    id: "vidfast",
+    label: "VidFast",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-  },
-  {
-    id: "smashy",
-    label: "Smashy Streams",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
+        : `https://vidfast.pro/movie/${id}`,
   },
   {
     id: "111movies",
@@ -51,14 +67,31 @@ const SERVERS: Server[] = [
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "vidlink",
-    label: "VidLink",
+    id: "movieapi",
+    label: "MovieAPI",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
-        : `https://vidlink.pro/movie/${id}`,
+        ? `https://moviesapi.club/tv/${id}-${s}-${e}`
+        : `https://moviesapi.club/movie/${id}`,
+  },
+  {
+    id: "2embed",
+    label: "2Embed",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+        : `https://www.2embed.cc/embed/${id}`,
+  },
+  {
+    id: "autoembed",
+    label: "AutoEmbed",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
+        : `https://player.autoembed.cc/embed/movie/${id}`,
   },
 ];
+
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
 // still typecheck.
@@ -99,7 +132,7 @@ const MoviePlayer = ({
     } catch {
       /* ignore */
     }
-    return "videasy";
+    return "vidlink";
   });
 
   const active = SERVERS.find((s) => s.id === server) || SERVERS[0];
@@ -211,21 +244,25 @@ const MoviePlayer = ({
 
       {/* Toolbar: server switcher + quick actions */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {SERVERS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => pickServer(s.id)}
-              className={`h-8 sm:h-9 px-2.5 sm:px-3 rounded-md text-[11px] sm:text-[12px] font-semibold border transition ${
-                server === s.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "text-foreground border-border/60 hover:bg-foreground/10"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+        <div className="relative">
+          <label className="sr-only" htmlFor="bb-server-select">
+            Server
+          </label>
+          <select
+            id="bb-server-select"
+            value={server}
+            onChange={(e) => pickServer(e.target.value as ServerKey)}
+            className="h-9 appearance-none rounded-md border border-border/60 bg-foreground/5 pl-3 pr-8 text-[12px] font-semibold text-foreground"
+          >
+            {SERVERS.map((s) => (
+              <option key={s.id} value={s.id} className="bg-background text-foreground">
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/70" />
         </div>
+
         <div className="ml-auto flex items-center gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
             <Download className="h-4 w-4" />
