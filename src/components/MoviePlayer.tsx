@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { WifiOff, CloudDownload, Share2, Check, Plus, Download } from "lucide-react";
+import { WifiOff, CloudDownload, Share2, Check, Plus, Download, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -132,7 +132,7 @@ const MoviePlayer = ({
     } catch {
       /* ignore */
     }
-    return "videasy";
+    return "vidlink";
   });
 
   const active = SERVERS.find((s) => s.id === server) || SERVERS[0];
