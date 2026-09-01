@@ -11,13 +11,14 @@ const SERVER_PREF_KEY = "bb:player:server";
 
 type ServerKey =
   | "vidlink"
-  | "vidsrc"
   | "videasy"
-  | "vidfast"
   | "111movies"
-  | "movieapi"
-  | "2embed"
-  | "autoembed";
+  | "vidsrc"
+  | "vidsc"
+  | "smashystreams"
+  | "vidrock"
+  | "megaplay"
+  | "vidnest";
 
 interface Server {
   id: ServerKey;
@@ -35,28 +36,12 @@ const SERVERS: Server[] = [
         : `https://vidlink.pro/movie/${id}`,
   },
   {
-    id: "vidsrc",
-    label: "VidSrc",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.sbs/embed/movie/${id}`,
-  },
-  {
     id: "videasy",
     label: "Videasy",
     url: (type, id, s, e) =>
       type === "tv"
         ? `https://player.videasy.net/tv/${id}/${s}/${e}`
         : `https://player.videasy.net/movie/${id}`,
-  },
-  {
-    id: "vidfast",
-    label: "VidFast",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
-        : `https://vidfast.pro/movie/${id}`,
   },
   {
     id: "111movies",
@@ -67,28 +52,52 @@ const SERVERS: Server[] = [
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "movieapi",
-    label: "MovieAPI",
+    id: "vidsrc",
+    label: "VidSrc",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://moviesapi.club/tv/${id}-${s}-${e}`
-        : `https://moviesapi.club/movie/${id}`,
+        ? `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.sbs/embed/movie/${id}`,
   },
   {
-    id: "2embed",
-    label: "2Embed",
+    id: "vidsc",
+    label: "VidSC",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
-        : `https://www.2embed.cc/embed/${id}`,
+        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.to/embed/movie/${id}`,
   },
   {
-    id: "autoembed",
-    label: "AutoEmbed",
+    id: "smashystreams",
+    label: "Smashy Streams",
     url: (type, id, s, e) =>
       type === "tv"
-        ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
-        : `https://player.autoembed.cc/embed/movie/${id}`,
+        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+  },
+  {
+    id: "vidrock",
+    label: "VidRock",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidrock.to/embed/tv/${id}/${s}/${e}`
+        : `https://vidrock.to/embed/movie/${id}`,
+  },
+  {
+    id: "megaplay",
+    label: "MegaPlay",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://megaplay.to/embed/tv/${id}/${s}/${e}`
+        : `https://megaplay.to/embed/movie/${id}`,
+  },
+  {
+    id: "vidnest",
+    label: "VidNest",
+    url: (type, id, s, e) =>
+      type === "tv"
+        ? `https://vidnest.to/embed/tv/${id}/${s}/${e}`
+        : `https://vidnest.to/embed/movie/${id}`,
   },
 ];
 
