@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const AD_KEY = "2e60bb2f50b02de1720874fdbb1e59b4";
+const AD_KEY = "1a3361e4e76e4c3f2944b9efa3332530";
 const CONTAINER_ID = `container-${AD_KEY}`;
 const INVOKE_SRC = `https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js`;
 
@@ -31,7 +31,7 @@ const buildSrcDoc = (heightPx: number) => `<!doctype html>
 </style>
 </head><body>
 <div id="${CONTAINER_ID}"></div>
-<script async data-cfasync="false" src="${INVOKE_SRC}"><\/script>
+<script async="async" data-cfasync="false" src="${INVOKE_SRC}"><\/script>
 </body></html>`;
 
 const NativeAd = ({
