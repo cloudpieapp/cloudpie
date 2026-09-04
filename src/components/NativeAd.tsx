@@ -31,7 +31,7 @@ const buildSrcDoc = (heightPx: number) => `<!doctype html>
 </style>
 </head><body>
 <div id="${CONTAINER_ID}"></div>
-<script async data-cfasync="false" src="${INVOKE_SRC}"><\/script>
+<script async="async" data-cfasync="false" src="${INVOKE_SRC}"><\/script>
 </body></html>`;
 
 const NativeAd = ({
