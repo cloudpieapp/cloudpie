@@ -11,6 +11,7 @@ import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMo
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
 import InlineAdRow from "@/components/InlineAdRow";
+import BannerAd468 from "@/components/BannerAd468";
 import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
@@ -96,6 +97,9 @@ const MovieDetailPage = () => {
         })}
       />
       <div className="relative">
+        <div className="px-3 pt-2 pb-1">
+          <BannerAd468 />
+        </div>
         <div className="relative w-full h-[55vh] md:h-[70vh]">
           {backdrop && <img src={backdrop} alt={data.title} className="absolute inset-0 w-full h-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
@@ -134,6 +138,9 @@ const MovieDetailPage = () => {
                 ))}
               </div>
               <p className="text-xs md:text-sm text-foreground/80 leading-relaxed mb-5 max-w-3xl">{data.overview}</p>
+              <div className="mb-5 -mx-[5%] md:mx-0">
+                <InlineAdRow count={4} />
+              </div>
               <div className="flex flex-wrap gap-3">
                 <Link
                   to={`/watch/movie/${data.id}`}

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+import BannerAd468 from "@/components/BannerAd468";
 
 
 import TmdbRow from "@/components/TmdbRow";
@@ -61,6 +62,9 @@ const MovieWatchPage = () => {
 
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
+            <div className="px-3 pt-2 pb-1">
+              <BannerAd468 />
+            </div>
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
               <MoviePlayer
                 tmdbId={tmdbId || ""}
@@ -84,6 +88,10 @@ const MovieWatchPage = () => {
                   <p className="text-[10.5px] text-white/55 mt-0.5">
                     {year}{data.runtime ? ` · ${data.runtime} min` : ""}
                   </p>
+                </div>
+
+                <div className="mt-3 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
                 </div>
 
                 {/* Mobile/tablet: horizontal suggestions. Desktop shows list in sidebar. */}

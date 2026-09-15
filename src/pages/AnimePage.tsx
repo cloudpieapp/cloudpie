@@ -1,4 +1,13 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { trackEvent } from "@/lib/analytics";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -59,6 +68,63 @@ const AnimeRow = ({ title, params }: { title: string; params: Record<string, str
   return <TmdbRow title={title} items={data} isLoading={isLoading} type="tv" />;
 };
 
+const NOW_ANIME_URL = "https://nowanime.lovable.app";
+
+/** One-time-per-session dialog telling users anime moved to NowAnime. */
+const NowAnimeDialog = () => {
+  const [open, setOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem("bb-nowanime-dialog") !== "1";
+    } catch {
+      return true;
+    }
+  });
+
+  const close = () => {
+    try {
+      sessionStorage.setItem("bb-nowanime-dialog", "1");
+    } catch {
+      /* ignore */
+    }
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => (!v ? close() : setOpen(true))}>
+      <DialogContent className="max-w-sm rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-base">Anime has moved to NowAnime</DialogTitle>
+          <DialogDescription className="text-[12.5px] leading-relaxed">
+            We've moved our anime operations to a curated site built just for anime —
+            a bigger library, faster streams and subs or dubs. Watch it all on NowAnime.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2 pt-1">
+          <a
+            href={NOW_ANIME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              trackEvent("external_app_dialog_click", { destination: NOW_ANIME_URL, source: "anime" });
+              close();
+            }}
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-[13px] font-bold text-primary-foreground"
+          >
+            Open NowAnime <ArrowUpRight className="h-4 w-4" />
+          </a>
+          <button
+            type="button"
+            onClick={close}
+            className="min-h-[40px] rounded-xl text-[12.5px] font-semibold text-muted-foreground hover:bg-foreground/5"
+          >
+            Stay on BingBloom
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const AnimePage = () => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const scrollTo = (id: string) => {
@@ -70,6 +136,7 @@ const AnimePage = () => {
   };
   return (
     <AppLayout>
+      <NowAnimeDialog />
       <SEO
         title="Anime – BingBloom"
         description="25 anime collections — trending, top-rated, isekai, mecha, romance, slice of life, sports and more. Stream anime free."
