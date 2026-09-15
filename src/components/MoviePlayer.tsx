@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { WifiOff, CloudDownload, Share2, Check, Plus, Download, ChevronDown } from "lucide-react";
+import { WifiOff, CloudDownload, Share2, Check, Plus, Download, ChevronDown, Maximize, Minimize } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -156,6 +156,31 @@ const MoviePlayer = ({
     }
   };
 
+  // ---- Fullscreen ----------------------------------------------------------
+  const [isFull, setIsFull] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFull(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = containerRef.current as
+      | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
+      | null;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        return;
+      }
+      if (el?.requestFullscreen) await el.requestFullscreen();
+      else if (el?.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   // ---- In-player actions: download, share, watchlist -----------------------
   const listItemId = `${type}-${tmdbId}`;
   const [downloadOpen, setDownloadOpen] = useState(false);
@@ -275,6 +300,12 @@ const MoviePlayer = ({
         <div className="ml-auto flex items-center gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
             <Download className="h-4 w-4" />
+          </PlayerIconButton>
+          <PlayerIconButton
+            label={isFull ? "Exit full screen" : "Full screen"}
+            onClick={toggleFullscreen}
+          >
+            {isFull ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </PlayerIconButton>
           <PlayerIconButton label="Share" onClick={shareLink}>
             <Share2 className="h-4 w-4" />
