@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+import BannerAd468 from "@/components/BannerAd468";
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -63,6 +64,9 @@ const TvWatchPage = () => {
 
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
+            <div className="px-3 pt-2 pb-1">
+              <BannerAd468 />
+            </div>
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
               {(() => {
                 const eps = seasonQuery.data?.episodes || [];
@@ -112,6 +116,10 @@ const TvWatchPage = () => {
                       <ChevronDown className="w-3 h-3 text-white/70 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   )}
+                </div>
+
+                <div className="mt-3 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
                 </div>
 
                 {/* Mobile/tablet: horizontal episode strip. Desktop uses sidebar list. */}
