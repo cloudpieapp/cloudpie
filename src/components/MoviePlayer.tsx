@@ -8,98 +8,39 @@ import DownloadSourceSheet from "@/components/DownloadSourceSheet";
 import { trackMediaView } from "@/lib/analytics";
 
 const SERVER_PREF_KEY = "bb:player:server";
+const EMBED_THEME = "9b5cff";
 
 type ServerKey =
+  | "vidbolt"
+  | "cinesrc"
+  | "vidcore"
+  | "vidnest"
   | "vidlink"
-  | "videasy"
-  | "111movies"
-  | "vidsrc"
-  | "vidsc"
-  | "smashystreams"
-  | "vidrock"
-  | "megaplay"
-  | "vidnest";
+  | "vidsrcme"
+  | "vidgod"
+  | "filmu";
 
 interface Server {
   id: ServerKey;
   label: string;
-  url: (type: "movie" | "tv", tmdbId: string, season: number, episode: number) => string;
+  base: string;
 }
 
 const SERVERS: Server[] = [
-  {
-    id: "vidlink",
-    label: "VidLink",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
-        : `https://vidlink.pro/movie/${id}`,
-  },
-  {
-    id: "videasy",
-    label: "Videasy",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://player.videasy.net/tv/${id}/${s}/${e}`
-        : `https://player.videasy.net/movie/${id}`,
-  },
-  {
-    id: "111movies",
-    label: "111Movies",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://111movies.com/tv/${id}/${s}/${e}`
-        : `https://111movies.com/movie/${id}`,
-  },
-  {
-    id: "vidsrc",
-    label: "VidSrc",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.sbs/embed/movie/${id}`,
-  },
-  {
-    id: "vidsc",
-    label: "VidSC",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.to/embed/movie/${id}`,
-  },
-  {
-    id: "smashystreams",
-    label: "Smashy Streams",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
-    id: "vidrock",
-    label: "VidRock",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidrock.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidrock.to/embed/movie/${id}`,
-  },
-  {
-    id: "megaplay",
-    label: "MegaPlay",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://megaplay.to/embed/tv/${id}/${s}/${e}`
-        : `https://megaplay.to/embed/movie/${id}`,
-  },
-  {
-    id: "vidnest",
-    label: "VidNest",
-    url: (type, id, s, e) =>
-      type === "tv"
-        ? `https://vidnest.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidnest.to/embed/movie/${id}`,
-  },
+  { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
+  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st" },
+  { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
+  { id: "vidnest", label: "Helix", base: "https://vidnest.fun" },
+  { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
+  { id: "vidsrcme", label: "Ironclad", base: "https://vidsrcme.ru" },
+  { id: "vidgod", label: "Vale", base: "https://vidgod.site" },
+  { id: "filmu", label: "Lumen", base: "https://embed.filmu.in" },
 ];
+
+const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
+  type === "tv"
+    ? `${base}/tv/${tmdbId}/${season}/${episode}?theme=${EMBED_THEME}`
+    : `${base}/movie/${tmdbId}?theme=${EMBED_THEME}`;
 
 
 // Kept as a legacy type so existing pages that pass `serverId`/`onServerChange`
