@@ -6,6 +6,7 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 
 import InlineAdRow from "@/components/InlineAdRow";
+import BannerAd468 from "@/components/BannerAd468";
 import { BRAND_PROVIDER_MAP } from "@/components/StreamingBrandsRow";
 
 import {
@@ -157,7 +158,7 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
       className="text-left rounded-xl overflow-hidden hover:scale-[1.02] transition-transform"
       style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
     >
-      <div className="relative w-full aspect-[2/3] bg-black">
+      <div className="relative w-full aspect-[3/4] bg-black">
         {poster ? (
           <img src={img(poster, "w300")} alt={title} loading="lazy" className="w-full h-full object-cover" />
         ) : (
@@ -172,9 +173,9 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
           </span>
         )}
       </div>
-      <div className="p-1.5">
-        <h3 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h3>
-        <p className="text-[9.5px] text-white/55 mt-0.5 line-clamp-1">
+      <div className="p-1">
+        <h3 className="text-[10px] font-bold text-white line-clamp-1 leading-tight">{title}</h3>
+        <p className="text-[8.5px] text-white/55 mt-0.5 line-clamp-1">
           {item._type === "tv" ? "Series" : "Movie"}{date ? ` · ${date.slice(0, 4)}` : ""}
         </p>
       </div>
@@ -329,6 +330,9 @@ const SearchPage = () => {
         description={searchQuery ? `Search results for "${searchQuery}" on BingBloom.` : "Explore movies, TV series, anime and animation on BingBloom."}
       />
       <div className="px-5 pt-4" style={{ background: "#000" }}>
+        <div className="-mx-2 mb-3">
+          <BannerAd468 />
+        </div>
         {/* Search bar */}
         <div ref={wrapRef} className="relative flex items-center gap-2 mb-4">
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/5">
@@ -395,12 +399,12 @@ const SearchPage = () => {
               <BrandedLoadingState label="Loading trending" />
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-2 pb-4">
+                <div className="grid grid-cols-4 gap-1.5 pb-4">
                   {(results as ResultItem[]).slice(0, 24).map((m, i) => (
                     <div key={`sg-${m._type}-${m.id}`} className="contents">
                       <ExploreCard item={m} onClick={() => openItem(m)} />
-                      {(i === 5 || i === 11 || i === 17) && (
-                        <div className="col-span-3 -mx-5 my-1">
+                      {(i === 7 || i === 15 || i === 23) && (
+                        <div className="col-span-4 -mx-5 my-1">
                           <SponsoredLabel />
                           <InlineAdRow count={4} />
                         </div>
@@ -458,12 +462,12 @@ const SearchPage = () => {
                 <p className="text-[10px] text-white/50 mb-2">
                   {filtered.length} result{filtered.length === 1 ? "" : "s"} for "{searchQuery}"
                 </p>
-                <div className="space-y-2 pb-4">
+                <div className="grid grid-cols-4 gap-1.5 pb-4">
                   {filtered.map((item, i) => (
-                    <div key={`${item._type}-${item.id}`}>
-                      <ResultRow item={item} onClick={() => openItem(item)} />
-                      {(i + 1) % 6 === 0 && i < filtered.length - 1 && (
-                        <div className="-mx-5 my-2">
+                    <div key={`${item._type}-${item.id}`} className="contents">
+                      <ExploreCard item={item} onClick={() => openItem(item)} />
+                      {(i + 1) % 8 === 0 && i < filtered.length - 1 && (
+                        <div className="col-span-4 -mx-5 my-1">
                           <SponsoredLabel />
                           <InlineAdRow count={4} />
                         </div>

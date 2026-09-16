@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { trackEvent } from "@/lib/analytics";
+import BannerAd468 from "@/components/BannerAd468";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -144,6 +145,10 @@ const AnimePage = () => {
       <div className="px-[4%] pt-6 pb-2">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Anime</h1>
         <p className="text-sm text-muted-foreground mt-1">25 hand-picked collections</p>
+      </div>
+
+      <div className="px-3 pb-1">
+        <BannerAd468 />
       </div>
 
       <InlineAdRow count={4} />

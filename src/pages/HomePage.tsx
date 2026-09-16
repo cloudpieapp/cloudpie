@@ -6,7 +6,7 @@ import TmdbContinueRow from "@/components/TmdbContinueRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
 import StreamingBrandsRow from "@/components/StreamingBrandsRow";
-import NewMoviesBanner from "@/components/NewMoviesBanner";
+import BannerAd468 from "@/components/BannerAd468";
 import {
   useTrendingMovies,
   useTrendingTv,
@@ -69,7 +69,9 @@ const HomePage = () => {
         }}
       />
 
-      <NewMoviesBanner />
+      <div className="px-3 pt-2 pb-1">
+        <BannerAd468 />
+      </div>
 
       <TmdbHero item={heroItem} type="movie" isLoading={trendingMovies.isLoading} />
 
