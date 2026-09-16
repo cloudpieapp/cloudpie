@@ -82,11 +82,11 @@ const MoviePlayer = ({
     } catch {
       /* ignore */
     }
-    return "vidlink";
+    return "vidbolt";
   });
 
   const active = SERVERS.find((s) => s.id === server) || SERVERS[0];
-  const embedUrl = active.url(type, tmdbId, season, episode);
+  const embedUrl = embedUrlFor(active.base, type, tmdbId, season, episode);
 
   const pickServer = (id: ServerKey) => {
     setServer(id);
