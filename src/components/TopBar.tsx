@@ -70,7 +70,6 @@ const TopBar = () => {
             <img
               src={"/logo-compact.png"}
               alt="BingBloom"
-              className="h-7 w-7 md:h-8 md:w-8"
               className="h-7 w-7 md:h-8 md:w-8 opacity-90"
             />
             <span className="hidden sm:inline font-display text-2xl text-foreground">BingBloom</span>
