@@ -24,17 +24,17 @@ const BRANDS = [
  * filtered to that service's catalogue.
  */
 const StreamingBrandsRow = () => (
-  <section className="px-4 md:px-6 py-3">
-    <div className="flex items-baseline justify-between mb-2">
-      <h2 className="text-white text-sm font-bold tracking-tight">Streaming Universe</h2>
-      <span className="text-[10px] text-white/45">Browse by service</span>
+  <section className="px-[4%] py-4 md:py-6">
+    <div className="flex items-baseline justify-between mb-4">
+      <h2 className="font-display text-[22px] md:text-[30px] leading-none text-foreground">Streaming Universe</h2>
+      <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Browse by service</span>
     </div>
     <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
       {BRANDS.map((b) => (
         <Link
           key={b.slug}
           to={`/search?provider=${b.slug}`}
-          className="group flex-shrink-0 w-[128px] h-[72px] rounded-xl overflow-hidden border border-white/10 grid place-items-center transition-transform hover:scale-[1.04]"
+          className="group flex-shrink-0 w-[128px] h-[72px] rounded-sm overflow-hidden border border-border grid place-items-center transition-all hover:-translate-y-1 hover:border-primary/50"
           style={{ background: b.bg }}
           aria-label={`${b.label} titles`}
         >

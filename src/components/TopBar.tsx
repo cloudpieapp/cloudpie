@@ -120,7 +120,7 @@ const TopBar = () => {
               href="https://bingbloomdownload.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(229,9,20,0.45)]"
+              className="md:hidden inline-flex items-center gap-1 rounded-sm bg-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-lg"
               aria-label="Download BingBloom app"
             >
               <Download className="h-3 w-3" /> Download App
@@ -129,7 +129,7 @@ const TopBar = () => {
               href="https://bingbloomdownload.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-[0_2px_10px_rgba(229,9,20,0.45)] hover:brightness-110"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground shadow-lg hover:brightness-110"
               aria-label="Download BingBloom app on desktop"
             >
               <Download className="h-3.5 w-3.5" /> Download App

@@ -18,18 +18,18 @@ const chips = [
 const CategoryChips = () => {
   const { pathname } = useLocation();
   return (
-    <div className="sticky top-12 md:top-14 z-30 bg-background/90 backdrop-blur-md border-b border-border/40">
-      <div className="flex gap-1.5 overflow-x-auto px-3 py-2 scrollbar-hide">
+    <div className="sticky top-12 md:top-16 z-30 bg-background/90 backdrop-blur-md border-b border-border/60">
+      <div className="flex gap-2 overflow-x-auto px-[4%] py-2.5 scrollbar-hide">
         {chips.map((c) => {
           const active = pathname === c.to;
           return (
             <Link
               key={c.to}
               to={c.to}
-              className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold whitespace-nowrap transition ${
+              className={`shrink-0 rounded-sm border px-3 py-1 text-[10px] uppercase tracking-[0.08em] font-medium whitespace-nowrap transition ${
                 active
-                  ? "bg-primary text-primary-foreground shadow-[0_0_14px_rgba(229,9,20,0.45)]"
-                  : "bg-secondary/70 text-foreground/75 hover:bg-secondary"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-secondary/70 text-foreground/70 hover:border-primary/40 hover:text-foreground"
               }`}
             >
               {c.label}

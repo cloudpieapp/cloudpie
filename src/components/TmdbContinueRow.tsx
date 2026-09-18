@@ -61,9 +61,9 @@ const TmdbContinueRow = () => {
   if (items.length === 0) return null;
 
   return (
-    <section className="mb-7">
-      <h2 className="text-base font-semibold text-foreground px-[4%] mb-3">Continue Watching</h2>
-      <div className="flex gap-3 px-[4%] overflow-x-auto scrollbar-hide pb-2">
+    <section className="mb-9 md:mb-12">
+      <h2 className="font-display text-[22px] md:text-[30px] leading-none text-foreground px-[4%] mb-4">Continue Watching</h2>
+      <div className="flex gap-3 md:gap-4 px-[4%] overflow-x-auto scrollbar-hide pb-2">
         {items.map(it => {
           const watchTo =
             it.type === "tv"
@@ -74,22 +74,22 @@ const TmdbContinueRow = () => {
             <Link
               key={`${it.type}-${it.id}-${it.season}-${it.episode}`}
               to={watchTo}
-              className="group flex-shrink-0 w-[180px]"
+              className="group flex-shrink-0 w-[180px] md:w-[240px]"
             >
-              <div className="aspect-video rounded-lg overflow-hidden relative bg-card">
+              <div className="aspect-video rounded-sm overflow-hidden relative bg-card ring-1 ring-border/60 transition group-hover:ring-primary/60">
                 <img src={poster} alt={it.title} className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-center pb-3">
-                  <div className="w-10 h-10 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                   <div className="w-10 h-10 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                     <Play className="w-4 h-4 text-foreground fill-current ml-0.5" />
                   </div>
                 </div>
                 {typeof it.progress === "number" && (
                   <div className="absolute bottom-0 inset-x-0 h-1 bg-black/40">
-                    <div className="h-full" style={{ width: `${it.progress}%`, background: "#E50914" }} />
+                    <div className="h-full bg-primary" style={{ width: `${it.progress}%` }} />
                   </div>
                 )}
               </div>
-              <p className="text-[12px] font-medium text-foreground mt-1.5 line-clamp-1">{it.title}</p>
+              <p className="font-display text-[16px] text-foreground mt-2 line-clamp-1 group-hover:text-primary">{it.title}</p>
               {it.type === "tv" && (
                 <p className="text-[10px] text-muted-foreground">S{it.season} · E{it.episode}</p>
               )}
