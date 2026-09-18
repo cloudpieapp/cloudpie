@@ -14,7 +14,7 @@ const BottomNav = () => {
   const { pathname } = useLocation();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-white/5 bg-black/95 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border bg-background/95 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex items-stretch justify-between px-2">
@@ -26,13 +26,13 @@ const BottomNav = () => {
               <Link
                 to={t.to}
                 className={`relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 px-1 pt-1.5 pb-1 text-[10.5px] font-medium transition ${
-                  active ? "text-[#E50914]" : "text-white/60"
+                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 1.8} />
                 <span className="truncate max-w-full">{t.label}</span>
                 {active && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-6 rounded-full bg-[#E50914]" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-6 bg-primary" />
                 )}
 
               </Link>

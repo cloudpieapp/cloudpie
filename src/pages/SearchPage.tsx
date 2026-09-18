@@ -329,17 +329,17 @@ const SearchPage = () => {
         title={searchQuery ? `${searchQuery} – Search – BingBloom` : "Explore – BingBloom"}
         description={searchQuery ? `Search results for "${searchQuery}" on BingBloom.` : "Explore movies, TV series, anime and animation on BingBloom."}
       />
-      <div className="px-5 pt-4" style={{ background: "#000" }}>
+      <div className="px-[4%] pt-6 bg-background">
         <div className="-mx-2 mb-3">
           <BannerAd468 />
         </div>
         {/* Search bar */}
         <div ref={wrapRef} className="relative flex items-center gap-2 mb-4">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/5">
-            <ArrowLeft className="w-4 h-4 text-white" />
+          <button onClick={() => navigate(-1)} className="p-1.5 rounded-sm hover:bg-secondary">
+            <ArrowLeft className="w-4 h-4 text-foreground" />
           </button>
-          <div className="flex-1 flex items-center gap-2 rounded-full px-3 py-2" style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Search className="w-3.5 h-3.5 text-white/50" />
+          <div className="flex-1 flex items-center gap-2 rounded-sm border border-border bg-secondary px-3 py-2">
+            <Search className="w-3.5 h-3.5 text-muted-foreground" />
             <input
               type="text"
               value={query}
@@ -347,7 +347,7 @@ const SearchPage = () => {
               onFocus={() => setSuggestOpen(true)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch(query)}
               placeholder="Search movies, shows, genres..."
-              className="flex-1 bg-transparent text-white text-xs placeholder:text-white/50 outline-none"
+              className="flex-1 bg-transparent text-foreground text-xs placeholder:text-muted-foreground outline-none"
             />
             {query && (
               <button onClick={() => { setQuery(""); handleSearch(""); }} className="text-[10px] text-white/50 hover:text-white">
@@ -392,8 +392,8 @@ const SearchPage = () => {
         {showExplore ? (
           <>
             <div className="flex items-center gap-1.5 mb-3">
-              <Flame className="w-4 h-4 fill-[#E50914]" style={{ color: "#E50914" }} />
-              <h2 className="text-white text-sm font-bold">{headerTitle}</h2>
+              <Flame className="w-4 h-4 fill-primary text-primary" />
+              <h2 className="font-display text-2xl text-foreground">{headerTitle}</h2>
             </div>
             {isFetching && results.length === 0 ? (
               <BrandedLoadingState label="Loading trending" />
@@ -423,8 +423,7 @@ const SearchPage = () => {
                 <button
                   key={f.value}
                   onClick={() => setFilter(f.value)}
-                  className={`px-3 py-1 rounded-full text-[10.5px] font-medium whitespace-nowrap transition-all ${filter === f.value ? "text-white" : "text-white/60 border border-white/10"}`}
-                  style={filter === f.value ? { background: "#E50914" } : { background: "#141414" }}
+                   className={`px-3 py-1 rounded-sm border text-[10px] uppercase tracking-[0.08em] font-medium whitespace-nowrap transition-all ${filter === f.value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-secondary text-muted-foreground"}`}
                 >
                   {f.label}
                 </button>
