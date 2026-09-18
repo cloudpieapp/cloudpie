@@ -8,10 +8,7 @@ const primaryNav = [
   { to: "/movies", label: "Movies", icon: Film },
   { to: "/tv", label: "TV Shows", icon: Tv },
   { to: "/anime", label: "Anime", icon: Clapperboard },
-  { to: "/animation", label: "Animation", icon: Palette },
-  { to: "/documentary", label: "Documentary", icon: Camera },
   { to: "/live-tv", label: "Live TV", icon: Radio },
-  { to: "/podcasts", label: "Podcasts", icon: Mic2 },
 ];
 
 const drawerExtras = [
@@ -52,13 +49,13 @@ const TopBar = () => {
 
   const isHome = location.pathname === "/home" || location.pathname === "/";
   const bgClass = scrolled || !isHome
-    ? "bg-background/95 backdrop-blur-md border-b border-border/60"
-    : "bg-gradient-to-b from-background/90 to-transparent";
+    ? "bg-background/95 backdrop-blur-md border-b border-border/70"
+    : "bg-background/80 backdrop-blur-sm";
 
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${bgClass}`}>
-        <div className="flex items-center gap-2 md:gap-3 px-2 md:px-6 h-12 md:h-14 max-w-[1600px] mx-auto">
+        <div className="flex items-center gap-2 md:gap-6 px-3 md:px-[4%] h-12 md:h-16 max-w-[1800px] mx-auto">
           {/* Hamburger on the LEFT (mobile) */}
           <button
             onClick={() => setDrawerOpen(true)}
@@ -74,26 +71,26 @@ const TopBar = () => {
               src={"/logo-compact.png"}
               alt="BingBloom"
               className="h-7 w-7 md:h-8 md:w-8"
-              style={{ filter: "drop-shadow(0 0 8px rgba(229,9,20,0.55))" }}
+              className="h-7 w-7 md:h-8 md:w-8 opacity-90"
             />
-            <span className="hidden sm:inline text-base font-extrabold text-gradient-bb tracking-tight">BingBloom</span>
+            <span className="hidden sm:inline font-display text-2xl text-foreground">BingBloom</span>
           </Link>
 
           {/* Desktop horizontal nav — centered */}
-          <nav className="hidden md:flex items-center gap-0.5 mx-auto overflow-x-auto scrollbar-hide">
+          <nav className="hidden md:flex items-center gap-7 mx-auto overflow-x-auto scrollbar-hide">
             {primaryNav.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                  `relative py-5 text-[12px] uppercase tracking-[0.12em] font-medium whitespace-nowrap transition-colors ${
                     isActive
-                      ? "text-foreground bg-secondary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                      ? "text-foreground after:absolute after:bottom-2 after:left-0 after:right-0 after:h-px after:bg-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   }`
                 }
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="hidden w-3.5 h-3.5" />
                 {label}
               </NavLink>
             ))}

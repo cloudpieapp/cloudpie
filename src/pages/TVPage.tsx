@@ -30,10 +30,11 @@ const TVPage = () => {
           url: "https://bingbloom.lovable.app/tv",
         }}
       />
-      <div className="px-[4%] pt-6 pb-4 flex items-end justify-between gap-4">
+      <div className="px-[4%] pt-8 md:pt-12 pb-6 flex items-end justify-between gap-4 border-b border-border/60">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">TV Shows</h1>
-          <p className="text-sm text-muted-foreground mt-1">Series, episodes and live channels</p>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-primary">Episodic stories</p>
+          <h1 className="mt-1 font-display text-4xl md:text-6xl text-foreground">TV Shows</h1>
+          <p className="text-sm text-muted-foreground mt-2">Series, episodes and live channels</p>
         </div>
         <Link to="/live-tv" className="flex items-center gap-1 text-sm text-primary font-medium hover:underline">
           <Radio className="w-4 h-4 text-destructive animate-pulse" /> Live TV <ChevronRight className="w-3 h-3" />

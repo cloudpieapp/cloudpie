@@ -44,9 +44,10 @@ const MoviesPage = () => {
           url: "https://bingbloom.lovable.app/movies",
         }}
       />
-      <div className="px-[4%] pt-6 pb-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Movies</h1>
-        <p className="text-sm text-muted-foreground mt-1">Discover trending, top-rated and upcoming films</p>
+      <div className="px-[4%] pt-8 md:pt-12 pb-6 border-b border-border/60">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-primary">The collection</p>
+        <h1 className="mt-1 font-display text-4xl md:text-6xl text-foreground">Movies</h1>
+        <p className="text-sm text-muted-foreground mt-2">Discover trending, top-rated and upcoming films</p>
       </div>
 
       <div className="px-3 pb-1">

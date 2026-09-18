@@ -142,9 +142,10 @@ const AnimePage = () => {
         title="Anime – BingBloom"
         description="25 anime collections — trending, top-rated, isekai, mecha, romance, slice of life, sports and more. Stream anime free."
       />
-      <div className="px-[4%] pt-6 pb-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Anime</h1>
-        <p className="text-sm text-muted-foreground mt-1">25 hand-picked collections</p>
+      <div className="px-[4%] pt-8 md:pt-12 pb-6 border-b border-border/60">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-primary">Curated animation</p>
+        <h1 className="mt-1 font-display text-4xl md:text-6xl text-foreground">Anime</h1>
+        <p className="text-sm text-muted-foreground mt-2">25 hand-picked collections</p>
       </div>
 
       <div className="px-3 pb-1">
@@ -163,7 +164,7 @@ const AnimePage = () => {
             <button
               key={r.title}
               onClick={() => scrollTo(`anime-${slugify(r.title)}`)}
-              className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap bg-white/5 text-white/80 hover:bg-primary hover:text-primary-foreground border border-white/10 transition"
+              className="flex-shrink-0 px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.08em] font-medium whitespace-nowrap bg-secondary text-foreground/80 hover:bg-primary hover:text-primary-foreground border border-border transition"
             >
               {r.title}
             </button>
