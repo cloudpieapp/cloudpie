@@ -28,13 +28,13 @@ interface Server {
 
 const SERVERS: Server[] = [
   { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
-  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st" },
+  { id: "cinesrc", label: "Nova", base: "https://embed.filmu.in" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
   { id: "vidnest", label: "Helix", base: "https://vidnest.fun" },
   { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
   { id: "vidsrcme", label: "Ironclad", base: "https://vidsrcme.ru" },
   { id: "vidgod", label: "Vale", base: "https://vidgod.site" },
-  { id: "filmu", label: "Lumen", base: "https://embed.filmu.in" },
+  { id: "filmu", label: "Lumen", base: "https://cinesrc.st" },
 ];
 
 const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
