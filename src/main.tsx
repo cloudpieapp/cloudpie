@@ -6,6 +6,7 @@ import "@fontsource/work-sans/500.css";
 import "@fontsource/work-sans/600.css";
 import App from "./App.tsx";
 import "./index.css";
+import { initializeAnalytics } from "./lib/analytics";
 
 // Apply persisted theme before render to avoid flash
 try {
@@ -14,7 +15,12 @@ try {
   else document.documentElement.classList.remove("light");
 } catch {}
 
-createRoot(document.getElementById("root")!).render(
+initializeAnalytics();
+
+const root = document.getElementById("root");
+if (!root) throw new Error("App root is missing");
+
+createRoot(root).render(
   <HelmetProvider>
     <App />
   </HelmetProvider>

@@ -25,6 +25,23 @@ declare global {
   }
 }
 
+/** Load Google Analytics once using the project measurement ID. */
+export const initializeAnalytics = () => {
+  if (typeof window === "undefined" || window.gtag) return;
+  const measurementId = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY?.trim();
+  if (!measurementId) return;
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = (...args: unknown[]) => window.dataLayer?.push(args);
+  window.gtag("js", new Date());
+  window.gtag("config", measurementId, { send_page_view: false });
+};
+
 const state = (): { session: string; lastKey: string } => {
   if (!window.__bbAnalytics) window.__bbAnalytics = { session: "", lastKey: "" };
   return window.__bbAnalytics;
