@@ -37,7 +37,7 @@ const ResetPasswordPage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Reset your password – BingBloom" description="Choose a new password for your BingBloom account." />
+      <SEO title="Reset your password – CloudPie" description="Choose a new password for your CloudPie account." />
       <div className="mx-auto w-full max-w-sm px-5 py-8">
         <h1 className="text-xl font-bold text-foreground">Set a new password</h1>
         {!ready ? (

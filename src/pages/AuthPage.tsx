@@ -51,7 +51,7 @@ const AuthPage = ({ initialMode = "signin" }: { initialMode?: Mode }) => {
           toast.success("Check your email to confirm your account.");
           return;
         }
-        toast.success("Welcome to BingBloom!");
+        toast.success("Welcome to CloudPie!");
       } else {
         const { error } = await signInWithEmail(email.trim(), password);
         if (error) throw error;
@@ -85,8 +85,8 @@ const AuthPage = ({ initialMode = "signin" }: { initialMode?: Mode }) => {
   return (
     <AppLayout>
       <SEO
-        title={isSignup ? "Create your BingBloom account" : "Sign in to BingBloom"}
-        description="Sign in or create a free BingBloom account to sync your watchlist, likes and downloads across devices."
+        title={isSignup ? "Create your CloudPie account" : "Sign in to CloudPie"}
+        description="Sign in or create a free CloudPie account to sync your watchlist, likes and downloads across devices."
       />
       <div className="mx-auto w-full max-w-sm px-5 py-8">
         <h1 className="text-xl font-bold text-foreground">
@@ -178,7 +178,7 @@ const AuthPage = ({ initialMode = "signin" }: { initialMode?: Mode }) => {
             </button>
           )}
           <p className="text-[12px] text-muted-foreground">
-            {isSignup ? "Already have an account?" : "New to BingBloom?"}{" "}
+            {isSignup ? "Already have an account?" : "New to CloudPie?"}{" "}
             <button
               type="button"
               onClick={() => {

@@ -1,4 +1,3 @@
-
 interface Props {
   size?: number;
   withWordmark?: boolean;
@@ -16,14 +15,13 @@ const BrandLogo = ({ size = 56, withWordmark = true, wordmarkSize = "md", classN
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <img
-        src={"/logo-compact.png"}
-        alt="BingBloom"
+        src="/logo-compact.png"
+        alt="CloudPie"
         style={{ width: size, height: size, objectFit: "contain" }}
       />
       {withWordmark && (
-        <p className={`${wm} font-extrabold tracking-tight mt-1.5 leading-none`}>
-          <span className="text-white">Bing</span>
-          <span style={{ color: "#E50914" }}>Bloom</span>
+        <p className={`${wm} font-extrabold tracking-tight mt-1.5 leading-none text-foreground`}>
+          CloudPie
         </p>
       )}
     </div>

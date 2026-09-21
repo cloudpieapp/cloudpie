@@ -118,7 +118,7 @@ const NowAnimeDialog = () => {
             onClick={close}
             className="min-h-[40px] rounded-xl text-[12.5px] font-semibold text-muted-foreground hover:bg-foreground/5"
           >
-            Stay on BingBloom
+            Stay on CloudPie
           </button>
         </div>
       </DialogContent>
@@ -139,7 +139,7 @@ const AnimePage = () => {
     <AppLayout>
       <NowAnimeDialog />
       <SEO
-        title="Anime – BingBloom"
+        title="Anime – CloudPie"
         description="25 anime collections — trending, top-rated, isekai, mecha, romance, slice of life, sports and more. Stream anime free."
       />
       <div className="px-[4%] pt-8 md:pt-12 pb-6 border-b border-border/60">

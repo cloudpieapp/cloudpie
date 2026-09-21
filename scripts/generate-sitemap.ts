@@ -254,7 +254,7 @@ function entryFromMovie(m: Title): SitemapEntry {
     lastmod: TODAY,
     changefreq: "weekly",
     priority: "0.7",
-    images: m.poster ? [{ loc: POSTER(m.poster), title: m.title, caption: `Watch ${m.title} free on BingBloom` }] : undefined,
+    images: m.poster ? [{ loc: POSTER(m.poster), title: m.title, caption: `Watch ${m.title} free on CloudPie` }] : undefined,
   };
 }
 function entryFromTv(t: Title): SitemapEntry {
@@ -263,7 +263,7 @@ function entryFromTv(t: Title): SitemapEntry {
     lastmod: TODAY,
     changefreq: "weekly",
     priority: "0.7",
-    images: t.poster ? [{ loc: POSTER(t.poster), title: t.title, caption: `Stream ${t.title} on BingBloom` }] : undefined,
+    images: t.poster ? [{ loc: POSTER(t.poster), title: t.title, caption: `Stream ${t.title} on CloudPie` }] : undefined,
   };
 }
 
@@ -346,14 +346,14 @@ const videoEntries = [
     player: `${BASE_URL}/watch/movie/${m.id}`,
     thumb: POSTER(m.poster),
     title: m.title,
-    description: `Watch ${m.title} free in HD on BingBloom — no subscription, no sign-up.`,
+    description: `Watch ${m.title} free in HD on CloudPie — no subscription, no sign-up.`,
   })),
   ...TV_SHOWS.slice(0, 50).map((t) => ({
     loc: `${BASE_URL}/tv/${t.id}`,
     player: `${BASE_URL}/watch/tv/${t.id}/1/1`,
     thumb: POSTER(t.poster),
     title: t.title,
-    description: `Stream ${t.title} free on BingBloom in HD.`,
+    description: `Stream ${t.title} free on CloudPie in HD.`,
   })),
 ];
 

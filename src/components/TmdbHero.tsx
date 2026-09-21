@@ -57,7 +57,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
 
       <div className={`absolute bottom-9 md:bottom-16 left-0 right-0 px-[5%] max-w-3xl transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
         <span className="text-[9px] md:text-[11px] font-medium uppercase tracking-[0.22em] text-primary">
-          BingBloom selection · {String(index + 1).padStart(2, "0")}
+          CloudPie selection · {String(index + 1).padStart(2, "0")}
         </span>
         <h1 key={`t-${item.id}`} className="mt-2 font-display text-[40px] sm:text-5xl md:text-7xl text-foreground leading-[0.92] drop-shadow-2xl animate-fade-in">
           {item.title}

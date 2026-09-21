@@ -113,7 +113,7 @@ const PlayerGestureLayer = ({ videoRef }: Props) => {
           <div className="text-[9px] text-white/80 font-bold">VOL</div>
           <div className="w-1.5 h-16 rounded-full bg-white/20 relative overflow-hidden">
             <div
-              className="absolute bottom-0 left-0 right-0 bg-[#E50914]"
+              className="absolute bottom-0 left-0 right-0 bg-[#7517FF]"
               style={{ height: `${volumePct * 100}%` }}
             />
           </div>

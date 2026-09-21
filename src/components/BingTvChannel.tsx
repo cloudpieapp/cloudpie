@@ -6,10 +6,11 @@ import SEO from "@/components/SEO";
 import MoviePlayer from "@/components/MoviePlayer";
 import { usePopularMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
-import logo from "@/assets/bingbloom-logo.jpeg";
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
+const logo = cloudPieLogo.url;
 
 /**
- * Bing TV — a virtual 24/7 movie channel. Deterministically selects
+ * CloudPie TV — a virtual 24/7 movie channel. Deterministically selects
  * a "currently airing" movie based on wall-clock time so all viewers
  * see (roughly) the same programme at the same time.
  */
@@ -43,8 +44,8 @@ const BingTvChannel = () => {
   return (
     <AppLayout>
       <SEO
-        title="Bing TV – 24/7 Free Movie Channel – BingBloom"
-        description="Bing TV is BingBloom's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
+        title="CloudPie TV – 24/7 Free Movie Channel – CloudPie"
+        description="CloudPie TV is CloudPie's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
         canonicalPath="/live/bing-tv"
       />
       <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
@@ -52,9 +53,9 @@ const BingTvChannel = () => {
           <Link to="/live-tv" className="w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 text-white">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#E50914" }}>Live</span>
-          <img src={logo} alt="Bing TV" className="w-6 h-6 rounded" />
-          <span className="text-sm font-bold text-white truncate flex-1">Bing TV</span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#7517FF" }}>Live</span>
+          <img src={logo} alt="CloudPie TV" className="w-6 h-6 rounded" />
+          <span className="text-sm font-bold text-white truncate flex-1">CloudPie TV</span>
         </div>
 
         <div className="w-full md:max-w-3xl md:mx-auto">
@@ -72,14 +73,14 @@ const BingTvChannel = () => {
             />
           ) : (
             <div className="aspect-video bg-black grid place-items-center text-white/60 text-sm">
-              {isLoading ? "Loading Bing TV…" : "Bing TV is warming up."}
+              {isLoading ? "Loading CloudPie TV…" : "CloudPie TV is warming up."}
             </div>
           )}
         </div>
 
         <div className="px-4 py-4 max-w-3xl mx-auto">
           <div className="flex items-center gap-2 mb-3">
-            <Radio className="w-4 h-4" style={{ color: "#E50914" }} />
+            <Radio className="w-4 h-4" style={{ color: "#7517FF" }} />
             <h2 className="text-sm font-bold text-white">Programme guide</h2>
             <span className="text-[10px] text-white/45">updates hourly</span>
           </div>
@@ -88,7 +89,7 @@ const BingTvChannel = () => {
               <div
                 key={i}
                 className="flex items-center gap-3 p-2.5 rounded-xl"
-                style={{ background: s.live ? "#1a0f10" : "#141414", border: `1px solid ${s.live ? "#E50914" : "rgba(255,255,255,0.06)"}` }}
+                style={{ background: s.live ? "#1a0f10" : "#141414", border: `1px solid ${s.live ? "#7517FF" : "rgba(255,255,255,0.06)"}` }}
               >
                 <div className="w-16 aspect-video rounded overflow-hidden bg-black flex-shrink-0">
                   {s.movie.backdrop_path && (
@@ -97,7 +98,7 @@ const BingTvChannel = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    {s.live && <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase text-white animate-pulse" style={{ background: "#E50914" }}>Now</span>}
+                    {s.live && <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase text-white animate-pulse" style={{ background: "#7517FF" }}>Now</span>}
                     <p className="text-[12.5px] font-bold text-white truncate">{s.movie.title}</p>
                   </div>
                   <p className="text-[10.5px] text-white/50 mt-0.5">

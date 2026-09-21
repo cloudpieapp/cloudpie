@@ -1,3 +1,4 @@
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, ArrowLeft, Loader2, Flame, Star, Play } from "lucide-react";
@@ -62,7 +63,7 @@ const SkeletonRow = () => (
 const BrandedLoadingState = ({ label = "Loading…" }: { label?: string }) => (
   <div className="space-y-2 pb-4">
     <div className="flex flex-col items-center justify-center gap-2 py-4">
-      <img src="/logo-compact.png" alt="BingBloom" className="h-12 w-12 animate-pulse rounded-xl" />
+      <img src={cloudPieLogo.url} alt="CloudPie" className="h-12 w-12 animate-pulse rounded-xl" />
       <p className="text-[11px] uppercase tracking-[0.25em] text-white/50 font-semibold">{label}</p>
     </div>
     {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
@@ -126,7 +127,7 @@ const ResultRow = ({ item, onClick }: { item: ResultItem; onClick: () => void })
         ) : (
           <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
         )}
-        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#7517FF]">
           <Play className="w-2.5 h-2.5 text-white fill-white" />
         </span>
       </div>
@@ -164,7 +165,7 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
         ) : (
           <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
         )}
-        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#7517FF]">
           <Play className="w-2.5 h-2.5 text-white fill-white" />
         </span>
         {!!item.vote_average && (
@@ -326,8 +327,8 @@ const SearchPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={searchQuery ? `${searchQuery} – Search – BingBloom` : "Explore – BingBloom"}
-        description={searchQuery ? `Search results for "${searchQuery}" on BingBloom.` : "Explore movies, TV series, anime and animation on BingBloom."}
+        title={searchQuery ? `${searchQuery} – Search – CloudPie` : "Explore – CloudPie"}
+        description={searchQuery ? `Search results for "${searchQuery}" on CloudPie.` : "Explore movies, TV series, anime and animation on CloudPie."}
       />
       <div className="px-[4%] pt-6 bg-background">
         <div className="-mx-2 mb-3">
@@ -434,7 +435,7 @@ const SearchPage = () => {
               <BrandedLoadingState label="Searching" />
             ) : filtered.length === 0 ? (
               <div className="py-8 flex flex-col items-center text-center">
-                <img src="/logo-compact.png" alt="" className="h-14 w-14 mb-3 rounded-xl opacity-90" />
+                <img src={cloudPieLogo.url} alt="" className="h-14 w-14 mb-3 rounded-xl opacity-90" />
                 <p className="text-sm font-semibold text-white">No exact matches</p>
                 <p className="text-xs text-white/55 mt-1 mb-5">
                   {related.length > 0 ? `Showing related results for "${searchQuery}"` : `Nothing matches "${searchQuery}". Here's what's trending.`}

@@ -156,8 +156,8 @@ const WatchPage = () => {
   return (
     <div className="min-h-screen bg-background pb-4">
       <SEO
-        title={stream?.title ? `${stream.title} – BingBloom` : "Watch – BingBloom"}
-        description={(stream?.description || stream?.title || "Watch videos on BingBloom").slice(0, 160)}
+        title={stream?.title ? `${stream.title} – CloudPie` : "Watch – CloudPie"}
+        description={(stream?.description || stream?.title || "Watch videos on CloudPie").slice(0, 160)}
         image={stream?.thumbnailUrl || undefined}
         canonicalPath={`/watch/${videoId}`}
       />

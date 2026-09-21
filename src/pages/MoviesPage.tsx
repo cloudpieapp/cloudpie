@@ -35,11 +35,11 @@ const MoviesPage = () => {
   return (
     <AppLayout>
       <SEO
-        title="Movies – BingBloom"
-        description="Browse trending, top-rated, now playing and upcoming movies across every genre. Stream full HD movies free on BingBloom."
+        title="Movies – CloudPie"
+        description="Browse trending, top-rated, now playing and upcoming movies across every genre. Stream full HD movies free on CloudPie."
         jsonLd={{
           "@type": "CollectionPage",
-          name: "Movies – BingBloom",
+          name: "Movies – CloudPie",
           description: "Browse trending, top-rated, now playing and upcoming movies across every genre.",
           url: "https://bingbloom.lovable.app/movies",
         }}

@@ -10,7 +10,7 @@ export const TELEGRAM_CHANNEL = "https://t.me/bingbloom";
  */
 const CommunityLinks = ({ className = "" }: { className?: string }) => (
   <section className={`rounded-2xl border border-border/60 bg-card p-3 ${className}`}>
-    <p className="text-[12.5px] font-bold text-foreground">Join the BingBloom community</p>
+    <p className="text-[12.5px] font-bold text-foreground">Join the CloudPie community</p>
     <p className="mt-0.5 text-[11px] text-muted-foreground">
       Get new release alerts, app updates and support.
     </p>

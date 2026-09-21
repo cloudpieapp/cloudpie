@@ -18,5 +18,5 @@ const sections = [
   ]},
 ];
 export default function SpeedTest() {
-  return <LegalPage title="Speed Test" description="Check your internet connection for the best BingBloom streaming experience." intro="Check your internet connection speed to ensure the best streaming experience on BingBloom. We recommend using fast.com or speedtest.net." sections={sections} cta={{ label: "Open fast.com", href: "https://fast.com" }} />;
+  return <LegalPage title="Speed Test" description="Check your internet connection for the best CloudPie streaming experience." intro="Check your internet connection speed to ensure the best streaming experience on CloudPie. We recommend using fast.com or speedtest.net." sections={sections} cta={{ label: "Open fast.com", href: "https://fast.com" }} />;
 }

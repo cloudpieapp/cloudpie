@@ -378,8 +378,8 @@ const PlayerControlsOverlay = ({
           onClick={togglePlay}
           className="grid place-items-center h-[68px] w-[68px] sm:h-20 sm:w-20 rounded-full text-white transition-all duration-200 hover:scale-105 active:scale-95"
           style={{
-            background: "rgba(229,9,20,0.92)",
-            boxShadow: "0 0 34px rgba(229,9,20,0.55), inset 0 0 0 1px rgba(255,255,255,0.18)",
+            background: "rgba(117,23,255,0.92)",
+            boxShadow: "0 0 34px rgba(117,23,255,0.55), inset 0 0 0 1px rgba(255,255,255,0.18)",
           }}
         >
           {buffering && !paused ? (
@@ -450,11 +450,11 @@ const PlayerControlsOverlay = ({
             />
           )}
           <div
-            className="absolute h-[3px] rounded-full bg-[#E50914]"
+            className="absolute h-[3px] rounded-full bg-[#7517FF]"
             style={{ width: `${pct}%` }}
           />
           <span
-            className="absolute h-3 w-3 rounded-full bg-[#E50914] shadow-[0_0_10px_rgba(229,9,20,0.8)]"
+            className="absolute h-3 w-3 rounded-full bg-[#7517FF] shadow-[0_0_10px_rgba(117,23,255,0.8)]"
             style={{ left: `calc(${pct}% - 6px)` }}
           />
           <input
@@ -503,7 +503,7 @@ const PlayerControlsOverlay = ({
                 }
                 wake();
               }}
-              className="hidden sm:block w-20 accent-[#E50914]"
+              className="hidden sm:block w-20 accent-[#7517FF]"
             />
             {/* Subtitles / quality / download / share / watchlist live here,
                 right next to the volume control. */}

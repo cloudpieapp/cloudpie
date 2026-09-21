@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Radio, Tv } from "lucide-react";
 import { TVAPP_CHANNELS } from "@/lib/iptv";
-import bingLogo from "@/assets/bingbloom-logo.jpeg";
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
+const bingLogo = cloudPieLogo.url;
 
 // Official channel logos so the row renders instantly without needing a playlist fetch.
 const CHANNEL_LOGOS: Record<string, string> = {
@@ -32,9 +33,9 @@ interface Item {
   bing?: boolean;
 }
 
-/** Compact horizontal row of curated live TV channels — Bing TV pinned first. */
+/** Compact horizontal row of curated live TV channels — CloudPie TV pinned first. */
 const LiveTvRow = () => {
-  // Prioritize the 7 named news channels + Bing TV first.
+  // Prioritize the 7 named news channels + CloudPie TV first.
   const priorityOrder = ["bbc-news", "cnn", "fox-news", "msnbc", "cnbc", "bloomberg", "sky-news"];
   const priority = priorityOrder
     .map((slug) => TVAPP_CHANNELS.find((c) => c.slug === slug))
@@ -42,7 +43,7 @@ const LiveTvRow = () => {
   const rest = TVAPP_CHANNELS.filter((c) => !priorityOrder.includes(c.slug)).slice(0, 14);
 
   const items: Item[] = [
-    { slug: "bing-tv", name: "Bing TV", logo: bingLogo, to: "/live/bing-tv", bing: true },
+    { slug: "bing-tv", name: "CloudPie TV", logo: bingLogo, to: "/live/bing-tv", bing: true },
     ...priority.map((c) => ({ slug: c.slug, name: c.name, logo: CHANNEL_LOGOS[c.slug], to: `/live-tv?ch=${encodeURIComponent(c.slug)}` })),
     ...rest.map((c) => ({ slug: c.slug, name: c.name, logo: CHANNEL_LOGOS[c.slug], to: `/live-tv?ch=${encodeURIComponent(c.slug)}` })),
   ];
@@ -62,7 +63,7 @@ const LiveTvRow = () => {
             to={ch.to}
             className="group flex-shrink-0 w-[120px] sm:w-[140px] md:w-[160px]"
           >
-            <div className={`aspect-video rounded-lg overflow-hidden relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ${ch.bing ? "ring-[#E50914]/70" : "ring-border"}`} style={{ background: ch.bing ? "linear-gradient(135deg,#1a0f10,#000)" : undefined }}>
+            <div className={`aspect-video rounded-lg overflow-hidden relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ${ch.bing ? "ring-[#7517FF]/70" : "ring-border"}`} style={{ background: ch.bing ? "linear-gradient(135deg,#1a0f10,#000)" : undefined }}>
               {ch.logo ? (
                 <img
                   src={ch.logo}

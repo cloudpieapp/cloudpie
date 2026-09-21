@@ -481,7 +481,7 @@ const MyDownloadsPage = () => {
 
   return (
     <AppLayout hideFooter>
-      <SEO title="My Downloads – BingBloom" description="Watch your downloaded movies offline anytime on BingBloom." />
+      <SEO title="My Downloads – CloudPie" description="Watch your downloaded movies offline anytime on CloudPie." />
       <div className="min-h-screen bg-background">
         <div className="max-w-[1180px] mx-auto w-full px-4 pt-3 pb-8">
           <header className="flex items-center justify-between mb-4 pt-1">

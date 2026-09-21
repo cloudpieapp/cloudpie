@@ -1,9 +1,7 @@
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
-import { LocalNotifications } from "@capacitor/local-notifications";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -56,7 +54,7 @@ import LegalNotices from "./pages/LegalNotices";
 import Help from "./pages/Help";
 import Jobs from "./pages/Jobs";
 import Terms from "./pages/Terms";
-import OnlyOnBingBloom from "./pages/OnlyOnBingBloom";
+import OnlyOnCloudPie from "./pages/OnlyOnBingBloom";
 import Redeem from "./pages/Redeem";
 import SpeedTest from "./pages/SpeedTest";
 import AdChoices from "./pages/AdChoices";
@@ -89,42 +87,6 @@ const persister = createSyncStoragePersister({
 });
 
 const App = () => {
-  useEffect(() => {
-    const sendNativeUpdateNotice = async () => {
-      const dismissed = window.localStorage.getItem("bingbloom-native-notice-sent");
-      if (dismissed) return;
-
-      try {
-        await LocalNotifications.createChannel({
-          id: "bingbloom-updates",
-          name: "BingBloom updates",
-          importance: 5,
-          visibility: 1,
-        });
-
-        const permission = await LocalNotifications.requestPermissions();
-        if (permission.display === "granted") {
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                id: Date.now(),
-                title: "BingBloom update ready",
-                body: "Your app now uses the BingBloom brand everywhere and is ready to open.",
-                schedule: { at: new Date(Date.now() + 1000) },
-                extra: { source: "native-update" },
-              },
-            ],
-          });
-          window.localStorage.setItem("bingbloom-native-notice-sent", "true");
-        }
-      } catch {
-        window.localStorage.setItem("bingbloom-native-notice-sent", "true");
-      }
-    };
-
-    void sendNativeUpdateNotice();
-  }, []);
-
   return (
   <PersistQueryClientProvider
     client={queryClient}
@@ -199,7 +161,7 @@ const App = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/only-on-bingbloom" element={<OnlyOnBingBloom />} />
+          <Route path="/only-on-bingbloom" element={<OnlyOnCloudPie />} />
           <Route path="/redeem" element={<Redeem />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/speed-test" element={<SpeedTest />} />

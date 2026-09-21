@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
-  base: "/free-app-/",
+  base: "/",
   server: {
     host: "::",
     port: 8080,
@@ -41,9 +41,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "Kenya Netflix",
-        short_name: "KenyaFlix",
-        description: "Kenyan Movies, Music & Shows. One app. Zero ads. Pure local vibes.",
+        name: "CloudPie - Stream. Discover. Bloom.",
+        short_name: "CloudPie",
+        description: "Stream movies, TV shows, music, anime and live TV with CloudPie.",
         theme_color: "#0D0D0D",
         background_color: "#0D0D0D",
         display: "standalone",
