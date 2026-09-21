@@ -1,3 +1,4 @@
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
 import { useEffect, useState } from "react";
 import { BellRing } from "lucide-react";
 import { ChevronLeft, Download, Star, Share2, Shield, Smartphone, Check, ChevronDown, AlertTriangle } from "lucide-react";
@@ -23,7 +24,7 @@ const InstallAppPage = () => {
     setDownloading(true);
     const a = document.createElement("a");
     a.href = apkAsset.url;
-    a.download = "BingBloom.apk";
+    a.download = "CloudPie.apk";
     a.rel = "noopener";
     a.target = "_blank";
     document.body.appendChild(a);
@@ -32,11 +33,11 @@ const InstallAppPage = () => {
     setTimeout(() => { setDownloading(false); setDone(true); }, 1200);
   };
 
-  useEffect(() => { document.title = "Install BingBloom – Free Movies & TV"; }, []);
+  useEffect(() => { document.title = "Install CloudPie – Free Movies & TV"; }, []);
 
   return (
     <AppLayout>
-      <SEO title="Install BingBloom App" description="Install the free BingBloom Android app to stream and download movies, TV shows, anime and live channels." />
+      <SEO title="Install CloudPie App" description="Install the free CloudPie Android app to stream and download movies, TV shows, anime and live channels." />
 
       <div className="max-w-2xl mx-auto px-4 pt-3 pb-10">
         <div className="mb-4 flex items-start gap-2 rounded-2xl border border-primary/20 bg-primary/10 p-3 text-sm text-foreground">
@@ -51,9 +52,9 @@ const InstallAppPage = () => {
         </Link>
 
         <div className="flex items-start gap-3 mb-4">
-          <img src={"/logo-compact.png"} alt="BingBloom" className="w-14 h-14 rounded-2xl flex-shrink-0 shadow-lg" style={{ filter: "drop-shadow(0 0 14px rgba(229,9,20,0.45))" }} />
+          <img src={cloudPieLogo.url} alt="CloudPie" className="w-14 h-14 rounded-2xl flex-shrink-0 shadow-lg" style={{ filter: "drop-shadow(0 0 14px rgba(117,23,255,0.45))" }} />
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-bold text-foreground leading-tight">BingBloom</h1>
+            <h1 className="text-base font-bold text-foreground leading-tight">CloudPie</h1>
             <p className="text-[11px] text-primary font-medium">Bing Bloom Studios</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">Contains ads · Free</p>
           </div>
@@ -79,14 +80,14 @@ const InstallAppPage = () => {
             <BellRing className="w-3.5 h-3.5" /> Check for update
           </a>
           <button
-            onClick={() => navigator.share?.({ title: "BingBloom", url: window.location.href }).catch(() => {})}
+            onClick={() => navigator.share?.({ title: "CloudPie", url: window.location.href }).catch(() => {})}
             className="w-10 grid place-items-center rounded-xl border border-border bg-card"
             aria-label="Share"
           >
             <Share2 className="w-3.5 h-3.5 text-foreground" />
           </button>
           <button
-            onClick={() => navigator.share?.({ title: "BingBloom", url: window.location.href }).catch(() => {})}
+            onClick={() => navigator.share?.({ title: "CloudPie", url: window.location.href }).catch(() => {})}
             className="w-10 grid place-items-center rounded-xl border border-border bg-card"
             aria-label="Share"
           >
@@ -109,7 +110,7 @@ const InstallAppPage = () => {
         </button>
         {helpOpen && (
           <div className="mb-4 rounded-xl border border-border/40 p-3 text-[11px] text-foreground/80 space-y-2 leading-relaxed">
-            <p><span className="font-semibold text-foreground">1.</span> Tap <span className="font-semibold">Install</span> above to download <span className="font-mono">BingBloom.apk</span>.</p>
+            <p><span className="font-semibold text-foreground">1.</span> Tap <span className="font-semibold">Install</span> above to download <span className="font-mono">CloudPie.apk</span>.</p>
             <p><span className="font-semibold text-foreground">2.</span> Your browser may ask for permission to download or install apps from unknown sources — tap <span className="font-semibold">Allow</span>.</p>
             <p><span className="font-semibold text-foreground">3.</span> Open the downloaded file and tap <span className="font-semibold">Install</span>.</p>
             <p className="flex items-start gap-1.5 text-[11px] mt-2 pt-2 border-t border-border/30">
@@ -128,7 +129,7 @@ const InstallAppPage = () => {
         <section className="mb-5">
           <h2 className="text-sm font-semibold text-foreground mb-1.5">About this app</h2>
           <p className="text-xs text-foreground/80 leading-relaxed">
-            Stream and download thousands of movies, TV shows, anime, live channels and music — completely free. BingBloom keeps your watchlist in sync, supports offline playback and ships with parental controls.
+            Stream and download thousands of movies, TV shows, anime, live channels and music — completely free. CloudPie keeps your watchlist in sync, supports offline playback and ships with parental controls.
           </p>
         </section>
 

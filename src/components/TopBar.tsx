@@ -1,3 +1,4 @@
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
 import { Link, useLocation, useNavigate, NavLink } from "react-router-dom";
 import { Search, X, Menu, Home, Film, Tv, Clapperboard, Radio, Palette, Camera, User, Mic2, Bookmark, Heart, Settings, Shield, Download } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -68,11 +69,11 @@ const TopBar = () => {
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
             <img
-              src={"/logo-compact.png"}
-              alt="BingBloom"
+              src={cloudPieLogo.url}
+              alt="CloudPie"
               className="h-7 w-7 md:h-8 md:w-8 opacity-90"
             />
-            <span className="hidden sm:inline font-display text-2xl text-foreground">BingBloom</span>
+            <span className="hidden sm:inline font-display text-2xl text-foreground">CloudPie</span>
           </Link>
 
           {/* Desktop horizontal nav — centered */}
@@ -121,7 +122,7 @@ const TopBar = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="md:hidden inline-flex items-center gap-1 rounded-sm bg-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-lg"
-              aria-label="Download BingBloom app"
+              aria-label="Download CloudPie app"
             >
               <Download className="h-3 w-3" /> Download App
             </a>
@@ -130,7 +131,7 @@ const TopBar = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground shadow-lg hover:brightness-110"
-              aria-label="Download BingBloom app on desktop"
+              aria-label="Download CloudPie app on desktop"
             >
               <Download className="h-3.5 w-3.5" /> Download App
             </a>
@@ -178,8 +179,8 @@ const TopBar = () => {
           <aside className="fixed top-0 left-0 bottom-0 z-[70] w-[82%] max-w-[300px] bg-card shadow-2xl flex flex-col animate-slide-in-right" style={{ animation: "slide-in-right 0.3s ease-out reverse" }}>
             <div className="flex items-center justify-between px-4 h-14 border-b border-border">
               <Link to="/home" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2">
-                <img src={"/logo-compact.png"} alt="" className="w-8 h-8" style={{ filter: "drop-shadow(0 0 6px rgba(229,9,20,0.6))" }} />
-                <span className="text-base font-extrabold text-gradient-bb">BingBloom</span>
+                <img src={cloudPieLogo.url} alt="" className="w-8 h-8" style={{ filter: "drop-shadow(0 0 6px rgba(117,23,255,0.6))" }} />
+                <span className="text-base font-extrabold text-gradient-bb">CloudPie</span>
               </Link>
               <button
                 onClick={() => setDrawerOpen(false)}

@@ -11,7 +11,8 @@ import { useMyList } from "@/hooks/useMyList";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
 import { toast } from "@/components/ui/sonner";
 import ContentCard from "@/components/ContentCard";
-import logoImg from "/logo.png";
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
+const logoImg = cloudPieLogo.url;
 
 const ProfilePage = () => {
   const { canInstall, isInstalled, install } = useInstallPrompt();
@@ -50,7 +51,7 @@ const ProfilePage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Profile – BingBloom" description="Your BingBloom profile — watch history, liked content, watchlist and account settings." />
+      <SEO title="Profile – CloudPie" description="Your CloudPie profile — watch history, liked content, watchlist and account settings." />
       <div className="max-w-3xl mx-auto px-5 py-6">
         <div className="bg-gradient-to-br from-primary/10 via-card to-card rounded-2xl p-6 mb-6 border border-border/50">
           <div className="flex items-start gap-4">
@@ -151,7 +152,7 @@ const ProfilePage = () => {
             <img src={logoImg} alt="BB" className="w-10 h-10 flex-shrink-0" />
             <div className="flex-1">
               <p className="text-xs font-semibold text-foreground mb-0.5">
-                {isInstalled ? "✅ App Installed!" : "Install BingBloom"}
+                {isInstalled ? "✅ App Installed!" : "Install CloudPie"}
               </p>
               <p className="text-[10px] text-muted-foreground mb-2">
                 {isInstalled ? "You're using the installed version." : "Add to home screen for fast access."}
@@ -166,7 +167,7 @@ const ProfilePage = () => {
         </div>
 
         <p className="text-center text-[10px] text-muted-foreground mt-6">
-          BingBloom v1.0 · Stream. Discover. Bloom. 🌸
+          CloudPie v1.0 · Stream. Discover. Bloom. 🌸
         </p>
       </div>
     </AppLayout>

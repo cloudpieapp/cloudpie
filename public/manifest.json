@@ -1,6 +1,6 @@
 {
-  "name": "BingBloom - Stream. Discover. Bloom.",
-  "short_name": "BingBloom",
+  "name": "CloudPie - Stream. Discover. Bloom.",
+  "short_name": "CloudPie",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

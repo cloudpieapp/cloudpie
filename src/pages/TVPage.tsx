@@ -21,11 +21,11 @@ const TVPage = () => {
   return (
     <AppLayout>
       <SEO
-        title="TV Shows – BingBloom"
-        description="Stream trending TV series, on-air shows, top-rated dramas and live channels from around the world on BingBloom."
+        title="TV Shows – CloudPie"
+        description="Stream trending TV series, on-air shows, top-rated dramas and live channels from around the world on CloudPie."
         jsonLd={{
           "@type": "CollectionPage",
-          name: "TV Shows – BingBloom",
+          name: "TV Shows – CloudPie",
           description: "Stream trending TV series, on-air shows, top-rated dramas and live channels from around the world.",
           url: "https://bingbloom.lovable.app/tv",
         }}

@@ -1,5 +1,5 @@
 /**
- * Single source of truth for BingBloom analytics.
+ * Single source of truth for CloudPie analytics.
  *
  * The app is a SPA, so the only automatic page view a provider records is the
  * first document load. Everything after that has to be reported manually. This

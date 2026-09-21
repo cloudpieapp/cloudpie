@@ -136,7 +136,7 @@ const MoviePlayer = ({
       type === "tv"
         ? `${window.location.origin}/watch/tv/${tmdbId}/${season}/${episode}`
         : `${window.location.origin}/watch/movie/${tmdbId}`;
-    const shareTitle = title || "BingBloom";
+    const shareTitle = title || "CloudPie";
     try {
       if (navigator.share) {
         await navigator.share({ title: shareTitle, url });
@@ -209,7 +209,7 @@ const MoviePlayer = ({
         <iframe
           key={embedUrl}
           src={embedUrl}
-          title={title ? `Watch ${title}` : "BingBloom player"}
+          title={title ? `Watch ${title}` : "CloudPie player"}
           className="absolute inset-0 w-full h-full border-0 bg-black"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
