@@ -117,7 +117,7 @@ const TopBar = () => {
           {/* Right cluster — mobile: install, search, profile, settings (rightmost) */}
           <div className="flex items-center gap-1 flex-shrink-0">
             <a
-              href="https://bingbloomdownload.lovable.app"
+              href="https://cloudpieapp.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
               className="md:hidden inline-flex items-center gap-1 rounded-sm bg-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-lg"
@@ -126,7 +126,7 @@ const TopBar = () => {
               <Download className="h-3 w-3" /> Download App
             </a>
             <a
-              href="https://bingbloomdownload.lovable.app"
+              href="https://cloudpieapp.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground shadow-lg hover:brightness-110"
