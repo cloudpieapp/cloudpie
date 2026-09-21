@@ -54,7 +54,7 @@ import LegalNotices from "./pages/LegalNotices";
 import Help from "./pages/Help";
 import Jobs from "./pages/Jobs";
 import Terms from "./pages/Terms";
-import OnlyOnCloudPie from "./pages/OnlyOnCloudPie";
+import OnlyOnCloudPie from "./pages/OnlyOnBingBloom";
 import Redeem from "./pages/Redeem";
 import SpeedTest from "./pages/SpeedTest";
 import AdChoices from "./pages/AdChoices";

@@ -6,10 +6,11 @@ import SEO from "@/components/SEO";
 import MoviePlayer from "@/components/MoviePlayer";
 import { usePopularMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
-import logo from "@/assets/bingbloom-logo.jpeg";
+import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
+const logo = cloudPieLogo.url;
 
 /**
- * Bing TV — a virtual 24/7 movie channel. Deterministically selects
+ * CloudPie TV — a virtual 24/7 movie channel. Deterministically selects
  * a "currently airing" movie based on wall-clock time so all viewers
  * see (roughly) the same programme at the same time.
  */
@@ -43,8 +44,8 @@ const BingTvChannel = () => {
   return (
     <AppLayout>
       <SEO
-        title="Bing TV – 24/7 Free Movie Channel – CloudPie"
-        description="Bing TV is CloudPie's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
+        title="CloudPie TV – 24/7 Free Movie Channel – CloudPie"
+        description="CloudPie TV is CloudPie's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
         canonicalPath="/live/bing-tv"
       />
       <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
@@ -53,8 +54,8 @@ const BingTvChannel = () => {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#7517FF" }}>Live</span>
-          <img src={logo} alt="Bing TV" className="w-6 h-6 rounded" />
-          <span className="text-sm font-bold text-white truncate flex-1">Bing TV</span>
+          <img src={logo} alt="CloudPie TV" className="w-6 h-6 rounded" />
+          <span className="text-sm font-bold text-white truncate flex-1">CloudPie TV</span>
         </div>
 
         <div className="w-full md:max-w-3xl md:mx-auto">
@@ -72,7 +73,7 @@ const BingTvChannel = () => {
             />
           ) : (
             <div className="aspect-video bg-black grid place-items-center text-white/60 text-sm">
-              {isLoading ? "Loading Bing TV…" : "Bing TV is warming up."}
+              {isLoading ? "Loading CloudPie TV…" : "CloudPie TV is warming up."}
             </div>
           )}
         </div>
