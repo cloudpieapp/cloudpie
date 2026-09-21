@@ -4,7 +4,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
-const BASE_URL = "https://bingbloom.lovable.app";
+const BASE_URL = "https://cloudpie.lovable.app";
 const TODAY = new Date().toISOString().slice(0, 10);
 const TARGET_COUNT = 250;
 
