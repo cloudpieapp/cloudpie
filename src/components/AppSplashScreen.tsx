@@ -1,4 +1,3 @@
-import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
 import { useEffect, useState } from "react";
 import splash1 from "@/assets/splash-1.jpg";
 import splash2 from "@/assets/splash-2.jpg";
@@ -53,7 +52,7 @@ const AppSplashScreen = () => {
 
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
         <img
-          src={cloudPieLogo.url}
+          src="/logo-compact.png"
           alt="CloudPie"
           className="h-16 w-16 rounded-2xl object-contain shadow-[0_0_28px_rgba(117,23,255,0.45)] animate-[bounce_1.2s_ease-in-out_infinite]"
         />

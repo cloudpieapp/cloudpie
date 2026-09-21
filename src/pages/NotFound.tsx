@@ -1,4 +1,3 @@
-import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
 import { Link, useNavigate } from "react-router-dom";
 import { Home, Compass, Film } from "lucide-react";
 import SEO from "@/components/SEO";
@@ -20,7 +19,7 @@ const NotFound = () => {
       />
       <div className="text-center px-6 max-w-sm w-full animate-fade-in">
         <img
-          src={cloudPieLogo.url}
+          src="/logo-compact.png"
           alt="CloudPie"
           className="w-20 h-20 mx-auto mb-5 rounded-2xl shadow-[0_0_40px_rgba(117,23,255,0.35)]"
         />

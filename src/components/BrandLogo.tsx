@@ -1,5 +1,3 @@
-import cloudPieLogo from "@/assets/cloudpie-logo.png.asset.json";
-
 interface Props {
   size?: number;
   withWordmark?: boolean;
@@ -17,7 +15,7 @@ const BrandLogo = ({ size = 56, withWordmark = true, wordmarkSize = "md", classN
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <img
-        src={cloudPieLogo.url}
+        src="/logo-compact.png"
         alt="CloudPie"
         style={{ width: size, height: size, objectFit: "contain" }}
       />
