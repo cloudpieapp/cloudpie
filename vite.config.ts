@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
-  base: "/appeqnso4wpubbpnxbo65vlbxrfihws5bg/",
+  base: "/free-app-/",
   server: {
     host: "::",
     port: 8080,
