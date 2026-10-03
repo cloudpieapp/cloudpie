@@ -30,7 +30,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   }, [index, slides.length]);
 
   if (isLoading || slides.length === 0) {
-    return <div className="relative w-full h-[56vh] sm:h-[62vh] md:h-[74vh] bg-card animate-pulse" />;
+    return <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[42vh] sm:h-[62vh] md:h-[74vh] bg-card animate-pulse" />;
   }
 
   const item = slides[index];
@@ -40,7 +40,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   const showButtons = phase === "buttons";
 
   return (
-    <div className="relative w-full h-[56vh] sm:h-[62vh] md:h-[74vh] max-h-[760px] overflow-hidden border-b border-border/60">
+    <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[42vh] sm:h-[62vh] md:h-[74vh] max-h-[760px] overflow-hidden border-b border-border/60">
       <img
         key={item.id}
         src={backdrop}
