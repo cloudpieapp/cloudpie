@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const AD_KEY = "1a3361e4e76e4c3f2944b9efa3332530";
+const AD_KEY = "271f2875efc430768f1d1f6771d5257c";
 const CONTAINER_ID = `container-${AD_KEY}`;
-const INVOKE_SRC = `https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js`;
+const INVOKE_SRC = `https://bancadeltempoidea.org/21/${AD_KEY}`;
 
 /**
  * Adsterra native banner.
