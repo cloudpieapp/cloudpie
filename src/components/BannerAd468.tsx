@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * global `atOptions` of multiple slots never collide, and scaled down on narrow
  * screens so it always fits a phone perfectly without horizontal overflow.
  */
-const AD_KEY = "5b6beb58c6b3a15cbeec08371006507f";
+const AD_KEY = "8baeae111a8bbe3faf7b40d656dbe0f5";
 const AD_W = 468;
 const AD_H = 60;
 
@@ -22,7 +22,7 @@ const SRC_DOC = `<!doctype html>
     'params' : {}
   };
 <\/script>
-<script async data-cfasync="false" src="https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js"><\/script>
+<script src="https://bancadeltempoidea.org/22/${AD_KEY}"><\/script>
 </body></html>`;
 
 const BannerAd468 = ({ className = "", label = true }: { className?: string; label?: boolean }) => {
