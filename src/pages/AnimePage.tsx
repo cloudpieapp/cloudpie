@@ -152,7 +152,6 @@ const AnimePage = () => {
         <BannerAd468 />
       </div>
 
-      <InlineAdRow count={4} />
 
       {/* Sticky category menu */}
       <div className="sticky top-12 md:top-14 z-30 bg-background/95 backdrop-blur border-b border-border">
@@ -175,6 +174,7 @@ const AnimePage = () => {
       {ROWS.map((r, i) => (
         <div key={r.title} id={`anime-${slugify(r.title)}`} className="scroll-mt-28">
           <AnimeRow title={r.title} params={r.params} />
+          {i === 0 && <InlineAdRow count={4} />}
           {(i === 4 || i === 10 || i === 16 || i === 21) && <InlineAdRow />}
         </div>
       ))}
