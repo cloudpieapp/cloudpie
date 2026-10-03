@@ -1,11 +1,11 @@
 {
-  "asset_id": "37342890-e33c-40f9-a028-41f8173b974f",
-  "content_type": "image/png",
-  "created_at": "2026-07-21T08:02:23Z",
+  "version": 1,
+  "asset_id": "8ca00d5b-93bf-45d8-a17b-caa50e564df5",
+  "project_id": "b1fc1abb-6f5c-4de2-ba9b-0255c0be26c1",
+  "url": "/__l5e/assets-v1/8ca00d5b-93bf-45d8-a17b-caa50e564df5/disney.png",
+  "r2_key": "a/v1/b1fc1abb-6f5c-4de2-ba9b-0255c0be26c1/8ca00d5b-93bf-45d8-a17b-caa50e564df5/disney.png",
   "original_filename": "disney.png",
-  "project_id": "1301ff95-3edf-4f6c-b808-9c8c957f31e7",
-  "r2_key": "a/v1/1301ff95-3edf-4f6c-b808-9c8c957f31e7/37342890-e33c-40f9-a028-41f8173b974f/disney.png",
-  "size": 112489,
-  "url": "/__l5e/assets-v1/37342890-e33c-40f9-a028-41f8173b974f/disney.png",
-  "version": 1
+  "size": 138104,
+  "content_type": "image/png",
+  "created_at": "2026-10-03T21:51:24Z"
 }
