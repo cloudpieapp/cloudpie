@@ -3,7 +3,9 @@ import netflix from "@/assets/brands/netflix.png.asset.json";
 import prime from "@/assets/brands/prime.png.asset.json";
 import tubi from "@/assets/brands/tubi.png.asset.json";
 import disney from "@/assets/brands/disney.png.asset.json";
-import dreamworks from "@/assets/brands/dreamworks.png.asset.json";
+import appletv from "@/assets/brands/appletv.png.asset.json";
+import crunchyroll from "@/assets/brands/crunchyroll.png.asset.json";
+import paramount from "@/assets/brands/paramount.png.asset.json";
 import imax from "@/assets/brands/imax.png.asset.json";
 
 /**
@@ -15,8 +17,10 @@ const BRANDS = [
   { slug: "prime",      label: "Prime Video", img: prime.url,      bg: "#000814", providerId: 9,   companyId: 0 },
   { slug: "tubi",       label: "Tubi",        img: tubi.url,       bg: "#5b21b6", providerId: 73,  companyId: 0 },
   { slug: "disney",     label: "Disney+",     img: disney.url,     bg: "#02264a", providerId: 337, companyId: 0 },
-  { slug: "dreamworks", label: "DreamWorks",  img: dreamworks.url, bg: "#0b1e3b", providerId: 0,   companyId: 521 },
   { slug: "imax",       label: "IMAX",        img: imax.url,       bg: "#000000", providerId: 0,   companyId: 41077 },
+  { slug: "appletv",    label: "Apple TV+",   img: appletv.url,    bg: "#000000", providerId: 350, companyId: 0 },
+  { slug: "crunchyroll",label: "Crunchyroll", img: crunchyroll.url,bg: "#ffffff", providerId: 283, companyId: 0 },
+  { slug: "paramount",  label: "Paramount+",  img: paramount.url,  bg: "#ffffff", providerId: 531, companyId: 0 },
 ];
 
 /**
@@ -42,7 +46,7 @@ const StreamingBrandsRow = () => (
             src={b.img}
             alt={b.label}
             loading="lazy"
-            className="max-w-[86%] max-h-[70%] object-contain drop-shadow-md"
+            className="w-full h-full object-contain"
           />
         </Link>
       ))}
