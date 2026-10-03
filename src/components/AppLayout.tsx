@@ -4,6 +4,7 @@ import TopBar from "./TopBar";
 import BottomNav from "./BottomNav";
 import Footer from "./Footer";
 import InlineAdRow from "./InlineAdRow";
+import BannerAd468 from "./BannerAd468";
 import ExternalSiteNotice from "./ExternalSiteNotice";
 
 
@@ -67,7 +68,11 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
         {children}
         {showEndAd && (
           <section aria-label="Advertisement" className="m-0 p-0 leading-none">
-            <InlineAdRow count={4} />
+            {pathname.startsWith("/library") ? (
+              <BannerAd468 className="px-3 py-2" adKey="eb5b8f1bae064cec17302eaea8d53b07" width={728} height={90} />
+            ) : (
+              <InlineAdRow count={4} />
+            )}
           </section>
         )}
       </main>

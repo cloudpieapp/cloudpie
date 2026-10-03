@@ -5,11 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * global `atOptions` of multiple slots never collide, and scaled down on narrow
  * screens so it always fits a phone perfectly without horizontal overflow.
  */
-const AD_KEY = "8baeae111a8bbe3faf7b40d656dbe0f5";
-const AD_W = 468;
-const AD_H = 60;
-
-const SRC_DOC = `<!doctype html>
+const buildDoc = (AD_KEY: string, AD_W: number, AD_H: number) => `<!doctype html>
 <html><head><meta charset="utf-8"/>
 <style>html,body{margin:0;padding:0;background:transparent;overflow:hidden;}</style>
 </head><body>
@@ -25,7 +21,10 @@ const SRC_DOC = `<!doctype html>
 <script src="https://bancadeltempoidea.org/22/${AD_KEY}"><\/script>
 </body></html>`;
 
-const BannerAd468 = ({ className = "", label = true }: { className?: string; label?: boolean }) => {
+const BannerAd468 = ({
+  className = "", label = true,
+  adKey: AD_KEY = "8baeae111a8bbe3faf7b40d656dbe0f5", width: AD_W = 468, height: AD_H = 60,
+}: { className?: string; label?: boolean; adKey?: string; width?: number; height?: number }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [armed, setArmed] = useState(false);
   const [scale, setScale] = useState(1);
@@ -67,9 +66,9 @@ const BannerAd468 = ({ className = "", label = true }: { className?: string; lab
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [AD_W]);
 
-  const srcDoc = useMemo(() => SRC_DOC, []);
+  const srcDoc = useMemo(() => buildDoc(AD_KEY, AD_W, AD_H), [AD_KEY, AD_W, AD_H]);
 
   return (
     <div
