@@ -25,6 +25,6 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://cloudpie.lovable.app/sitemap-index.xml
-Sitemap: https://cloudpie.lovable.app/sitemap.xml
-Sitemap: https://cloudpie.lovable.app/video-sitemap.xml
+Sitemap: https://bingbloom.lovable.app/sitemap-index.xml
+Sitemap: https://bingbloom.lovable.app/sitemap.xml
+Sitemap: https://bingbloom.lovable.app/video-sitemap.xml
