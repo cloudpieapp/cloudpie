@@ -19,7 +19,7 @@ const TmdbCard = ({ item, type, width, fill, rank }: TmdbCardProps) => {
 
   const sizingClass = fill
     ? "w-full"
-    : "w-[92px] sm:w-[120px] md:w-[168px] lg:w-[180px]";
+    : "w-[84px] sm:w-[104px] md:w-[128px] lg:w-[140px]";
   const inlineStyle = !fill && width ? { width, minWidth: width } : undefined;
 
   return (
@@ -55,7 +55,7 @@ const TmdbCard = ({ item, type, width, fill, rank }: TmdbCardProps) => {
         )}
       </div>
       <div className="mt-2 px-0.5">
-        <p className="font-display text-[15px] md:text-[17px] leading-tight text-foreground line-clamp-1 group-hover:text-primary">{item.title}</p>
+        <p className="font-display text-[12px] md:text-[14px] leading-tight text-foreground line-clamp-1 group-hover:text-primary">{item.title}</p>
         {year && <p className="mt-0.5 text-[9px] md:text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{year}</p>}
       </div>
     </Link>

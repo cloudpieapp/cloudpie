@@ -30,7 +30,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   }, [index, slides.length]);
 
   if (isLoading || slides.length === 0) {
-    return <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[42vh] sm:h-[62vh] md:h-[74vh] bg-card animate-pulse" />;
+    return <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[30vh] sm:h-[44vh] md:h-[52vh] bg-card animate-pulse" />;
   }
 
   const item = slides[index];
@@ -40,7 +40,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   const showButtons = phase === "buttons";
 
   return (
-    <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[42vh] sm:h-[62vh] md:h-[74vh] max-h-[760px] overflow-hidden border-b border-border/60">
+    <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[30vh] sm:h-[44vh] md:h-[52vh] max-h-[520px] overflow-hidden border-b border-border/60">
       <img
         key={item.id}
         src={backdrop}
@@ -59,7 +59,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
         <span className="text-[9px] md:text-[11px] font-medium uppercase tracking-[0.22em] text-primary">
           CloudPie selection · {String(index + 1).padStart(2, "0")}
         </span>
-        <h1 key={`t-${item.id}`} className="mt-2 font-display text-[40px] sm:text-5xl md:text-7xl text-foreground leading-[0.92] drop-shadow-2xl animate-fade-in">
+        <h1 key={`t-${item.id}`} className="mt-2 font-display text-[28px] sm:text-4xl md:text-5xl text-foreground leading-[0.92] drop-shadow-2xl animate-fade-in">
           {item.title}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[9px] md:text-xs uppercase tracking-[0.1em] text-foreground/75">
