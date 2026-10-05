@@ -110,13 +110,17 @@ const MoviePlayer = ({
     const el = containerRef.current as
       | (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> })
       | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orient = (screen as any).orientation;
     try {
       if (document.fullscreenElement) {
+        try { orient?.unlock?.(); } catch { /* ignore */ }
         await document.exitFullscreen();
         return;
       }
       if (el?.requestFullscreen) await el.requestFullscreen();
       else if (el?.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+      try { await orient?.lock?.("landscape"); } catch { /* not supported */ }
     } catch {
       /* ignore */
     }
