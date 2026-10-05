@@ -302,9 +302,11 @@ const PlayerIconButton = ({
     title={label}
     aria-label={label}
     onClick={onClick}
-    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-secondary px-3 text-[12px] font-semibold text-foreground ring-1 ring-border/60 transition hover:bg-primary hover:text-primary-foreground hover:ring-primary active:scale-95"
+    className="group flex w-14 flex-col items-center gap-1 text-[10px] font-medium text-muted-foreground transition active:scale-95 sm:w-auto sm:h-9 sm:flex-row sm:gap-1.5 sm:rounded-full sm:bg-secondary sm:px-3 sm:text-[12px] sm:font-semibold sm:text-foreground sm:ring-1 sm:ring-border/60 sm:hover:bg-primary sm:hover:text-primary-foreground sm:hover:ring-primary"
   >
-    {children}
-    <span className="hidden sm:inline">{short ?? label}</span>
+    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/30 group-active:bg-primary group-active:text-primary-foreground sm:h-auto sm:w-auto sm:rounded-none sm:bg-transparent sm:text-current sm:ring-0">
+      {children}
+    </span>
+    <span>{short ?? label}</span>
   </button>
 );
