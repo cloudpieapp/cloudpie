@@ -62,7 +62,15 @@ const TvWatchPage = () => {
           </h1>
         </header>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
+        <div className="lg:grid lg:grid-cols-[190px_minmax(0,1fr)_300px] lg:gap-6 lg:px-4 lg:pt-5 max-w-[1480px] mx-auto">
+          <aside className="hidden lg:block min-w-0">
+            <div className="sticky top-16">
+              <p className="mb-2 text-[9px] uppercase text-muted-foreground">Sponsored</p>
+              <div className="space-y-3 overflow-hidden">
+                <BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} />
+              </div>
+            </div>
+          </aside>
           <div className="min-w-0">
             <div className="px-3 pt-2 pb-1">
               <BannerAd468 />
@@ -120,6 +128,7 @@ const TvWatchPage = () => {
 
                 <div className="mt-3 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
+                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
 
                 {/* Mobile/tablet: horizontal episode strip. Desktop uses sidebar list. */}
@@ -177,6 +186,7 @@ const TvWatchPage = () => {
 
                 <div className="mt-3 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
+                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
 
                 <div className="mt-2 -mx-4 lg:mx-0 space-y-0.5">
@@ -187,13 +197,14 @@ const TvWatchPage = () => {
 
                 <div className="mt-2 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
+                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Desktop sidebar — episode list (YouTube-style) */}
-          <aside className="hidden lg:block w-[320px] shrink-0 pt-1">
+          <aside className="hidden lg:block w-[300px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto pr-1">
               {seasons.length > 0 && (
                 <div>
