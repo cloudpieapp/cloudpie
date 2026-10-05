@@ -1,3 +1,4 @@
+import NativeAd from "@/components/NativeAd";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Check, ChevronDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useState, useRef } from "react";
@@ -67,6 +68,7 @@ const TvWatchPage = () => {
             <div className="sticky top-16">
               <p className="mb-2 text-[9px] uppercase text-muted-foreground">Sponsored</p>
               <div className="space-y-3 overflow-hidden">
+                <NativeAd />
                 <BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} />
               </div>
             </div>
@@ -128,7 +130,6 @@ const TvWatchPage = () => {
 
                 <div className="mt-3 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
-                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
 
                 {/* Mobile/tablet: horizontal episode strip. Desktop uses sidebar list. */}
@@ -186,7 +187,6 @@ const TvWatchPage = () => {
 
                 <div className="mt-3 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
-                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
 
                 <div className="mt-2 -mx-4 lg:mx-0 space-y-0.5">
@@ -197,7 +197,6 @@ const TvWatchPage = () => {
 
                 <div className="mt-2 -mx-4 lg:mx-0">
                   <InlineAdRow count={4} />
-                  <div className="flex justify-center py-2 overflow-hidden"><BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} /></div>
                 </div>
               </div>
             )}
