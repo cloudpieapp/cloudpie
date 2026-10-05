@@ -222,7 +222,7 @@ const MoviePlayer = ({
       </div>
 
       {/* Toolbar: server switcher + quick actions */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
+      <div className="flex items-center gap-2 px-3 py-2 bg-card border-t border-border/60 flex-wrap">
         <div className="relative">
           <label className="sr-only" htmlFor="bb-server-select">
             Server
@@ -248,6 +248,7 @@ const MoviePlayer = ({
           </PlayerIconButton>
           <PlayerIconButton
             label={isFull ? "Exit full screen" : "Full screen"}
+            short={isFull ? "Exit" : "Fullscreen"}
             onClick={toggleFullscreen}
           >
             {isFull ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
@@ -257,6 +258,7 @@ const MoviePlayer = ({
           </PlayerIconButton>
           <PlayerIconButton
             label={inList ? "Remove from watchlist" : "Add to watchlist"}
+            short={inList ? "Saved" : "Watchlist"}
             onClick={toggleWatchlist}
           >
             {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -286,10 +288,12 @@ export default MoviePlayer;
 /** Circular, glassy icon button used in the player toolbar. */
 const PlayerIconButton = ({
   label,
+  short,
   onClick,
   children,
 }: {
   label: string;
+  short?: string;
   onClick: () => void;
   children: React.ReactNode;
 }) => (
@@ -298,8 +302,9 @@ const PlayerIconButton = ({
     title={label}
     aria-label={label}
     onClick={onClick}
-    className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full border border-border/60 text-foreground transition hover:bg-foreground/10 active:scale-95"
+    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-secondary px-3 text-[12px] font-semibold text-foreground ring-1 ring-border/60 transition hover:bg-primary hover:text-primary-foreground hover:ring-primary active:scale-95"
   >
     {children}
+    <span className="hidden sm:inline">{short ?? label}</span>
   </button>
 );
