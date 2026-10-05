@@ -28,7 +28,7 @@ const TmdbRow = ({ title, items, isLoading, type, viewAll, ranked }: TmdbRowProp
       <div className="flex gap-2.5 md:gap-4 px-[4%] overflow-x-auto scrollbar-hide pb-3 snap-x snap-mandatory">
         {isLoading
           ? Array.from({ length: 8 }).map((_, i) => (
-               <div key={i} className="flex-shrink-0 w-[108px] sm:w-[132px] md:w-[168px] aspect-[2/3] rounded-sm bg-card animate-pulse" />
+               <div key={i} className="flex-shrink-0 w-[84px] sm:w-[104px] md:w-[128px] aspect-[2/3] rounded-sm bg-card animate-pulse" />
             ))
           : items!.slice(0, 20).map((item, idx) => (
               <TmdbCard
