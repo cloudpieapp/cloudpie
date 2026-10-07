@@ -66,6 +66,7 @@ import MovieFAQ from "./pages/MovieFAQ";
 import FAQsPage from "./pages/FAQsPage";
 import BingTvChannel from "./components/BingTvChannel";
 import Blog from "./pages/Blog";
+import AdminPage from "./pages/AdminPage";
 import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient({
@@ -176,6 +177,7 @@ const App = () => {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
 
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

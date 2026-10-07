@@ -6,6 +6,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toggleMyList, isInMyList } from "@/hooks/useMyList";
 import DownloadSourceSheet from "@/components/DownloadSourceSheet";
 import { trackMediaView } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 const SERVER_PREF_KEY = "bb:player:server:v2";
 const EMBED_THEME = "9b5cff";
@@ -21,19 +22,19 @@ type ServerKey =
   | "filmu";
 
 interface Server {
-  id: ServerKey;
+  id: string;
   label: string;
   base: string;
 }
 
 const SERVERS: Server[] = [
   { id: "cinesrc", label: "Nova", base: "https://cinesrc.st/embed" },
-  { id: "vidnest", label: "Helix", base: "https://dulo.mov/embed" },
+  { id: "vidnest", label: "Helix", base: "https://moviesapi.to" },
   { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
-  { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
+  { id: "vidlink", label: "Astra", base: "https://vidzen.fun" },
   { id: "vidsrcme", label: "Ironclad", base: "https://player.videasy.net" },
-  { id: "vidgod", label: "Vale", base: "https://vidsrc.cc/v2/embed" },
+  { id: "vidgod", label: "Vale", base: "https://vidcore.io/embed" },
   { id: "filmu", label: "Lumen", base: "https://player.smashy.stream" },
 ];
 
@@ -79,20 +80,31 @@ const MoviePlayer = ({
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();
-  const [server, setServer] = useState<ServerKey>(() => {
+  const [servers, setServers] = useState<Server[]>(SERVERS);
+  useEffect(() => {
+    supabase
+      .from("player_servers")
+      .select("id,label,base")
+      .eq("enabled", true)
+      .order("sort")
+      .then(({ data }) => {
+        if (data && data.length) setServers(data as Server[]);
+      });
+  }, []);
+  const [server, setServer] = useState<string>(() => {
     try {
-      const saved = localStorage.getItem(SERVER_PREF_KEY) as ServerKey | null;
-      if (saved && SERVERS.some((s) => s.id === saved)) return saved;
+      const saved = localStorage.getItem(SERVER_PREF_KEY);
+      if (saved) return saved;
     } catch {
       /* ignore */
     }
     return "cinesrc";
   });
 
-  const active = SERVERS.find((s) => s.id === server) || SERVERS[0];
+  const active = servers.find((s) => s.id === server) || servers[0];
   const embedUrl = embedUrlFor(active.base, type, tmdbId, season, episode);
 
-  const pickServer = (id: ServerKey) => {
+  const pickServer = (id: string) => {
     setServer(id);
     try {
       localStorage.setItem(SERVER_PREF_KEY, id);
@@ -233,11 +245,11 @@ const MoviePlayer = ({
           </label>
           <select
             id="bb-server-select"
-            value={server}
-            onChange={(e) => pickServer(e.target.value as ServerKey)}
+            value={active?.id}
+            onChange={(e) => pickServer(e.target.value)}
             className="h-9 appearance-none rounded-md border border-border/60 bg-foreground/5 pl-3 pr-8 text-[12px] font-semibold text-foreground"
           >
-            {SERVERS.map((s) => (
+            {servers.map((s) => (
               <option key={s.id} value={s.id} className="bg-background text-foreground">
                 {s.label}
               </option>
