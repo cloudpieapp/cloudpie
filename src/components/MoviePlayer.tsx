@@ -27,7 +27,7 @@ interface Server {
 }
 
 const SERVERS: Server[] = [
-  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st" },
+  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st/embed" },
   { id: "vidnest", label: "Helix", base: "https://dulo.mov/embed" },
   { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
