@@ -7,7 +7,7 @@ import { toggleMyList, isInMyList } from "@/hooks/useMyList";
 import DownloadSourceSheet from "@/components/DownloadSourceSheet";
 import { trackMediaView } from "@/lib/analytics";
 
-const SERVER_PREF_KEY = "bb:player:server";
+const SERVER_PREF_KEY = "bb:player:server:v2";
 const EMBED_THEME = "9b5cff";
 
 type ServerKey =
@@ -27,18 +27,22 @@ interface Server {
 }
 
 const SERVERS: Server[] = [
+  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st" },
+  { id: "vidnest", label: "Helix", base: "https://dulo.mov/embed" },
   { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
-  { id: "cinesrc", label: "Nova", base: "https://embed.filmu.in" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
-  { id: "vidnest", label: "Helix", base: "https://vidnest.fun" },
   { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
-  { id: "vidsrcme", label: "Ironclad", base: "https://vidsrcme.ru" },
-  { id: "vidgod", label: "Vale", base: "https://vidgod.site" },
-  { id: "filmu", label: "Lumen", base: "https://cinesrc.st" },
+  { id: "vidsrcme", label: "Ironclad", base: "https://player.videasy.net" },
+  { id: "vidgod", label: "Vale", base: "https://vidsrc.cc/v2/embed" },
+  { id: "filmu", label: "Lumen", base: "https://player.smashy.stream" },
 ];
 
 const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
-  type === "tv"
+  base.includes("smashy.stream")
+    ? type === "tv"
+      ? `${base}/tv/${tmdbId}?s=${season}&e=${episode}`
+      : `${base}/movie/${tmdbId}`
+    : type === "tv"
     ? `${base}/tv/${tmdbId}/${season}/${episode}?theme=${EMBED_THEME}`
     : `${base}/movie/${tmdbId}?theme=${EMBED_THEME}`;
 
@@ -82,7 +86,7 @@ const MoviePlayer = ({
     } catch {
       /* ignore */
     }
-    return "vidbolt";
+    return "cinesrc";
   });
 
   const active = SERVERS.find((s) => s.id === server) || SERVERS[0];

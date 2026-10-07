@@ -13,7 +13,7 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
       <div className="grid grid-cols-4 gap-1.5 md:gap-3">
         {Array.from({ length: count }).map((_, i) => (
           <div key={i} className="flex flex-col">
-            <NativeAd inline height={110} desktopHeight={150} />
+            <NativeAd inline height={110} desktopHeight={190} />
           </div>
         ))}
       </div>
