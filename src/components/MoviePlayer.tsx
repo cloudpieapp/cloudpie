@@ -28,12 +28,12 @@ interface Server {
 
 const SERVERS: Server[] = [
   { id: "cinesrc", label: "Nova", base: "https://cinesrc.st/embed" },
-  { id: "vidnest", label: "Helix", base: "https://dulo.mov/embed" },
+  { id: "vidnest", label: "Helix", base: "https://moviesapi.to" },
   { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
-  { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
+  { id: "vidlink", label: "Astra", base: "https://vidzen.fun" },
   { id: "vidsrcme", label: "Ironclad", base: "https://player.videasy.net" },
-  { id: "vidgod", label: "Vale", base: "https://vidsrc.cc/v2/embed" },
+  { id: "vidgod", label: "Vale", base: "https://vidcore.io/embed" },
   { id: "filmu", label: "Lumen", base: "https://player.smashy.stream" },
 ];
 
