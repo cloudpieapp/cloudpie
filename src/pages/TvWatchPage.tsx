@@ -70,6 +70,11 @@ const TvWatchPage = () => {
               <div className="space-y-3 overflow-hidden">
                 <NativeAd />
                 <BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} />
+                <NativeAd />
+                <BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} />
+                <NativeAd />
+                <BannerAd468 adKey="260c50d43a8bdd4fd350d9525928d5bc" width={300} height={250} />
+                
               </div>
             </div>
           </aside>
