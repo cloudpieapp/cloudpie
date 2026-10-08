@@ -28,18 +28,29 @@ interface Server {
 }
 
 const SERVERS: Server[] = [
-  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st/embed" },
-  { id: "vidnest", label: "Helix", base: "https://moviesapi.to" },
-  { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
+  { id: "cinesrc", label: "CineSrc", base: "https://cinesrc.st/embed" },
+  { id: "nova", label: "Nova", base: "https://moviesapi.to" },
+  { id: "vale", label: "Vale", base: "https://vidzen.fun" },
+  { id: "smashystreams", label: "SmashyStreams", base: "https://embed.smashystream.com" },
+  { id: "vidbolt", label: "VidBolt", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
-  { id: "vidlink", label: "Astra", base: "https://vidzen.fun" },
-  { id: "vidsrcme", label: "Ironclad", base: "https://player.videasy.net" },
-  { id: "vidgod", label: "Vale", base: "https://vidcore.io/embed" },
-  { id: "filmu", label: "Lumen", base: "https://player.smashy.stream" },
+  { id: "vidnest", label: "Helix", base: "https://vidnest.fun" },
+  { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
+  { id: "vidsrcme", label: "Ironclad", base: "https://vidsrcme.ru/embed" },
+  { id: "filmu", label: "Lumen", base: "https://embed.filmu.in" },
 ];
 
+/** Servers that offer the optional redirect-blocking sandbox. Shown first. */
+export const PROTECTED_IDS = ["cinesrc", "nova", "vale", "dumpo", "smashystreams"];
+const PROTECTION_PREF_KEY = "bb:player:protection";
+
+const sortProtectedFirst = (list: Server[]) =>
+  [...list].sort(
+    (a, b) => Number(PROTECTED_IDS.includes(b.id)) - Number(PROTECTED_IDS.includes(a.id)),
+  );
+
 const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
-  base.includes("smashy.stream")
+  base.includes("smashy")
     ? type === "tv"
       ? `${base}/tv/${tmdbId}?s=${season}&e=${episode}`
       : `${base}/movie/${tmdbId}`
