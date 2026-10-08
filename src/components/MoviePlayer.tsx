@@ -258,13 +258,16 @@ const MoviePlayer = ({
         className="relative w-full aspect-video overflow-hidden bb-player-shell bg-black"
       >
         <iframe
-          key={embedUrl}
+          key={`${embedUrl}-${sandboxOn ? "s" : "n"}`}
           src={embedUrl}
           title={title ? `Watch ${title}` : "CloudPie player"}
           className="absolute inset-0 w-full h-full border-0 bg-black"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
           referrerPolicy="origin"
+          {...(sandboxOn
+            ? { sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation" }
+            : {})}
         />
       </div>
 
@@ -283,11 +286,26 @@ const MoviePlayer = ({
             {servers.map((s) => (
               <option key={s.id} value={s.id} className="bg-background text-foreground">
                 {s.label}
+                {PROTECTED_IDS.includes(s.id) ? " (Protected)" : ""}
               </option>
             ))}
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/70" />
         </div>
+        {isProtected && (
+          <button
+            type="button"
+            onClick={toggleProtection}
+            aria-pressed={protection}
+            className={`h-8 rounded-full px-3 text-[11px] font-semibold transition ${
+              protection
+                ? "bg-primary text-primary-foreground"
+                : "bg-primary/15 text-primary ring-1 ring-primary/50 animate-pulse shadow-[0_0_14px_hsl(var(--primary)/0.7)]"
+            }`}
+          >
+            {protection ? "Ads off ✓" : "Turn off ads"}
+          </button>
+        )}
 
         <div className="ml-auto flex items-center gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
