@@ -31,7 +31,7 @@ const SERVERS: Server[] = [
   { id: "cinesrc", label: "CineSrc", base: "https://cinesrc.st/embed" },
   { id: "nova", label: "Nova", base: "https://moviesapi.to" },
   { id: "vale", label: "Vale", base: "https://vidzen.fun" },
-  { id: "dumpo", label: "Dumpo", base: "https://dulo.mov/embed" },
+  { id: "dumpo", label: "Dumpo", base: "https://dulo.mov/watch" },
   { id: "smashystreams", label: "SmashyStreams", base: "https://embed.smashystream.com" },
   { id: "vidbolt", label: "VidBolt", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
@@ -51,7 +51,11 @@ const sortProtectedFirst = (list: Server[]) =>
   );
 
 const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
-  base.includes("smashy")
+  base.includes("dulo.mov")
+    ? type === "tv"
+      ? `https://dulo.mov/watch/tv/${tmdbId}/${season}/${episode}`
+      : `https://dulo.mov/watch/movie/${tmdbId}`
+    : base.includes("smashy")
     ? type === "tv"
       ? `${base}/tv/${tmdbId}?s=${season}&e=${episode}`
       : `${base}/movie/${tmdbId}`
@@ -266,8 +270,8 @@ const MoviePlayer = ({
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
           referrerPolicy="origin"
-          {...(sandboxOn
-            ? { sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation" }
+          {...(sandboxOn || active.base.includes("dulo.mov")
+            ? { sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation allow-storage-access-by-user-activation" }
             : {})}
         />
       </div>
