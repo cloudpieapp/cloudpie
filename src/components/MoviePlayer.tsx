@@ -31,6 +31,7 @@ const SERVERS: Server[] = [
   { id: "cinesrc", label: "CineSrc", base: "https://cinesrc.st/embed" },
   { id: "nova", label: "Nova", base: "https://moviesapi.to" },
   { id: "vale", label: "Vale", base: "https://vidzen.fun" },
+  { id: "dumpo", label: "Dumpo", base: "https://dulo.mov/embed" },
   { id: "smashystreams", label: "SmashyStreams", base: "https://embed.smashystream.com" },
   { id: "vidbolt", label: "VidBolt", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
@@ -272,8 +273,8 @@ const MoviePlayer = ({
       </div>
 
       {/* Toolbar: server switcher + quick actions */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-card border-t border-border/60 flex-wrap">
-        <div className="relative">
+      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-card border-t border-border/60 flex-nowrap overflow-x-auto scrollbar-hide">
+        <div className="relative shrink-0">
           <label className="sr-only" htmlFor="bb-server-select">
             Server
           </label>
@@ -281,7 +282,7 @@ const MoviePlayer = ({
             id="bb-server-select"
             value={active?.id}
             onChange={(e) => pickServer(e.target.value)}
-            className="h-9 appearance-none rounded-md border border-border/60 bg-foreground/5 pl-3 pr-8 text-[12px] font-semibold text-foreground"
+            className="h-9 max-w-[120px] sm:max-w-none appearance-none rounded-md border border-border/60 bg-foreground/5 pl-2 sm:pl-3 pr-7 sm:pr-8 text-[12px] font-semibold text-foreground"
           >
             {servers.map((s) => (
               <option key={s.id} value={s.id} className="bg-background text-foreground">
@@ -297,7 +298,7 @@ const MoviePlayer = ({
             type="button"
             onClick={toggleProtection}
             aria-pressed={protection}
-            className={`h-8 rounded-full px-3 text-[11px] font-semibold transition ${
+            className={`h-8 shrink-0 whitespace-nowrap rounded-full px-2.5 sm:px-3 text-[11px] font-semibold transition ${
               protection
                 ? "bg-primary text-primary-foreground"
                 : "bg-primary/15 text-primary ring-1 ring-primary/50 animate-pulse shadow-[0_0_14px_hsl(var(--primary)/0.7)]"
@@ -307,7 +308,7 @@ const MoviePlayer = ({
           </button>
         )}
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
             <Download className="h-4 w-4" />
           </PlayerIconButton>
@@ -373,11 +374,11 @@ const PlayerIconButton = ({
     title={label}
     aria-label={label}
     onClick={onClick}
-    className="group flex w-14 flex-col items-center gap-1 text-[10px] font-medium text-muted-foreground transition active:scale-95 sm:w-auto sm:h-9 sm:flex-row sm:gap-1.5 sm:rounded-full sm:bg-secondary sm:px-3 sm:text-[12px] sm:font-semibold sm:text-foreground sm:ring-1 sm:ring-border/60 sm:hover:bg-primary sm:hover:text-primary-foreground sm:hover:ring-primary"
+    className="group flex shrink-0 flex-row items-center text-[10px] font-medium text-muted-foreground transition active:scale-95 sm:w-auto sm:h-9 sm:flex-row sm:gap-1.5 sm:rounded-full sm:bg-secondary sm:px-3 sm:text-[12px] sm:font-semibold sm:text-foreground sm:ring-1 sm:ring-border/60 sm:hover:bg-primary sm:hover:text-primary-foreground sm:hover:ring-primary"
   >
-    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/30 group-active:bg-primary group-active:text-primary-foreground sm:h-auto sm:w-auto sm:rounded-none sm:bg-transparent sm:text-current sm:ring-0">
+    <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30 group-active:bg-primary group-active:text-primary-foreground sm:h-auto sm:w-auto sm:rounded-none sm:bg-transparent sm:text-current sm:ring-0">
       {children}
     </span>
-    <span>{short ?? label}</span>
+    <span className="hidden sm:inline">{short ?? label}</span>
   </button>
 );
