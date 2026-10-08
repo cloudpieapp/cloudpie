@@ -28,18 +28,29 @@ interface Server {
 }
 
 const SERVERS: Server[] = [
-  { id: "cinesrc", label: "Nova", base: "https://cinesrc.st/embed" },
-  { id: "vidnest", label: "Helix", base: "https://moviesapi.to" },
-  { id: "vidbolt", label: "Cipher", base: "https://vidbolt.xyz" },
+  { id: "cinesrc", label: "CineSrc", base: "https://cinesrc.st/embed" },
+  { id: "nova", label: "Nova", base: "https://moviesapi.to" },
+  { id: "vale", label: "Vale", base: "https://vidzen.fun" },
+  { id: "smashystreams", label: "SmashyStreams", base: "https://embed.smashystream.com" },
+  { id: "vidbolt", label: "VidBolt", base: "https://vidbolt.xyz" },
   { id: "vidcore", label: "Crimson", base: "https://vidcore.io" },
-  { id: "vidlink", label: "Astra", base: "https://vidzen.fun" },
-  { id: "vidsrcme", label: "Ironclad", base: "https://player.videasy.net" },
-  { id: "vidgod", label: "Vale", base: "https://vidcore.io/embed" },
-  { id: "filmu", label: "Lumen", base: "https://player.smashy.stream" },
+  { id: "vidnest", label: "Helix", base: "https://vidnest.fun" },
+  { id: "vidlink", label: "Astra", base: "https://vidlink.pro" },
+  { id: "vidsrcme", label: "Ironclad", base: "https://vidsrcme.ru/embed" },
+  { id: "filmu", label: "Lumen", base: "https://embed.filmu.in" },
 ];
 
+/** Servers that offer the optional redirect-blocking sandbox. Shown first. */
+export const PROTECTED_IDS = ["cinesrc", "nova", "vale", "dumpo", "smashystreams"];
+const PROTECTION_PREF_KEY = "bb:player:protection";
+
+const sortProtectedFirst = (list: Server[]) =>
+  [...list].sort(
+    (a, b) => Number(PROTECTED_IDS.includes(b.id)) - Number(PROTECTED_IDS.includes(a.id)),
+  );
+
 const embedUrlFor = (base: string, type: "movie" | "tv", tmdbId: string, season: number, episode: number) =>
-  base.includes("smashy.stream")
+  base.includes("smashy")
     ? type === "tv"
       ? `${base}/tv/${tmdbId}?s=${season}&e=${episode}`
       : `${base}/movie/${tmdbId}`
@@ -88,7 +99,8 @@ const MoviePlayer = ({
       .eq("enabled", true)
       .order("sort")
       .then(({ data }) => {
-        if (data && data.length) setServers(data as Server[]);
+        if (data && data.length)
+          setServers(sortProtectedFirst((data as Server[]).filter((s) => s.base)));
       });
   }, []);
   const [server, setServer] = useState<string>(() => {
@@ -103,6 +115,25 @@ const MoviePlayer = ({
 
   const active = servers.find((s) => s.id === server) || servers[0];
   const embedUrl = embedUrlFor(active.base, type, tmdbId, season, episode);
+  const isProtected = PROTECTED_IDS.includes(active.id);
+  const [protection, setProtection] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(PROTECTION_PREF_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const toggleProtection = () => {
+    setProtection((p) => {
+      try {
+        localStorage.setItem(PROTECTION_PREF_KEY, p ? "0" : "1");
+      } catch {
+        /* ignore */
+      }
+      return !p;
+    });
+  };
+  const sandboxOn = isProtected && protection;
 
   const pickServer = (id: string) => {
     setServer(id);
@@ -227,13 +258,16 @@ const MoviePlayer = ({
         className="relative w-full aspect-video overflow-hidden bb-player-shell bg-black"
       >
         <iframe
-          key={embedUrl}
+          key={`${embedUrl}-${sandboxOn ? "s" : "n"}`}
           src={embedUrl}
           title={title ? `Watch ${title}` : "CloudPie player"}
           className="absolute inset-0 w-full h-full border-0 bg-black"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
           referrerPolicy="origin"
+          {...(sandboxOn
+            ? { sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation" }
+            : {})}
         />
       </div>
 
@@ -252,11 +286,26 @@ const MoviePlayer = ({
             {servers.map((s) => (
               <option key={s.id} value={s.id} className="bg-background text-foreground">
                 {s.label}
+                {PROTECTED_IDS.includes(s.id) ? " (Protected)" : ""}
               </option>
             ))}
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/70" />
         </div>
+        {isProtected && (
+          <button
+            type="button"
+            onClick={toggleProtection}
+            aria-pressed={protection}
+            className={`h-8 rounded-full px-3 text-[11px] font-semibold transition ${
+              protection
+                ? "bg-primary text-primary-foreground"
+                : "bg-primary/15 text-primary ring-1 ring-primary/50 animate-pulse shadow-[0_0_14px_hsl(var(--primary)/0.7)]"
+            }`}
+          >
+            {protection ? "Ads off ✓" : "Turn off ads"}
+          </button>
+        )}
 
         <div className="ml-auto flex items-center gap-1.5">
           <PlayerIconButton label="Download" onClick={() => setDownloadOpen(true)}>
@@ -281,6 +330,12 @@ const MoviePlayer = ({
           </PlayerIconButton>
         </div>
       </div>
+
+      {isProtected && (
+        <p className="px-3 pb-2 bg-card text-[10.5px] leading-snug text-muted-foreground">
+          For no redirects, turn on "Turn off ads". If the video doesn't play, turn it off to keep enjoying your show.
+        </p>
+      )}
 
       <DownloadSourceSheet
         open={downloadOpen}

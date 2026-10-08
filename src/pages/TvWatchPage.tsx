@@ -79,7 +79,7 @@ const TvWatchPage = () => {
             </div>
           </aside>
           <div className="min-w-0">
-            <div className="px-3 pt-2 pb-1">
+            <div className="px-3 pt-2 pb-1 lg:hidden">
               <BannerAd468 />
             </div>
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
@@ -210,6 +210,7 @@ const TvWatchPage = () => {
           {/* Desktop sidebar — episode list (YouTube-style) */}
           <aside className="hidden lg:block w-[300px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto pr-1">
+              <div className="overflow-hidden"><BannerAd468 /></div>
               {seasons.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-2">

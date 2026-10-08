@@ -40,7 +40,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   const showButtons = phase === "buttons";
 
   return (
-    <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[30vh] sm:h-[44vh] md:h-[52vh] max-h-[520px] overflow-hidden border-b border-border/60">
+    <div className="relative w-[92%] mx-auto rounded-xl sm:w-full sm:rounded-none h-[30vh] sm:h-[44vh] md:h-[56vh] lg:h-[60vh] max-h-[600px] overflow-hidden border-b border-border/60">
       <img
         key={item.id}
         src={backdrop}
