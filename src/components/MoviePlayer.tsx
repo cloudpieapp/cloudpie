@@ -99,7 +99,8 @@ const MoviePlayer = ({
       .eq("enabled", true)
       .order("sort")
       .then(({ data }) => {
-        if (data && data.length) setServers(data as Server[]);
+        if (data && data.length)
+          setServers(sortProtectedFirst((data as Server[]).filter((s) => s.base)));
       });
   }, []);
   const [server, setServer] = useState<string>(() => {
@@ -114,6 +115,25 @@ const MoviePlayer = ({
 
   const active = servers.find((s) => s.id === server) || servers[0];
   const embedUrl = embedUrlFor(active.base, type, tmdbId, season, episode);
+  const isProtected = PROTECTED_IDS.includes(active.id);
+  const [protection, setProtection] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(PROTECTION_PREF_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const toggleProtection = () => {
+    setProtection((p) => {
+      try {
+        localStorage.setItem(PROTECTION_PREF_KEY, p ? "0" : "1");
+      } catch {
+        /* ignore */
+      }
+      return !p;
+    });
+  };
+  const sandboxOn = isProtected && protection;
 
   const pickServer = (id: string) => {
     setServer(id);
