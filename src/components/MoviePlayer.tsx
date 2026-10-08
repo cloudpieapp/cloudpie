@@ -331,6 +331,12 @@ const MoviePlayer = ({
         </div>
       </div>
 
+      {isProtected && (
+        <p className="px-3 pb-2 bg-card text-[10.5px] leading-snug text-muted-foreground">
+          For no redirects, turn on "Turn off ads". If the video doesn't play, turn it off to keep enjoying your show.
+        </p>
+      )}
+
       <DownloadSourceSheet
         open={downloadOpen}
         onOpenChange={setDownloadOpen}

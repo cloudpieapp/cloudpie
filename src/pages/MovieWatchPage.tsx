@@ -77,7 +77,7 @@ const MovieWatchPage = () => {
             </div>
           </aside>
           <div className="min-w-0">
-            <div className="px-3 pt-2 pb-1">
+            <div className="px-3 pt-2 pb-1 lg:hidden">
               <BannerAd468 />
             </div>
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
@@ -172,6 +172,7 @@ const MovieWatchPage = () => {
           {/* Desktop sidebar — YouTube-style suggestions column */}
           <aside className="hidden lg:block w-[300px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4">
+              <div className="overflow-hidden"><BannerAd468 /></div>
               <div>
                 <h3 className="text-[13px] font-semibold text-white mb-2">Up Next</h3>
                 <div className="space-y-2">
