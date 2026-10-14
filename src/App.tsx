@@ -150,6 +150,7 @@ const App = () => {
           <Route path="/download/:mediaType/:id" element={<DownloadPage />} />
           <Route path="/download/:mediaType/:id/:s/:e" element={<DownloadPage />} />
           <Route path="/install" element={<InstallAppPage />} />
+          <Route path="/download-app" element={<DownloadApkPage />} />
           <Route path="/download-apk" element={<DownloadApkPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/support" element={<Navigate to="/help" replace />} />

@@ -17,7 +17,7 @@ const COLS = [
     links: [
       { label: "Ways to Watch", to: "/ways-to-watch" },
       { label: "Check for update", to: "https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n" },
-      { label: "Download APK", to: "/download-apk" },
+      { label: "Download APK", to: "/download-app" },
       { label: "Speed Test", to: "/speed-test" },
       { label: "Follow Us", to: "/follow-us" },
       { label: "Account", to: "/profile" },
