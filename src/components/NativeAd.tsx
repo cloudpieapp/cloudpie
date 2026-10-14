@@ -48,7 +48,7 @@ const NativeAd = ({
   desktopHeight?: number;
 }) => {
   const h = height ?? (inline ? 110 : compact ? 130 : 180);
-  const dh = desktopHeight ?? (inline ? 190 : compact ? 210 : 240);
+  const dh = desktopHeight ?? (inline ? 240 : compact ? 260 : 310);
   const srcDoc = useMemo(() => buildSrcDoc(Math.max(h, dh)), [h, dh]);
 
   const slotRef = useRef<HTMLDivElement>(null);
